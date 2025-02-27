@@ -4,3 +4,8 @@
 **.vcxproj
 **.vcxproj.filters
 **.vcxproj.user
+
+# build folder
+build/
+Debug/
+Release/
