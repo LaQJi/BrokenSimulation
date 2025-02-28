@@ -209,6 +209,19 @@ namespace Geometry
 		this->components = vector.components;
 	}
 
+	template<std::size_t N>
+	void Vector<N>::normalize()
+	{
+		double magnitude = this->getMagnitude();
+		if (magnitude != 0.0)
+		{
+			for (std::size_t i = 0; i < N; i++)
+			{
+				this->components[i] /= magnitude;
+			}
+		}
+	}
+
 	template <std::size_t N>
 	std::size_t Vector<N>::getDimension() const
 	{
@@ -444,6 +457,86 @@ namespace Geometry
 		return distance / normal.getMagnitude();
 	}
 
+	template<std::size_t N>
+	void Hyperplane<N>::setNormalDirection(std::shared_ptr<Point<N>> pointBehind)
+	{
+		Vector<N> direction;
+		for (std::size_t i = 0; i < N; i++)
+		{
+			direction[i] = (*pointBehind)[i] - (*this->vertices[0])[i];
+		}
+		if (normal * direction < 0.0)
+		{
+			normal = -normal;
+		}
+	}
+
+	template<std::size_t N>
+	bool Hyperplane<N>::isAdjacent(const Hyperplane<N>& hyperplane, std::size_t& index) const
+	{
+		int count = 0;
+		index = 0;
+		for (std::size_t i = 0; i < N; i++)
+		{
+			bool flag = false;
+			for (std::size_t j = 0; j < N; j++)
+			{
+				if (this->vertices[i] == hyperplane.vertices[j])
+				{
+					count++;
+					flag = true;
+					break;
+				}
+			}
+			// 如果hyperplane中不包含vertices[i]，则将index设置为i
+			if (!flag)
+			{
+				index = i;
+			}
+		}
+		return count == N - 1;
+	}
+
+	template<std::size_t N>
+	void Hyperplane<N>::setNeighbor(std::shared_ptr<Hyperplane<N>> neighbor)
+	{
+		std::size_t index = 0;
+		// 判断是否为邻接hyperplane
+		if (isAdjacent(*neighbor, index))
+		{
+			this->neighbors[index] = neighbor;
+		}
+		else
+		{
+			throw std::invalid_argument("Hyperplanes are not adjacent");
+		}
+	}
+
+	template<std::size_t N>
+	void Hyperplane<N>::setNeighbor(std::size_t index, std::shared_ptr<Hyperplane<N>> neighbor)
+	{
+		static_assert(index < N, "Hyperplane neighbor index must be less than N");
+		// temp为neighbor中不包含的点
+		std::shared_ptr<Point<N>> temp = this->vertices[index];
+		// 判断neighbor中是否包含temp
+		auto iter = std::find(neighbor->vertices.begin(), neighbor->vertices.end(), temp);
+		// 如果neighbor中不包含temp，则将neighbor设置为邻接hyperplane
+		if (iter == neighbor->vertices.end())
+		{
+			this->neighbors[index] = neighbor;
+		}
+		else
+		{
+			throw std::invalid_argument("Hyperplanes are not adjacent");
+		}
+	}
+
+	template<std::size_t N>
+	std::shared_ptr<Hyperplane<N>> Hyperplane<N>::getNeighbor(std::size_t index) const
+	{
+		return this->neighbors[index];
+	}
+
 	template <std::size_t N>
 	const std::shared_ptr<Point<N>>& Hyperplane<N>::operator[](std::size_t index) const
 	{
@@ -500,7 +593,8 @@ namespace Geometry
 	template <std::size_t N>
 	Simplex<N>::Simplex()
 	{
-		this->vertices.fill(Point<N>());
+		this->vertices.fill(nullptr);
+		this->facets.fill(nullptr);
 	}
 
 	template <std::size_t N>
@@ -511,6 +605,11 @@ namespace Geometry
 		{
 			this->vertices[i] = std::make_shared<Point<N>>(vertices[i]);
 		}
+		if (!initializeFacets())
+		{
+			this->vertices.fill(nullptr);
+			this->facets.fill(nullptr);
+		}
 	}
 
 	template <std::size_t N>
@@ -518,6 +617,11 @@ namespace Geometry
 		: vertices(vertices)
 	{
 		std::sort(this->vertices.begin(), this->vertices.end());
+		if (!initializeFacets())
+		{
+			this->vertices.fill(nullptr);
+			this->facets.fill(nullptr);
+		}
 	}
 
 	template <std::size_t N>
@@ -525,6 +629,46 @@ namespace Geometry
 	{
 		this->vertices = simplex.vertices;
 		std::sort(this->vertices.begin(), this->vertices.end());
+		this->facets = simplex.facets;
+	}
+
+	template<std::size_t N>
+	bool Simplex<N>::initializeFacets()
+	{
+		std::vector<std::shared_ptr<Hyperplane<N>>> facets;
+		for (std::size_t i = 0; i < N + 1; i++)
+		{
+			std::array<std::shared_ptr<Point<N>>, N> facetVertices;
+			std::size_t index = 0;
+			for (std::size_t j = 0; j < N + 1; j++)
+			{
+				if (j != i)
+				{
+					facetVertices[index] = vertices[j];
+					index++;
+				}
+			}
+			facets.push_back(std::make_shared<Hyperplane<N>>(facetVertices));
+			if (facets[i]->getNormal() == Vector<N>())
+			{
+				this->facets = std::array<std::shared_ptr<Hyperplane<N>>, N + 1>();
+				return false;
+			}
+		}
+		for (std::size_t i = 0; i < N + 1; i++)
+		{
+			std::size_t index = 0;
+			for (std::size_t j = 0; j < N + 1; j++)
+			{
+				if (i != j)
+				{
+					facets[i]->setNeighbor(facets[j], index);
+					index++;
+				}
+			}
+		}
+		this->facets = facets;
+		return true;
 	}
 
 	template<std::size_t N>
@@ -585,27 +729,15 @@ namespace Geometry
 	}
 
 	template<std::size_t N>
+	std::shared_ptr<Hyperplane<N>> Simplex<N>::getFacet(std::size_t index) const
+	{
+		return this->facets[index];
+	}
+
+	template<std::size_t N>
 	std::vector<std::shared_ptr<Hyperplane<N>>> Simplex<N>::getFacets() const
 	{
-		std::vector<std::shared_ptr<Hyperplane<N>>> facets;
-		for (std::size_t i = 0; i < N + 1; i++)
-		{
-			std::array<Point<N>, N> facetVertices;
-			for (std::size_t j = 0; j < N; j++)
-			{
-				std::size_t index = 0;
-				for (std::size_t k = 0; k < N + 1; k++)
-				{
-					if (k != i)
-					{
-						facetVertices[index] = vertices[k];
-						index++;
-					}
-				}
-			}
-			facets.push_back(std::make_shared<Hyperplane<N>>(facetVertices));
-		}
-		return facets;
+		return this->facets;
 	}
 
 	template<std::size_t N>
@@ -677,6 +809,15 @@ namespace Geometry
 			vertices.push_back(std::make_shared<Point<N>>(point));
 		}
 		this->vertices = vertices;
+		std::sort(this->vertices.begin(), this->vertices.end());
+		this->facets.fill(nullptr);
+	}
+
+	template <std::size_t N>
+	ConvexHull<N>::ConvexHull(const std::vector<std::shared_ptr<Point<N>>>& points)
+		: vertices(points)
+	{
+		std::sort(this->vertices.begin(), this->vertices.end());
 		this->facets.fill(nullptr);
 	}
 
@@ -685,6 +826,16 @@ namespace Geometry
 		: vertices(convexHull.vertices),
 		facets(convexHull.facets)
 	{
+		std::sort(this->vertices.begin(), this->vertices.end());
+	}
+
+	template<std::size_t N>
+	bool ConvexHull<N>::initialize()
+	{
+		// 尝试构建初始单纯形
+		std::array<std::shared_ptr<Point<N>>, N> facetVertices;
+
+		// TODO: 代码实现
 	}
 
 	template<std::size_t N>
@@ -806,7 +957,23 @@ namespace Geometry
 		{
 			normal[i] = matrix[0][i];
 		}
+		normal.normalize();
 		return normal;
 	}
 
+	template<std::size_t N>
+	std::shared_ptr<Point<N + 1>> projectOntoParaboloid(const std::shared_ptr<Point<N>>& point)
+	{
+		std::shared_ptr<Point<N + 1>> projected = std::make_shared<Point<N + 1>>();
+		for (std::size_t i = 0; i < N; i++)
+		{
+			(*projected)[i] = (*point)[i];
+		}
+		(*projected)[N] = 0.0;
+		for (std::size_t i = 0; i < N; i++)
+		{
+			(*projected)[N] += (*point)[i] * (*point)[i];
+		}
+		return projected;
+	}
 }

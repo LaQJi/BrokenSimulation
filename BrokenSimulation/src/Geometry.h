@@ -83,6 +83,7 @@ namespace Geometry
 
 
 		// 成员函数
+		void normalize();
 		std::size_t getDimension() const;
 		double getMagnitude() const;
 		Vector<N> getUnit() const;
@@ -125,8 +126,11 @@ namespace Geometry
 		std::size_t getDimension() const;
 		Vector<N> getNormal() const;
 		double getDistance(const Point<N>& point) const;
-
-		//todo：反转方向、添加邻接等功能；simplex类构造函数初始化面的时候，需要考虑方向、且需计算hyperplane信息，包括邻接；hull扩展等功能；公共函数需初始化simplex
+		void setNormalDirection(std::shared_ptr<Point<N>> pointBehind);
+		bool isAdjacent(const Hyperplane<N>& hyperplane, std::size_t& index) const;
+		void setNeighbor(std::shared_ptr<Hyperplane<N>> neighbor);
+		void setNeighbor(std::size_t index, std::shared_ptr<Hyperplane<N>> neighbor);
+		std::shared_ptr<Hyperplane<N>> getNeighbor(std::size_t index) const;
 
 
 		// 重载运算符
@@ -159,9 +163,11 @@ namespace Geometry
 
 
 		// 成员函数
+		bool initializeFacets();
 		std::size_t getDimension() const;
 		std::shared_ptr<Point<N>> getCentroid() const;
 		std::shared_ptr<Point<N>> getCircumcenter() const;
+		std::shared_ptr<Hyperplane<N>> getFacet(std::size_t index) const;
 		std::vector<std::shared_ptr<Hyperplane<N>>> getFacets() const;
 
 
@@ -174,6 +180,7 @@ namespace Geometry
 
 	private:
 		std::array<std::shared_ptr<Point<N>>, N + 1> vertices;
+		std::array<std::shared_ptr<Hyperplane<N>>, N + 1> facets;
 	};
 
 
@@ -188,10 +195,12 @@ namespace Geometry
 		// 构造函数
 		ConvexHull();
 		ConvexHull(const std::vector<Point<N>>& points);
+		ConvexHull(const std::vector<std::shared_ptr<Point<N>>>& points);
 		ConvexHull(const ConvexHull<N>& convexHull);
 
 
 		// 成员函数
+		bool initialize();
 		std::size_t getDimension() const;
 		std::vector<std::shared_ptr<Hyperplane<N>>> getFacets() const;
 		std::vector<std::shared_ptr<Point<N>>> getVertices() const;
@@ -213,4 +222,7 @@ namespace Geometry
 
 	template <std::size_t N>
 	Vector<N> calculateNormal(const std::array<std::shared_ptr<Point<N>>, N>& vertices);
+
+	template <std::size_t N>
+	std::shared_ptr<Point<N + 1>> projectOntoParaboloid(const std::shared_ptr<Point<N>>& point);
 }
