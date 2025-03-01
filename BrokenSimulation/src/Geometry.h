@@ -55,6 +55,7 @@ namespace Geometry
 		// 重载运算符
 		const double& operator[](std::size_t index) const;
 		double& operator[](std::size_t index);
+		Vector<N> operator-(const Point<N>& point) const;
 		bool operator==(const Point<N>& point) const;
 		bool operator!=(const Point<N>& point) const;
 		bool operator<(const Point<N>& point) const;
@@ -131,6 +132,8 @@ namespace Geometry
 		void setNeighbor(std::shared_ptr<Hyperplane<N>> neighbor);
 		void setNeighbor(std::size_t index, std::shared_ptr<Hyperplane<N>> neighbor);
 		std::shared_ptr<Hyperplane<N>> getNeighbor(std::size_t index) const;
+		bool addPointAbove(std::shared_ptr<Point<N>> point);
+		std::vector<std::shared_ptr<Point<N>>> getPointsAbove() const;
 
 
 		// 重载运算符
@@ -144,6 +147,7 @@ namespace Geometry
 		std::array<std::shared_ptr<Point<N>>, N> vertices;
 		Vector<N> normal;
 		std::array<std::shared_ptr<Hyperplane<N>>, N> neighbors;
+		std::vector<std::shared_ptr<Point<N>>> pointsAbove;
 	};
 
 
@@ -218,7 +222,13 @@ namespace Geometry
 
 	// Geometry functions
 	template <std::size_t N>
-	int calculateMatrixRank(std::array<std::array<double, N>, N>& matrix);
+	int calculateSquareMatrixRank(std::array<std::array<double, N>, N>& matrix);
+
+	template <std::size_t N>
+	int calculateMatrixRank(std::vector<std::array<double, N>>& matrix);
+
+	template <std::size_t N>
+	bool isLinearlyIndependent(const std::vector<std::array<double, N>>& matrix, const Vector<N>& newVector);
 
 	template <std::size_t N>
 	Vector<N> calculateNormal(const std::array<std::shared_ptr<Point<N>>, N>& vertices);

@@ -103,6 +103,17 @@ namespace Geometry
 		return this->coordinates[index];
 	}
 
+	template<std::size_t N>
+	Vector<N> Point<N>::operator-(const Point<N>& point) const
+	{
+		Vector<N> vector;
+		for (std::size_t i = 0; i < N; i++)
+		{
+			vector[i] = this->coordinates[i] - point[i];
+		}
+		return vector;
+	}
+
 	template <std::size_t N>
 	bool Point<N>::operator==(const Point<N>& point) const
 	{
@@ -383,6 +394,7 @@ namespace Geometry
 		this->vertices.fill(nullptr);
 		this->normal = Vector<N>();
 		this->neighbors.fill(nullptr);
+		this->pointsAbove.clear();
 	}
 
 	template <std::size_t N>
@@ -405,6 +417,7 @@ namespace Geometry
 			this->normal = normal;
 			this->neighbors.fill(nullptr);
 		}
+		this->pointsAbove.clear();
 	}
 
 	template <std::size_t N>
@@ -424,13 +437,15 @@ namespace Geometry
 			this->normal = normal;
 			this->neighbors.fill(nullptr);
 		}
+		this->pointsAbove.clear();
 	}
 
 	template <std::size_t N>
 	Hyperplane<N>::Hyperplane(const Hyperplane<N>& hyperplane)
 		: vertices(hyperplane.vertices),
 		normal(hyperplane.normal),
-		neighbors(hyperplane.neighbors)
+		neighbors(hyperplane.neighbors),
+		pointsAbove(hyperplane.pointsAbove)
 	{
 	}
 
@@ -537,6 +552,31 @@ namespace Geometry
 		return this->neighbors[index];
 	}
 
+	template<std::size_t N>
+	bool Hyperplane<N>::addPointAbove(std::shared_ptr<Point<N>> point)
+	{
+		if (point != nullptr)
+		{
+			Vector<N> vector = *point - *this->vertices[0];
+			// 如果点在超平面上方，则将点加入pointsAbove
+			if (normal * vector > 0.0)
+			{
+				this->pointsAbove.push_back(point);
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
+
+	template<std::size_t N>
+	std::vector<std::shared_ptr<Point<N>>> Hyperplane<N>::getPointsAbove() const
+	{
+		return std::vector<std::shared_ptr<Point<N>>>();
+	}
+
 	template <std::size_t N>
 	const std::shared_ptr<Point<N>>& Hyperplane<N>::operator[](std::size_t index) const
 	{
@@ -635,6 +675,8 @@ namespace Geometry
 	template<std::size_t N>
 	bool Simplex<N>::initializeFacets()
 	{
+		// 计算单纯形的重心，用于确认单纯形的面的法向量方向
+		std::shared_ptr<Point<N>> centroid = getCentroid();
 		std::vector<std::shared_ptr<Hyperplane<N>>> facets;
 		for (std::size_t i = 0; i < N + 1; i++)
 		{
@@ -649,11 +691,14 @@ namespace Geometry
 				}
 			}
 			facets.push_back(std::make_shared<Hyperplane<N>>(facetVertices));
+			// 如果面的法向量为零向量，则无法构建单纯形
 			if (facets[i]->getNormal() == Vector<N>())
 			{
 				this->facets = std::array<std::shared_ptr<Hyperplane<N>>, N + 1>();
 				return false;
 			}
+			// 根据重心的位置设置面的法向量方向
+			facets[i]->setNormalDirection(centroid);
 		}
 		for (std::size_t i = 0; i < N + 1; i++)
 		{
@@ -833,9 +878,68 @@ namespace Geometry
 	bool ConvexHull<N>::initialize()
 	{
 		// 尝试构建初始单纯形
-		std::array<std::shared_ptr<Point<N>>, N> facetVertices;
+		std::vector<std::shared_ptr<Point<N>>> simplexVertices;
+		{
+			simplexVertices.push_back(this->vertices[0]);
+			std::size_t index = 1;
 
-		// TODO: 代码实现
+			// matrix用于存储构建单纯形的点之间的向量
+			std::vector<std::array<double, N>> matrix;
+			while (simplexVertices.size() < N + 1)
+			{
+				// 如果vertices中的点线性相关，则无法构建初始单纯形
+				if (index == this->vertices.size())
+				{
+					return false;
+				}
+				// direction为vertices[index]与vertices[0]之间的向量
+				Vector<N> direction = this->vertices[index] - this->vertices[0];
+				// 如果direction与matrix中的向量线性无关，则将vertices[index]添加到simplexVertices中，并将direction添加到matrix中
+				bool flag = isLinearlyIndependent(matrix, direction);
+				if (flag)
+				{
+					simplexVertices.push_back(this->vertices[index]);
+					matrix.push_back(direction);
+				}
+				index++;
+			}
+
+			// 构建初始单纯形
+			Simplex<N> simplex(simplexVertices);
+			// 如果无法构建初始单纯形，则返回false
+			bool flag = simplex.initializeFacets();
+			if (!flag)
+			{
+				return false;
+			}
+			// 将初始单纯形的顶点和面赋值给convexHull
+			std::vector<std::shared_ptr<Hyperplane<N>>> facets = simplex.getFacets();
+
+			for (std::size_t i = 0; i < N + 1; i++)
+			{
+				this->facets[i] = facets[i];
+			}
+		}
+
+		// 将convecHull中的在单纯形外部点添加到面的上方集合中
+		for (std::shared_ptr<Point<N>> point : this->vertices)
+		{
+			// 如果点不在simplexVertices中，则将点添加到面的外部集合中
+			auto iter = std::find(simplexVertices.begin(), simplexVertices.end(), point);
+			if (iter == simplexVertices.end())
+			{
+				for (std::shared_ptr<Hyperplane<N>> facet : this->facets)
+				{
+					// 如果点在面的上方，则将点添加到面的外部集合中
+					if (facet->addPointAbove(point))
+					{
+						break;
+					}
+				}
+			}
+		}
+
+		// TODO: 递归添加点
 	}
 
 	template<std::size_t N>
@@ -896,7 +1000,7 @@ namespace Geometry
 
 	// Geometry functions
 	template <std::size_t N>
-	int calculateMatrixRank(std::array<std::array<double, N>, N>& matrix) 
+	int calculateSquareMatrixRank(std::array<std::array<double, N>, N>& matrix) 
 	{
 		int rank = 0;
 		for (std::size_t i = 0; i < N; i++)
@@ -938,6 +1042,62 @@ namespace Geometry
 	}
 
 	template<std::size_t N>
+	int calculateMatrixRank(std::vector<std::array<double, N>>& matrix)
+	{
+		std::size_t rows = matrix.size();
+		std::size_t cols = N;
+		int rank = 0;
+
+		for (std::size_t i = 0; i < rows; i++)
+		{
+			if (matrix[i][rank] != 0)
+			{
+				for (std::size_t j = 0; j < cols; j++)
+				{
+					if (j != i)
+					{
+						double factor = matrix[j][rank] / matrix[i][rank];
+						for (std::size_t k = 0; k < cols; k++)
+						{
+							matrix[j][k] -= factor * matrix[i][k];
+						}
+					}
+				}
+				rank++;
+			}
+		}
+		return rank;
+	}
+
+	template<std::size_t N>
+	bool isLinearlyIndependent(const std::vector<std::array<double, N>>& matrix, const Vector<N>& newVector)
+	{
+		int n = matrix.size();
+		
+		if (n == 0)
+		{
+			// 如果matrix为空，则newPoint与原向量线性无关
+			return true;
+		}
+
+		if (n >= N)
+		{
+			// 如果matrix中的向量数量大于等于N，则无法构建新的线性无关向量
+			return false;
+		}
+
+		std::vector<std::array<double, N>> tempMatrix = matrix;
+		std::array<double, N> newVectorArray;
+		for (std::size_t i = 0; i < N; i++)
+		{
+			newVectorArray[i] = newVector[i];
+		}
+		tempMatrix.push_back(newVectorArray);
+
+		return calculateMatrixRank<N>(tempMatrix) == n + 1;
+	}
+
+	template<std::size_t N>
 	Vector<N> calculateNormal(const std::array<std::shared_ptr<Point<N>>, N>& vertices)
 	{
 		std::array<std::array<double, N>, N> matrix;
@@ -948,7 +1108,7 @@ namespace Geometry
 				matrix[i][j] = (*vertices[i])[j];
 			}
 		}
-		if (calculateMatrixRank<N>(matrix) < N)
+		if (calculateSquareMatrixRank<N>(matrix) < N)
 		{
 			return Vector<N>();
 		}
