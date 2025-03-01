@@ -409,7 +409,10 @@ namespace Geometry
 		}
 		else
 		{
-			std::sort(vertices.begin(), vertices.end());
+			std::sort(vertices.begin(), vertices.end(), [](const Point<N>& point1, const Point<N>& point2)
+				{
+					return point1 < point2;
+				});
 			for (std::size_t i = 0; i < N; i++)
 			{
 				this->vertices[i] = std::make_shared<Point<N>>(vertices[i]);
@@ -433,7 +436,10 @@ namespace Geometry
 		}
 		else
 		{
-			std::sort(this->vertices.begin(), this->vertices.end());
+			std::sort(this->vertices.begin(), this->vertices.end(), [](const std::shared_ptr<Point<N>>& point1, const std::shared_ptr<Point<N>>& point2)
+				{
+					return *point1 < *point2;
+				});
 			this->normal = normal;
 			this->neighbors.fill(nullptr);
 		}
@@ -464,12 +470,7 @@ namespace Geometry
 	template <std::size_t N>
 	double Hyperplane<N>::getDistance(const Point<N>& point) const
 	{
-		double distance = 0.0;
-		for (std::size_t i = 0; i < N; i++)
-		{
-			distance += normal[i] * (point[i] - (*this->vertices[0])[i]);
-		}
-		return distance / normal.getMagnitude();
+		return normal * (point - *this->vertices[0]);
 	}
 
 	template<std::size_t N>
@@ -484,6 +485,12 @@ namespace Geometry
 		{
 			normal = -normal;
 		}
+	}
+
+	template<std::size_t N>
+	bool Hyperplane<N>::isAbove(const Point<N>& point) const
+	{
+		return this->normal * (point - *this->vertices[0]) > 0.0;
 	}
 
 	template<std::size_t N>
@@ -553,6 +560,12 @@ namespace Geometry
 	}
 
 	template<std::size_t N>
+	std::array<std::shared_ptr<Hyperplane<N>>, N> Hyperplane<N>::getNeighbors() const
+	{
+		return this->neighbors;
+	}
+
+	template<std::size_t N>
 	bool Hyperplane<N>::addPointAbove(std::shared_ptr<Point<N>> point)
 	{
 		if (point != nullptr)
@@ -574,7 +587,45 @@ namespace Geometry
 	template<std::size_t N>
 	std::vector<std::shared_ptr<Point<N>>> Hyperplane<N>::getPointsAbove() const
 	{
-		return std::vector<std::shared_ptr<Point<N>>>();
+		return this->pointsAbove;
+	}
+
+	template<std::size_t N>
+	std::shared_ptr<Point<N>> Hyperplane<N>::getFurthestPointAbove() const
+	{
+		std::shared_ptr<Point<N>> furthestPoint = nullptr;
+		double maxDistance = 0.0;
+		for (auto point : this->pointsAbove)
+		{
+			double distance = getDistance(*point);
+			if (distance > maxDistance)
+			{
+				maxDistance = distance;
+				furthestPoint = point;
+			}
+		}
+		return furthestPoint;
+	}
+
+	template<std::size_t N>
+	std::array<std::shared_ptr<HyperplanePencil<N>>, N> Hyperplane<N>::getPencils() const
+	{
+		std::array<std::shared_ptr<HyperplanePencil<N>>, N> pencils;
+		for (std::size_t i = 0; i < N; i++)
+		{
+			std::array<std::shared_ptr<Point<N>>, N - 1> vertices;
+			std::size_t index = 0;
+			for (std::size_t j = 0; j < N; j++)
+			{
+				if (j != i)
+				{
+					vertices[index] = this->vertices[j];
+					index++;
+				}
+			}
+			pencils[i] = std::make_shared<HyperplanePencil<N>>(vertices);
+		}
+		return pencils;
 	}
 
 	template <std::size_t N>
@@ -629,6 +680,87 @@ namespace Geometry
 		return output;
 	}
 
+	template<std::size_t N>
+	HyperplanePencil<N>::HyperplanePencil()
+	{
+		this->vertices.fill(nullptr);
+	}
+
+	// HyperplanePencil class
+	template <std::size_t N>
+	HyperplanePencil<N>::HyperplanePencil(const std::array<std::shared_ptr<Point<N>>, N - 1>& vertices)
+		: vertices(vertices)
+	{
+		std::sort(this->vertices.begin(), this->vertices.end(), [](const std::shared_ptr<Point<N>>& point1, const std::shared_ptr<Point<N>>& point2)
+			{
+				return *point1 < *point2;
+			});
+	}
+
+	template<std::size_t N>
+	HyperplanePencil<N>::HyperplanePencil(const HyperplanePencil<N>& hyperplanePencil)
+		: vertices(hyperplanePencil.vertices)
+	{
+	}
+
+	template<std::size_t N>
+	std::size_t HyperplanePencil<N>::getDimension() const
+	{
+		return N;
+	}
+	
+	template <std::size_t N>
+	const std::shared_ptr<Point<N>>& HyperplanePencil<N>::operator[](std::size_t index) const
+	{
+		static_assert(index < N - 1, "HyperplanePencil index must be less than N - 1");
+		return this->vertices[index];
+	}
+
+	template <std::size_t N>
+	std::shared_ptr<Point<N>>& HyperplanePencil<N>::operator[](std::size_t index)
+	{
+		static_assert(index < N - 1, "HyperplanePencil index must be less than N - 1");
+		return this->vertices[index];
+	}
+
+	template <std::size_t N>
+	bool HyperplanePencil<N>::operator==(const HyperplanePencil<N>& hyperplanePencil) const
+	{
+		for (std::size_t i = 0; i < N - 1; i++)
+		{
+			if (this->vertices[i] != hyperplanePencil[i])
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	template <std::size_t N>
+	bool HyperplanePencil<N>::operator!=(const HyperplanePencil<N>& hyperplanePencil) const
+	{
+		return !(*this == hyperplanePencil);
+	}
+
+	template <std::size_t N>
+	std::ostream& operator<<(std::ostream& output, const HyperplanePencil<N>& hyperplanePencil)
+	{
+		if (!hyperplanePencil)
+		{
+			output << "HyperplanePencil is not initialized";
+		}
+		else
+		{
+			output << "{";
+			for (std::size_t i = 0; i < N - 2; i++)
+			{
+				output << *hyperplanePencil[i] << ", ";
+			}
+			output << *hyperplanePencil[N - 2] << "}";
+		}
+		return output;
+	}
+
 	// Simplex class
 	template <std::size_t N>
 	Simplex<N>::Simplex()
@@ -640,7 +772,10 @@ namespace Geometry
 	template <std::size_t N>
 	Simplex<N>::Simplex(const std::array<Point<N>, N + 1>& vertices)
 	{
-		std::sort(vertices.begin(), vertices.end());
+		std::sort(vertices.begin(), vertices.end(), [](const Point<N>& point1, const Point<N>& point2)
+			{
+				return point1 < point2;
+			});
 		for (std::size_t i = 0; i < N + 1; i++)
 		{
 			this->vertices[i] = std::make_shared<Point<N>>(vertices[i]);
@@ -656,7 +791,10 @@ namespace Geometry
 	Simplex<N>::Simplex(const std::array<std::shared_ptr<Point<N>>, N + 1>& vertices)
 		: vertices(vertices)
 	{
-		std::sort(this->vertices.begin(), this->vertices.end());
+		std::sort(this->vertices.begin(), this->vertices.end(), [](const std::shared_ptr<Point<N>>& point1, const std::shared_ptr<Point<N>>& point2)
+			{
+				return *point1 < *point2;
+			});
 		if (!initializeFacets())
 		{
 			this->vertices.fill(nullptr);
@@ -668,7 +806,10 @@ namespace Geometry
 	Simplex<N>::Simplex(const Simplex<N>& simplex)
 	{
 		this->vertices = simplex.vertices;
-		std::sort(this->vertices.begin(), this->vertices.end());
+		std::sort(this->vertices.begin(), this->vertices.end(), [](const std::shared_ptr<Point<N>>& point1, const std::shared_ptr<Point<N>>& point2)
+			{
+				return *point1 < *point2;
+			});
 		this->facets = simplex.facets;
 	}
 
@@ -854,7 +995,10 @@ namespace Geometry
 			vertices.push_back(std::make_shared<Point<N>>(point));
 		}
 		this->vertices = vertices;
-		std::sort(this->vertices.begin(), this->vertices.end());
+		std::sort(this->vertices.begin(), this->vertices.end(), [](const std::shared_ptr<Point<N>>& point1, const std::shared_ptr<Point<N>>& point2)
+			{
+				return *point1 < *point2;
+			});
 		this->facets.fill(nullptr);
 	}
 
@@ -862,7 +1006,10 @@ namespace Geometry
 	ConvexHull<N>::ConvexHull(const std::vector<std::shared_ptr<Point<N>>>& points)
 		: vertices(points)
 	{
-		std::sort(this->vertices.begin(), this->vertices.end());
+		std::sort(this->vertices.begin(), this->vertices.end(), [](const std::shared_ptr<Point<N>>& point1, const std::shared_ptr<Point<N>>& point2)
+			{
+				return *point1 < *point2;
+			});
 		this->facets.fill(nullptr);
 	}
 
@@ -871,7 +1018,10 @@ namespace Geometry
 		: vertices(convexHull.vertices),
 		facets(convexHull.facets)
 	{
-		std::sort(this->vertices.begin(), this->vertices.end());
+		std::sort(this->vertices.begin(), this->vertices.end(), [](const std::shared_ptr<Point<N>>& point1, const std::shared_ptr<Point<N>>& point2)
+			{
+				return *point1 < *point2;
+			});
 	}
 
 	template<std::size_t N>
@@ -939,7 +1089,88 @@ namespace Geometry
 			}
 		}
 
-		// TODO: 递归添加点
+		// 递归将面的外部点添加到convexHull中
+		{
+			// 记录待处理的面
+			std::vector<std::shared_ptr<Hyperplane<N>>> processFacets = this->facets;
+			while (!processFacets.empty())
+			{
+				// 取出待处理的面
+				std::shared_ptr<Hyperplane<N>> facet = processFacets.back();
+				processFacets.pop_back();
+				// 取出面的外部点中距离面最远的点
+				std::shared_ptr<Point<N>> furthestPoint = facet->getFurthestPointAbove();
+				if (furthestPoint != nullptr)
+				{
+					// 记录该点的可见面
+					std::vector<std::shared_ptr<Hyperplane<N>>> visibleFacets;
+					// 计算该点的可见面（可考虑抽取为函数）
+					{
+						// 记录已访问的面
+						std::set<std::shared_ptr<Hyperplane<N>>> visitedFacets;
+						// 待确认的面
+						std::vector<std::shared_ptr<Hyperplane<N>>> facetsToCheck;
+						facetsToCheck.push_back(facet);
+
+						while (!facetsToCheck.empty())
+						{
+							std::shared_ptr<Hyperplane<N>> currentFacet = facetsToCheck.back();
+							facetsToCheck.pop_back();
+							
+							if (visitedFacets.find(currentFacet) == visitedFacets.end())
+							{
+								visitedFacets.insert(currentFacet);
+								
+								if (currentFacet->isAbove(*furthestPoint))
+								{
+									visibleFacets.push_back(currentFacet);
+									// 将当前面的邻接面添加到待确认的面中
+									for (auto& f : currentFacet->getNeighbors())
+									{
+										if (f != nullptr)
+										{
+											facetsToCheck.push_back(f);
+										}
+									}
+								}
+							}
+						}
+					}
+					// 构建新的凸包面，并将外部点重新分配到新的面中
+					{
+						std::vector<std::shared_ptr<Hyperplane<N>>> newFacets;
+						// 统计超平面束的出现次数
+						std::map<std::shared_ptr<HyperplanePencil<N>>, std::vector<std::shared_ptr<Point<N>>>> pencilMap;
+						for (std::shared_ptr<Hyperplane<N>> visibleFacet : visibleFacets)
+						{
+							// 获取可见面的超平面束
+							std::array<std::shared_ptr<HyperplanePencil<N>>, N> pencils = visibleFacet->getPencils();
+							std::size_t index = 0;
+							for (std::shared_ptr<HyperplanePencil<N>> pencil : pencils)
+							{
+								pencilMap[pencil].push_back((*visibleFacet)[index]);
+							}
+						}
+						// 获取凸包面的超平面束
+						std::vector<std::shared_ptr<HyperplanePencil<N>>> pencils;
+						for (auto& pair : pencilMap)
+						{
+							if (pair.second.size() == 1)
+							{
+								pencils.push_back(pair.first);
+								// TODO: 获取该超平面束对应的超平面的对应邻接面的指针
+							}
+						}
+
+						// 删除凸包中的可见超平面
+						for (std::shared_ptr<Hyperplane<N>> visibleFacet : visibleFacets)
+						{
+							// TODO: 删除可见面
+						}
+					}
+				}
+			}
+		}
 	}
 
 	template<std::size_t N>

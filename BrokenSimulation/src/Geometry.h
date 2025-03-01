@@ -22,6 +22,9 @@ namespace Geometry
 	class Hyperplane;
 
 	template <std::size_t N>
+	class HyperplanePencil;
+
+	template <std::size_t N>
 	class Simplex;
 
 	template <std::size_t N>
@@ -128,12 +131,16 @@ namespace Geometry
 		Vector<N> getNormal() const;
 		double getDistance(const Point<N>& point) const;
 		void setNormalDirection(std::shared_ptr<Point<N>> pointBehind);
+		bool isAbove(const Point<N>& point) const;
 		bool isAdjacent(const Hyperplane<N>& hyperplane, std::size_t& index) const;
 		void setNeighbor(std::shared_ptr<Hyperplane<N>> neighbor);
 		void setNeighbor(std::size_t index, std::shared_ptr<Hyperplane<N>> neighbor);
 		std::shared_ptr<Hyperplane<N>> getNeighbor(std::size_t index) const;
+		std::array<std::shared_ptr<Hyperplane<N>>, N> getNeighbors() const;
 		bool addPointAbove(std::shared_ptr<Point<N>> point);
 		std::vector<std::shared_ptr<Point<N>>> getPointsAbove() const;
+		std::shared_ptr<Point<N>> getFurthestPointAbove() const;
+		std::array<std::shared_ptr<HyperplanePencil<N>>, N> getPencils() const;
 
 
 		// 重载运算符
@@ -148,6 +155,36 @@ namespace Geometry
 		Vector<N> normal;
 		std::array<std::shared_ptr<Hyperplane<N>>, N> neighbors;
 		std::vector<std::shared_ptr<Point<N>>> pointsAbove;
+	};
+
+
+	// HyperplanePencil class
+	template <std::size_t N>
+	class HyperplanePencil
+	{
+		static_assert(N > 1, "HyperplanePencil dimension must be greater than 1");
+		static_assert(N < 4, "HyperplanePencil dimension must be less than 4");
+
+	public:
+		// 构造函数
+		HyperplanePencil();
+		HyperplanePencil(const std::array<std::shared_ptr<Point<N>>, N - 1>& vertices);
+		HyperplanePencil(const HyperplanePencil<N>& hyperplanePencil);
+
+
+		// 成员函数
+		std::size_t getDimension() const;
+
+
+		// 重载运算符
+		const std::shared_ptr<Point<N>>& operator[](std::size_t index) const;
+		std::shared_ptr<Point<N>>& operator[](std::size_t index);
+		bool operator==(const HyperplanePencil<N>& hyperplanePencil) const;
+		bool operator!=(const HyperplanePencil<N>& hyperplanePencil) const;
+		friend std::ostream& operator<<(std::ostream& output, const HyperplanePencil<N>& hyperplanePencil);
+
+	private:
+		std::array<std::shared_ptr<Point<N>>, N - 1> vertices;
 	};
 
 
