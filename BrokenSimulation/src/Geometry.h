@@ -137,10 +137,12 @@ namespace Geometry
 		void setNeighbor(std::size_t index, std::shared_ptr<Hyperplane<N>> neighbor);
 		std::shared_ptr<Hyperplane<N>> getNeighbor(std::size_t index) const;
 		std::array<std::shared_ptr<Hyperplane<N>>, N> getNeighbors() const;
+		void removeNeighbor(std::shared_ptr<Hyperplane<N>> neighbor);
 		bool addPointAbove(std::shared_ptr<Point<N>> point);
 		std::vector<std::shared_ptr<Point<N>>> getPointsAbove() const;
 		std::shared_ptr<Point<N>> getFurthestPointAbove() const;
 		std::array<std::shared_ptr<HyperplanePencil<N>>, N> getPencils() const;
+		std::size_t getVertexIndex(std::shared_ptr<Point<N>> vertex) const;
 
 
 		// ÖØÔØÔËËã·û
