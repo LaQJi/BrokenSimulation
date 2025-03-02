@@ -31,7 +31,6 @@ namespace Geometry
 			for (std::size_t i = 0; i < M; i++)
 			{
 				this->coordinates[i] = point[i];
-				projection += point[i] * point[i];
 			}
 			for (std::size_t i = M; i < N; i++)
 			{
@@ -1053,6 +1052,8 @@ namespace Geometry
 	{
 		// 尝试构建初始单纯形
 		std::vector<std::shared_ptr<Point<N>>> simplexVertices;
+		// 记录凸包的内部点
+		std::shared_ptr<Point<N>> centroid = nullptr;
 		{
 			simplexVertices.push_back(this->vertices[0]);
 			std::size_t index = 1;
@@ -1081,7 +1082,7 @@ namespace Geometry
 			// 构建初始单纯形
 			Simplex<N> simplex(simplexVertices);
 			// 记录初始单纯形的重心，该点始终为凸包的内部点
-			std::shared_ptr<Point<N>> centroid = simplex.getCentroid();
+			centroid = simplex.getCentroid();
 			// 如果无法构建初始单纯形，则返回false
 			bool flag = simplex.initializeFacets();
 			if (!flag)
@@ -1163,6 +1164,7 @@ namespace Geometry
 						}
 					}
 					// 构建新的凸包面，并将外部点重新分配到新的面中
+					std::vector<std::shared_ptr<Hyperplane<N>>> newFacets;
 					{
 						// 记录超平面束对应的邻接面
 						std::map<std::shared_ptr<HyperplanePencil<N>>, std::shared_ptr<Hyperplane<N>>> pencilNeighbors;
@@ -1233,7 +1235,6 @@ namespace Geometry
 							neighbor->setNeighbor(newFacet);
 							newFacets.push_back(newFacet);
 						}
-						std::vector<std::shared_ptr<Hyperplane<N>>> newFacets;
 						// 设置邻接关系
 						for (std::shared_ptr<Hyperplane<N>> newFacet : newFacets)
 						{
