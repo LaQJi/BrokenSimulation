@@ -9,3 +9,7 @@
 build/
 Debug/
 Release/
+
+# dependencies and vendor
+dependencies/
+vendor/
