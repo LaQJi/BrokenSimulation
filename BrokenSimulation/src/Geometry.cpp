@@ -91,14 +91,14 @@ namespace Geometry
 	template <std::size_t N>
 	const double& Point<N>::operator[](std::size_t index) const
 	{
-		static_assert(index < N, "Point index must be less than N");
+		assert(index < N && "Point index must be less than N");
 		return this->coordinates[index];
 	}
 
 	template <std::size_t N>
 	double& Point<N>::operator[](std::size_t index)
 	{
-		static_assert(index < N, "Point index must be less than N");
+		assert(index < N && "Point index must be less than N");
 		return this->coordinates[index];
 	}
 
@@ -197,6 +197,11 @@ namespace Geometry
 		return output;
 	}
 
+	// 显式实例化
+	template class Point<2>;
+	template class Point<3>;
+	template class Point<4>;
+
 	// Vector class
 	template <std::size_t N>
 	Vector<N>::Vector()
@@ -268,14 +273,14 @@ namespace Geometry
 	template<std::size_t N>
 	const double& Vector<N>::operator[](std::size_t index) const
 	{
-		static_assert(index < N, "Vector index must be less than N");
+		assert(index < N && "Vector index must be less than N");
 		return this->components[index];
 	}
 
 	template<std::size_t N>
 	double& Vector<N>::operator[](std::size_t index)
 	{
-		static_assert(index < N, "Vector index must be less than N");
+		assert(index < N && "Vector index must be less than N");
 		return this->components[index];
 	}
 
@@ -353,18 +358,29 @@ namespace Geometry
 		return dotProduct;
 	}
 
+    template<std::size_t N>
+    Vector<N> Vector<N>::operator^(const Vector<N>& vector) const
+    {
+		if (N == 3)
+		{
+			Vector<N> crossProduct;
+
+			crossProduct[0] = this->components[1] * vector[2] - this->components[2] * vector[1];
+			crossProduct[1] = this->components[2] * vector[0] - this->components[0] * vector[2];
+			crossProduct[2] = this->components[0] * vector[1] - this->components[1] * vector[0];
+
+			return crossProduct;
+		}
+		else
+		{
+			throw std::invalid_argument("Cross product is only defined for 3D vectors");
+		}
+    }
+
 	template<std::size_t N>
-	Vector<N> Vector<N>::operator^(const Vector<N>& vector) const
+	Vector<N> Vector<N>::operator-() const
 	{
-		static_assert(N == 3, "Cross product is only defined for 3D vectors");
-
-		Vector<N> crossProduct;
-
-		crossProduct[0] = this->components[1] * vector[2] - this->components[2] * vector[1];
-		crossProduct[1] = this->components[2] * vector[0] - this->components[0] * vector[2];
-		crossProduct[2] = this->components[0] * vector[1] - this->components[1] * vector[0];
-
-		return crossProduct;
+		return *this * -1.0;
 	}
 
 	template<std::size_t N>
@@ -386,6 +402,11 @@ namespace Geometry
 		return output;
 	}
 
+	// 显式实例化
+	template class Vector<2>;
+	template class Vector<3>;
+	template class Vector<4>;
+
 	// Hyperplane class
 	template <std::size_t N>
 	Hyperplane<N>::Hyperplane()
@@ -399,7 +420,13 @@ namespace Geometry
 	template <std::size_t N>
 	Hyperplane<N>::Hyperplane(const std::array<Point<N>, N>& vertices)
 	{
-		Vector<N> normal = calculateNormal(vertices);
+		std::array<std::shared_ptr<Point<N>>, N> sharedVertices;
+		for (std::size_t i = 0; i < N; i++)
+		{
+			sharedVertices[i] = std::make_shared<Point<N>>(vertices[i]);
+		}
+
+		Vector<N> normal = calculateNormal(sharedVertices);
 		if (normal == Vector<N>())
 		{
 			this->vertices.fill(nullptr);
@@ -408,17 +435,15 @@ namespace Geometry
 		}
 		else
 		{
-			std::sort(vertices.begin(), vertices.end(), [](const Point<N>& point1, const Point<N>& point2)
+			std::sort(sharedVertices.begin(), sharedVertices.end(), [](const std::shared_ptr<Point<N>>& point1, const std::shared_ptr<Point<N>>& point2)
 				{
-					return point1 < point2;
+					return *point1 < *point2;
 				});
-			for (std::size_t i = 0; i < N; i++)
-			{
-				this->vertices[i] = std::make_shared<Point<N>>(vertices[i]);
-			}
+			this->vertices = sharedVertices;
 			this->normal = normal;
 			this->neighbors.fill(nullptr);
 		}
+
 		this->pointsAbove.clear();
 	}
 
@@ -480,7 +505,7 @@ namespace Geometry
 		{
 			direction[i] = (*pointBehind)[i] - (*this->vertices[0])[i];
 		}
-		if (normal* direction < 0.0)
+		if (normal* direction > 0.0)
 		{
 			normal = -normal;
 		}
@@ -536,7 +561,7 @@ namespace Geometry
 	template<std::size_t N>
 	void Hyperplane<N>::setNeighbor(std::size_t index, std::shared_ptr<Hyperplane<N>> neighbor)
 	{
-		static_assert(index < N, "Hyperplane neighbor index must be less than N");
+		assert(index < N && "Hyperplane neighbor index must be less than N");
 		// temp为neighbor中不包含的点
 		std::shared_ptr<Point<N>> temp = this->vertices[index];
 		// 判断neighbor中是否包含temp
@@ -654,14 +679,14 @@ namespace Geometry
 	template <std::size_t N>
 	const std::shared_ptr<Point<N>>& Hyperplane<N>::operator[](std::size_t index) const
 	{
-		static_assert(index < N, "Hyperplane index must be less than N");
+		assert(index < N && "Hyperplane index must be less than N");
 		return this->vertices[index];
 	}
 
 	template <std::size_t N>
 	std::shared_ptr<Point<N>>& Hyperplane<N>::operator[](std::size_t index)
 	{
-		static_assert(index < N, "Hyperplane index must be less than N");
+		assert(index < N && "Hyperplane index must be less than N");
 		return this->vertices[index];
 	}
 
@@ -709,6 +734,11 @@ namespace Geometry
 		this->vertices.fill(nullptr);
 	}
 
+	// 显式实例化
+	template class Hyperplane<2>;
+	template class Hyperplane<3>;
+	template class Hyperplane<4>;
+
 	// HyperplanePencil class
 	template <std::size_t N>
 	HyperplanePencil<N>::HyperplanePencil(const std::array<std::shared_ptr<Point<N>>, N - 1>& vertices)
@@ -735,14 +765,14 @@ namespace Geometry
 	template <std::size_t N>
 	const std::shared_ptr<Point<N>>& HyperplanePencil<N>::operator[](std::size_t index) const
 	{
-		static_assert(index < N - 1, "HyperplanePencil index must be less than N - 1");
+		assert(index < N - 1 && "HyperplanePencil index must be less than N - 1");
 		return this->vertices[index];
 	}
 
 	template <std::size_t N>
 	std::shared_ptr<Point<N>>& HyperplanePencil<N>::operator[](std::size_t index)
 	{
-		static_assert(index < N - 1, "HyperplanePencil index must be less than N - 1");
+		assert(index < N - 1 && "HyperplanePencil index must be less than N - 1");
 		return this->vertices[index];
 	}
 
@@ -784,6 +814,11 @@ namespace Geometry
 		return output;
 	}
 
+	// 显式实例化
+	template class HyperplanePencil<2>;
+	template class HyperplanePencil<3>;
+	template class HyperplanePencil<4>;
+
 	// Simplex class
 	template <std::size_t N>
 	Simplex<N>::Simplex()
@@ -795,13 +830,11 @@ namespace Geometry
 	template <std::size_t N>
 	Simplex<N>::Simplex(const std::array<Point<N>, N + 1>& vertices)
 	{
-		std::sort(vertices.begin(), vertices.end(), [](const Point<N>& point1, const Point<N>& point2)
-			{
-				return point1 < point2;
-			});
+		std::vector<Point<N>> points(vertices.begin(), vertices.end());
+		std::sort(points.begin(), points.end());
 		for (std::size_t i = 0; i < N + 1; i++)
 		{
-			this->vertices[i] = std::make_shared<Point<N>>(vertices[i]);
+			this->vertices[i] = std::make_shared<Point<N>>(points[i]);
 		}
 		if (!initializeFacets())
 		{
@@ -871,12 +904,15 @@ namespace Geometry
 			{
 				if (i != j)
 				{
-					facets[i]->setNeighbor(facets[j], index);
+					facets[i]->setNeighbor(index, facets[j]);
 					index++;
 				}
 			}
 		}
-		this->facets = facets;
+		for (std::size_t i = 0; i < N + 1; i++)
+		{
+			this->facets[i] = facets[i];
+		}
 		return true;
 	}
 
@@ -889,17 +925,17 @@ namespace Geometry
 	template<std::size_t N>
 	std::shared_ptr<Point<N>> Simplex<N>::getCentroid() const
 	{
-		Point<N> centroid;
+		std::shared_ptr<Point<N>> centroid = std::make_shared<Point<N>>();
 		for (std::size_t i = 0; i < N + 1; i++)
 		{
 			for (std::size_t j = 0; j < N; j++)
 			{
-				centroid[j] += (*vertices[i])[j];
+				(*centroid)[j] += (*vertices[i])[j];
 			}
 		}
 		for (std::size_t i = 0; i < N; i++)
 		{
-			centroid[i] /= (N + 1);
+			(*centroid)[i] /= (N + 1);
 		}
 		return centroid;
 	}
@@ -907,7 +943,7 @@ namespace Geometry
 	template<std::size_t N>
 	std::shared_ptr<Point<N>> Simplex<N>::getCircumcenter() const
 	{
-		Point<N> circumcenter;
+		std::shared_ptr<Point<N>> circumcenter = std::make_shared<Point<N>>();
 		std::array<std::array<double, N>, N> coefficients;
 		for (std::size_t i = 0; i < N; i++)
 		{
@@ -927,12 +963,12 @@ namespace Geometry
 		}
 		for (std::size_t i = 1; i < N; i++)
 		{
-			circumcenter[i] = constants[i];
+			(*circumcenter)[i] = constants[i];
 			for (std::size_t j = 1; j < i; j++)
 			{
-				circumcenter[i] -= coefficients[i][j] * circumcenter[j];
+				(*circumcenter)[i] -= coefficients[i][j] * (*circumcenter)[j];
 			}
-			circumcenter[i] /= coefficients[i][i];
+			(*circumcenter)[i] /= coefficients[i][i];
 		}
 		return circumcenter;
 	}
@@ -946,20 +982,25 @@ namespace Geometry
 	template<std::size_t N>
 	std::vector<std::shared_ptr<Hyperplane<N>>> Simplex<N>::getFacets() const
 	{
-		return this->facets;
+		std::vector<std::shared_ptr<Hyperplane<N>>> facets;
+		for (std::size_t i = 0; i < N + 1; i++)
+		{
+			facets.push_back(this->facets[i]);
+		}
+		return facets;
 	}
 
 	template<std::size_t N>
 	const std::shared_ptr<Point<N>>& Simplex<N>::operator[](std::size_t index) const
 	{
-		static_assert(index < N + 1, "Simplex index must be less than N + 1");
+		assert(index < N + 1 && "Simplex index must be less than N + 1");
 		return this->vertices[index];
 	}
 
 	template<std::size_t N>
 	std::shared_ptr<Point<N>>& Simplex<N>::operator[](std::size_t index)
 	{
-		static_assert(index < N + 1, "Simplex index must be less than N + 1");
+		assert(index < N + 1 && "Simplex index must be less than N + 1");
 		return this->vertices[index];
 	}
 
@@ -1001,12 +1042,15 @@ namespace Geometry
 		return output;
 	}
 
+	// 显式实例化
+	template class Simplex<2>;
+	template class Simplex<3>;
+	template class Simplex<4>;
+
 	// ConvexHull class
 	template <std::size_t N>
 	ConvexHull<N>::ConvexHull()
 	{
-		this->vertices.fill(nullptr);
-		this->facets.fill(nullptr);
 	}
 
 	template <std::size_t N>
@@ -1022,7 +1066,6 @@ namespace Geometry
 			{
 				return *point1 < *point2;
 			});
-		this->facets.fill(nullptr);
 	}
 
 	template <std::size_t N>
@@ -1033,7 +1076,6 @@ namespace Geometry
 			{
 				return *point1 < *point2;
 			});
-		this->facets.fill(nullptr);
 	}
 
 	template<std::size_t N>
@@ -1050,6 +1092,10 @@ namespace Geometry
 	template<std::size_t N>
 	bool ConvexHull<N>::initialize()
 	{
+		// TODO: 修复删除面的逻辑
+
+
+
 		// 尝试构建初始单纯形
 		std::vector<std::shared_ptr<Point<N>>> simplexVertices;
 		// 记录凸包的内部点
@@ -1068,21 +1114,29 @@ namespace Geometry
 					return false;
 				}
 				// direction为vertices[index]与vertices[0]之间的向量
-				Vector<N> direction = this->vertices[index] - this->vertices[0];
+				Vector<N> direction = *this->vertices[index] - *this->vertices[0];
 				// 如果direction与matrix中的向量线性无关，则将vertices[index]添加到simplexVertices中，并将direction添加到matrix中
 				bool flag = isLinearlyIndependent(matrix, direction);
 				if (flag)
 				{
 					simplexVertices.push_back(this->vertices[index]);
-					matrix.push_back(direction);
+					std::array<double, N> temp;
+					for (std::size_t i = 0; i < N; i++)
+					{
+						temp[i] = direction[i];
+					}
+					matrix.push_back(temp);
 				}
 				index++;
 			}
 
 			// 构建初始单纯形
-			Simplex<N> simplex(simplexVertices);
-			// 记录初始单纯形的重心，该点始终为凸包的内部点
-			centroid = simplex.getCentroid();
+			std::array<std::shared_ptr<Point<N>>, N + 1> tempVertices;
+			for (std::size_t i = 0; i < N + 1; i++)
+			{
+				tempVertices[i] = simplexVertices[i];
+			}
+			Simplex<N> simplex(tempVertices);
 			// 如果无法构建初始单纯形，则返回false
 			bool flag = simplex.initializeFacets();
 			if (!flag)
@@ -1094,8 +1148,10 @@ namespace Geometry
 
 			for (std::size_t i = 0; i < N + 1; i++)
 			{
-				this->facets[i] = facets[i];
+				this->facets.push_back(facets[i]);
 			}
+			// 记录初始单纯形的重心，该点始终为凸包的内部点
+			centroid = simplex.getCentroid();
 		}
 
 		// 将convecHull中的在单纯形外部点添加到面的上方集合中
@@ -1182,6 +1238,7 @@ namespace Geometry
 								{
 									pencilMap[pencil].push_back((*visibleFacet)[index]);
 									pencilFacets[pencil] = visibleFacet;
+									index++;
 								}
 							}
 							// 获取凸包面的超平面束
@@ -1214,7 +1271,7 @@ namespace Geometry
 										neighbors[i]->removeNeighbor(visibleFacet);
 									}
 								}
-								std::vector<std::shared_ptr<Point<N>>>& points = visibleFacet->getPointsAbove();
+								std::vector<std::shared_ptr<Point<N>>> points = visibleFacet->getPointsAbove();
 								pointsAbove.insert(pointsAbove.end(), points.begin(), points.end());
 							}
 						}
@@ -1253,11 +1310,14 @@ namespace Geometry
 						// 将外部点重新分配到新的凸包面中
 						for (std::shared_ptr<Point<N>> p : pointsAbove)
 						{
-							for (std::shared_ptr<Hyperplane<N>> newFacet : newFacets)
+							if (p != furthestPoint)
 							{
-								if (newFacet->addPointAbove(p))
+								for (std::shared_ptr<Hyperplane<N>> newFacet : newFacets)
 								{
-									break;
+									if (newFacet->addPointAbove(p))
+									{
+										break;
+									}
 								}
 							}
 						}
@@ -1327,49 +1387,12 @@ namespace Geometry
 		return output;
 	}
 
-	// Geometry functions
-	template <std::size_t N>
-	int calculateSquareMatrixRank(std::array<std::array<double, N>, N>& matrix)
-	{
-		int rank = 0;
-		for (std::size_t i = 0; i < N; i++)
-		{
-			if (matrix[i][i] == 0)
-			{
-				bool swapped = false;
-				for (std::size_t j = i + 1; j < N; j++)
-				{
-					if (matrix[j][i] != 0)
-					{
-						std::swap(matrix[i], matrix[j]);
-						swapped = true;
-						break;
-					}
-				}
-				if (!swapped)
-				{
-					continue;
-				}
-			}
-			for (std::size_t j = i + 1; j < N; j++)
-			{
-				double factor = matrix[j][i] / matrix[i][i];
-				for (std::size_t k = i; k < N; k++)
-				{
-					matrix[j][k] -= factor * matrix[i][k];
-				}
-			}
-		}
-		for (std::size_t i = 0; i < N; i++)
-		{
-			if (matrix[i][i] != 0.0)
-			{
-				rank++;
-			}
-		}
-		return rank;
-	}
+	// 显式实例化
+	template class ConvexHull<2>;
+	template class ConvexHull<3>;
+	template class ConvexHull<4>;
 
+	// Geometry functions
 	template<std::size_t N>
 	int calculateMatrixRank(std::vector<std::array<double, N>>& matrix)
 	{
@@ -1377,24 +1400,45 @@ namespace Geometry
 		std::size_t cols = N;
 		int rank = 0;
 
-		for (std::size_t i = 0; i < rows; i++)
+		for (std::size_t col = 0; col < cols; col++)
 		{
-			if (matrix[i][rank] != 0)
+			std::size_t maxRow = rank;
+			for (std::size_t row = rank + 1; row < rows; row++)
 			{
-				for (std::size_t j = 0; j < cols; j++)
+				if (std::abs(matrix[row][col]) > std::abs(matrix[maxRow][col]))
 				{
-					if (j != i)
-					{
-						double factor = matrix[j][rank] / matrix[i][rank];
-						for (std::size_t k = 0; k < cols; k++)
-						{
-							matrix[j][k] -= factor * matrix[i][k];
-						}
-					}
+					maxRow = row;
 				}
-				rank++;
 			}
+
+			if (std::abs(matrix[maxRow][col]) < 1e-9)
+			{
+				continue;
+			}
+
+			if (maxRow != rank)
+			{
+				std::swap(matrix[rank], matrix[maxRow]);
+			}
+
+			for (std::size_t c = col + 1; c < cols; c++)
+			{
+				matrix[rank][c] /= matrix[rank][col];
+			}
+			matrix[rank][col] = 1.0;
+
+			for (std::size_t row = rank + 1; row < rows; row++)
+			{
+				double factor = matrix[row][col];
+				for (std::size_t c = col; c < cols; c++)
+				{
+					matrix[row][c] -= factor * matrix[rank][c];
+				}
+			}
+
+			rank++;
 		}
+
 		return rank;
 	}
 
@@ -1429,22 +1473,34 @@ namespace Geometry
 	template<std::size_t N>
 	Vector<N> calculateNormal(const std::array<std::shared_ptr<Point<N>>, N>& vertices)
 	{
-		std::array<std::array<double, N>, N> matrix;
-		for (std::size_t i = 0; i < N; i++)
+		std::vector<std::array<double, N>> matrix;
+		for (std::size_t i = 1; i < N; i++)
 		{
+			std::array<double, N> row;
 			for (std::size_t j = 0; j < N; j++)
 			{
-				matrix[i][j] = (*vertices[i])[j];
+				row[j] = (*vertices[i])[j] - (*vertices[0])[j];
 			}
+			matrix.push_back(row);
 		}
-		if (calculateSquareMatrixRank<N>(matrix) < N)
-		{
-			return Vector<N>();
-		}
+
 		Vector<N> normal;
-		for (std::size_t i = 0; i < N; i++)
+		if constexpr (N == 3)
 		{
-			normal[i] = matrix[0][i];
+			normal = Vector<N>(matrix[0]) ^ Vector<N>(matrix[1]);
+		}
+		else
+		{
+			normal = Vector<N>(matrix[0]);
+			for (std::size_t i = 1; i < N - 1; i++)
+			{
+				double dotProduct = Vector<N>(matrix[i]) * Vector<N>(matrix[i + 1]);
+				
+				for (std::size_t j = 0; j < N; j++)
+				{
+					normal[j] -= dotProduct * matrix[i][j];
+				}
+			}
 		}
 		normal.normalize();
 		return normal;

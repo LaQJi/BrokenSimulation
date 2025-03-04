@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <array>
 #include <set>
 #include <vector>
 #include <tuple>
@@ -8,6 +9,7 @@
 #include <algorithm>
 #include <cmath>
 #include <memory>
+#include <cassert>
 
 namespace Geometry
 {
@@ -35,9 +37,6 @@ namespace Geometry
 	template <std::size_t N>
 	class Point
 	{
-		static_assert(N > 0, "Point dimension must be greater than 0");
-		static_assert(N < 4, "Point dimension must be less than 4");
-
 	public:
 		// 构造函数
 		Point();
@@ -76,9 +75,6 @@ namespace Geometry
 	template <std::size_t N>
 	class Vector
 	{
-		static_assert(N > 0, "Vector dimension must be greater than 0");
-		static_assert(N < 4, "Vector dimension must be less than 4");
-
 	public:
 		// 构造函数
 		Vector();
@@ -104,6 +100,7 @@ namespace Geometry
 		Vector<N> operator/(double scalar) const;
 		double operator*(const Vector<N>& vector) const;
 		Vector<N> operator^(const Vector<N>& vector) const;
+		Vector<N> operator-() const;
 		friend std::ostream& operator<<(std::ostream& output, const Vector<N>& vector);
 
 	private:
@@ -115,9 +112,6 @@ namespace Geometry
 	template <std::size_t N>
 	class Hyperplane
 	{
-		static_assert(N > 1, "Hyperplane dimension must be greater than 1");
-		static_assert(N < 4, "Hyperplane dimension must be less than 4");
-
 	public:
 		// 构造函数
 		Hyperplane();
@@ -164,9 +158,6 @@ namespace Geometry
 	template <std::size_t N>
 	class HyperplanePencil
 	{
-		static_assert(N > 1, "HyperplanePencil dimension must be greater than 1");
-		static_assert(N < 4, "HyperplanePencil dimension must be less than 4");
-
 	public:
 		// 构造函数
 		HyperplanePencil();
@@ -194,9 +185,6 @@ namespace Geometry
 	template <std::size_t N>
 	class Simplex
 	{
-		static_assert(N > 0, "Simplex dimension must be greater than 0");
-		static_assert(N < 4, "Simplex dimension must be less than 4");
-
 	public:
 		// 构造函数
 		Simplex();
@@ -231,9 +219,6 @@ namespace Geometry
 	template <std::size_t N>
 	class ConvexHull
 	{
-		static_assert(N > 0, "ConvexHull dimension must be greater than 0");
-		static_assert(N < 4, "ConvexHull dimension must be less than 4");
-
 	public:
 		// 构造函数
 		ConvexHull();
@@ -260,9 +245,6 @@ namespace Geometry
 
 
 	// Geometry functions
-	template <std::size_t N>
-	int calculateSquareMatrixRank(std::array<std::array<double, N>, N>& matrix);
-
 	template <std::size_t N>
 	int calculateMatrixRank(std::vector<std::array<double, N>>& matrix);
 
