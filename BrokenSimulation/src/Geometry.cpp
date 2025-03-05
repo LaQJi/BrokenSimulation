@@ -642,9 +642,9 @@ namespace Geometry
 	}
 
 	template<std::size_t N>
-	std::array<std::shared_ptr<HyperplanePencil<N>>, N> Hyperplane<N>::getPencils() const
+	std::array<HyperplanePencil<N>, N> Hyperplane<N>::getPencils() const
 	{
-		std::array<std::shared_ptr<HyperplanePencil<N>>, N> pencils;
+		std::array<HyperplanePencil<N>, N> pencils;
 		for (std::size_t i = 0; i < N; i++)
 		{
 			std::array<std::shared_ptr<Point<N>>, N - 1> vertices;
@@ -657,7 +657,7 @@ namespace Geometry
 					index++;
 				}
 			}
-			pencils[i] = std::make_shared<HyperplanePencil<N>>(vertices);
+			pencils[i] = HyperplanePencil<N>(vertices);
 		}
 		return pencils;
 	}
@@ -793,6 +793,23 @@ namespace Geometry
 	bool HyperplanePencil<N>::operator!=(const HyperplanePencil<N>& hyperplanePencil) const
 	{
 		return !(*this == hyperplanePencil);
+	}
+
+	template<std::size_t N>
+	bool HyperplanePencil<N>::operator<(const HyperplanePencil<N>& hyperplanePencil) const
+	{
+		for (std::size_t i = 0; i < N - 1; i++)
+		{
+			if (*this->vertices[i] < *hyperplanePencil[i])
+			{
+				return true;
+			}
+			else if (*this->vertices[i] > *hyperplanePencil[i])
+			{
+				return false;
+			}
+		}
+		return false;
 	}
 
 	template <std::size_t N>
@@ -1092,10 +1109,6 @@ namespace Geometry
 	template<std::size_t N>
 	bool ConvexHull<N>::initialize()
 	{
-		// TODO: 修复删除面的逻辑
-
-
-
 		// 尝试构建初始单纯形
 		std::vector<std::shared_ptr<Point<N>>> simplexVertices;
 		// 记录凸包的内部点
@@ -1207,6 +1220,13 @@ namespace Geometry
 								if (currentFacet->isAbove(*furthestPoint))
 								{
 									visibleFacets.push_back(currentFacet);
+
+									auto iter = std::find(processFacets.begin(), processFacets.end(), currentFacet);
+									if (iter != processFacets.end())
+									{
+										processFacets.erase(iter);
+									}
+
 									// 将当前面的邻接面添加到待确认的面中
 									for (auto& f : currentFacet->getNeighbors())
 									{
@@ -1223,18 +1243,18 @@ namespace Geometry
 					std::vector<std::shared_ptr<Hyperplane<N>>> newFacets;
 					{
 						// 记录超平面束对应的邻接面
-						std::map<std::shared_ptr<HyperplanePencil<N>>, std::shared_ptr<Hyperplane<N>>> pencilNeighbors;
+						std::map<HyperplanePencil<N>, std::shared_ptr<Hyperplane<N>>> pencilNeighbors;
 						{
 							// 统计超平面束的出现次数
-							std::map<std::shared_ptr<HyperplanePencil<N>>, std::vector<std::shared_ptr<Point<N>>>> pencilMap;
+							std::map<HyperplanePencil<N>, std::vector<std::shared_ptr<Point<N>>>> pencilMap;
 							// 记录超平面束对应的超平面
-							std::map<std::shared_ptr<HyperplanePencil<N>>, std::shared_ptr<Hyperplane<N>>> pencilFacets;
+							std::map<HyperplanePencil<N>, std::shared_ptr<Hyperplane<N>>> pencilFacets;
 							for (std::shared_ptr<Hyperplane<N>> visibleFacet : visibleFacets)
 							{
 								// 获取可见面的超平面束
-								std::array<std::shared_ptr<HyperplanePencil<N>>, N> pencils = visibleFacet->getPencils();
+								std::array<HyperplanePencil<N>, N> pencils = visibleFacet->getPencils();
 								std::size_t index = 0;
-								for (std::shared_ptr<HyperplanePencil<N>> pencil : pencils)
+								for (HyperplanePencil<N> pencil : pencils)
 								{
 									pencilMap[pencil].push_back((*visibleFacet)[index]);
 									pencilFacets[pencil] = visibleFacet;
@@ -1278,12 +1298,12 @@ namespace Geometry
 						// 添加新的凸包面
 						for (auto& pair : pencilNeighbors)
 						{
-							std::shared_ptr<HyperplanePencil<N>> pencil = pair.first;
+							HyperplanePencil<N> pencil = pair.first;
 							std::shared_ptr<Hyperplane<N>> neighbor = pair.second;
 							std::array<std::shared_ptr<Point<N>>, N> vertices;
 							for (std::size_t i = 0; i < N - 1; i++)
 							{
-								vertices[i] = (*pencil)[i];
+								vertices[i] = pencil[i];
 							}
 							vertices[N - 1] = furthestPoint;
 							std::shared_ptr<Hyperplane<N>> newFacet = std::make_shared<Hyperplane<N>>(vertices);

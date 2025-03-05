@@ -135,7 +135,7 @@ namespace Geometry
 		bool addPointAbove(std::shared_ptr<Point<N>> point);
 		std::vector<std::shared_ptr<Point<N>>> getPointsAbove() const;
 		std::shared_ptr<Point<N>> getFurthestPointAbove() const;
-		std::array<std::shared_ptr<HyperplanePencil<N>>, N> getPencils() const;
+		std::array<HyperplanePencil<N>, N> getPencils() const;
 		std::size_t getVertexIndex(std::shared_ptr<Point<N>> vertex) const;
 
 
@@ -174,6 +174,7 @@ namespace Geometry
 		std::shared_ptr<Point<N>>& operator[](std::size_t index);
 		bool operator==(const HyperplanePencil<N>& hyperplanePencil) const;
 		bool operator!=(const HyperplanePencil<N>& hyperplanePencil) const;
+		bool operator<(const HyperplanePencil<N>& hyperplanePencil) const;
 		friend std::ostream& operator<<(std::ostream& output, const HyperplanePencil<N>& hyperplanePencil);
 
 	private:
