@@ -149,6 +149,22 @@ unsigned int Shader::CreateShader(const std::string& vertexShader, const std::st
 	GLCall(glAttachShader(program, vs));
 	GLCall(glAttachShader(program, fs));
 	GLCall(glLinkProgram(program));
+
+	int result;
+	GLCall(glGetProgramiv(program, GL_LINK_STATUS, &result));
+	if (result == GL_FALSE)
+	{
+		int length;
+		GLCall(glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length));
+		char* message = (char*)_malloca(length * sizeof(char));
+		GLCall(glGetProgramInfoLog(program, length, &length, message));
+		std::cerr << "Failed to link shader program!" << std::endl;
+		std::cerr << message << std::endl;
+		_freea(message);
+		GLCall(glDeleteProgram(program));
+		return 0;
+	}
+
 	GLCall(glValidateProgram(program));
 
 	GLCall(glDeleteShader(vs));
