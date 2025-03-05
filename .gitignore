@@ -13,3 +13,6 @@ Release/
 # dependencies and vendor
 dependencies/
 vendor/
+
+# resoureces
+res/
