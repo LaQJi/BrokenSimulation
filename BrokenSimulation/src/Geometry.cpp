@@ -358,9 +358,9 @@ namespace Geometry
 		return dotProduct;
 	}
 
-    template<std::size_t N>
-    Vector<N> Vector<N>::operator^(const Vector<N>& vector) const
-    {
+	template<std::size_t N>
+	Vector<N> Vector<N>::operator^(const Vector<N>& vector) const
+	{
 		if (N == 3)
 		{
 			Vector<N> crossProduct;
@@ -375,7 +375,7 @@ namespace Geometry
 		{
 			throw std::invalid_argument("Cross product is only defined for 3D vectors");
 		}
-    }
+	}
 
 	template<std::size_t N>
 	Vector<N> Vector<N>::operator-() const
@@ -505,7 +505,7 @@ namespace Geometry
 		{
 			direction[i] = (*pointBehind)[i] - (*this->vertices[0])[i];
 		}
-		if (normal* direction > 0.0)
+		if (normal * direction > 0.0)
 		{
 			normal = -normal;
 		}
@@ -1369,7 +1369,7 @@ namespace Geometry
 		return this->vertices;
 	}
 
-	template<std::size_t N>
+	template <std::size_t N>
 	bool ConvexHull<N>::operator==(const ConvexHull<N>& convexHull) const
 	{
 		for (std::size_t i = 0; i < this->vertices.size(); i++)
@@ -1382,13 +1382,13 @@ namespace Geometry
 		return true;
 	}
 
-	template<std::size_t N>
+	template <std::size_t N>
 	bool ConvexHull<N>::operator!=(const ConvexHull<N>& convexHull) const
 	{
 		return !(*this == convexHull);
 	}
 
-	template<std::size_t N>
+	template <std::size_t N>
 	std::ostream& operator<<(std::ostream& output, const ConvexHull<N>& convexHull)
 	{
 		if (!convexHull)
@@ -1413,7 +1413,7 @@ namespace Geometry
 	template class ConvexHull<4>;
 
 	// Geometry functions
-	template<std::size_t N>
+	template <std::size_t N>
 	int calculateMatrixRank(std::vector<std::array<double, N>>& matrix)
 	{
 		std::size_t rows = matrix.size();
@@ -1462,7 +1462,7 @@ namespace Geometry
 		return rank;
 	}
 
-	template<std::size_t N>
+	template <std::size_t N>
 	bool isLinearlyIndependent(const std::vector<std::array<double, N>>& matrix, const Vector<N>& newVector)
 	{
 		int n = matrix.size();
@@ -1490,7 +1490,7 @@ namespace Geometry
 		return calculateMatrixRank<N>(tempMatrix) == n + 1;
 	}
 
-	template<std::size_t N>
+	template <std::size_t N>
 	Vector<N> calculateNormal(const std::array<std::shared_ptr<Point<N>>, N>& vertices)
 	{
 		std::vector<std::array<double, N>> matrix;
@@ -1505,17 +1505,21 @@ namespace Geometry
 		}
 
 		Vector<N> normal;
-		if constexpr (N == 3)
+		if constexpr (N == 2)
+		{
+			normal = Vector<N>(matrix[0]);
+		}
+		else if constexpr (N == 3)
 		{
 			normal = Vector<N>(matrix[0]) ^ Vector<N>(matrix[1]);
 		}
-		else
+		else if constexpr (N == 4)
 		{
 			normal = Vector<N>(matrix[0]);
 			for (std::size_t i = 1; i < N - 1; i++)
 			{
 				double dotProduct = Vector<N>(matrix[i]) * Vector<N>(matrix[i + 1]);
-				
+
 				for (std::size_t j = 0; j < N; j++)
 				{
 					normal[j] -= dotProduct * matrix[i][j];
@@ -1526,19 +1530,4 @@ namespace Geometry
 		return normal;
 	}
 
-	template<std::size_t N>
-	std::shared_ptr<Point<N + 1>> projectOntoParaboloid(const std::shared_ptr<Point<N>>& point)
-	{
-		std::shared_ptr<Point<N + 1>> projected = std::make_shared<Point<N + 1>>();
-		for (std::size_t i = 0; i < N; i++)
-		{
-			(*projected)[i] = (*point)[i];
-		}
-		(*projected)[N] = 0.0;
-		for (std::size_t i = 0; i < N; i++)
-		{
-			(*projected)[N] += (*point)[i] * (*point)[i];
-		}
-		return projected;
-	}
 }

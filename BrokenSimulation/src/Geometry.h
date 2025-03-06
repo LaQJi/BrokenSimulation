@@ -254,7 +254,4 @@ namespace Geometry
 
 	template <std::size_t N>
 	Vector<N> calculateNormal(const std::array<std::shared_ptr<Point<N>>, N>& vertices);
-
-	template <std::size_t N>
-	std::shared_ptr<Point<N + 1>> projectOntoParaboloid(const std::shared_ptr<Point<N>>& point);
 }
