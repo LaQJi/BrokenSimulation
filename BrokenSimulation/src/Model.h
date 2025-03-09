@@ -35,15 +35,15 @@ public:
 
 	const unsigned int GetIndexCount() const { return indices.size(); }
 
+private:
+	std::vector<Vertex> vertices;
+	std::vector<unsigned int> indices;
+
 	std::unique_ptr<VertexArray> va;
 	std::unique_ptr<VertexBuffer> vb;
 
 	std::unique_ptr<IndexBuffer> ib;
 	std::unique_ptr<VertexBufferLayout> layout;
-
-private:
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
 
 	std::string directory;
 	std::string name;
