@@ -10,7 +10,6 @@
 #include "test/TestHull.h"
 #include "test/TestDelaunay.h"
 #include "test/TestLoadModel.h"
-#include "test/TestClearColor.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
@@ -93,7 +92,6 @@ int main(void)
 		testMenu->RegisterTest<test::TestHull>("Convex Hull");
 		testMenu->RegisterTest<test::TestDelaunay>("Delaunay");
 		testMenu->RegisterTest<test::TestLoadModel>("Load Model");
-		testMenu->RegisterTest<test::TestClearColor>("Clear Color");
 
 		while (!glfwWindowShouldClose(window))
 		{

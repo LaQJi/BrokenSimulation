@@ -41,7 +41,7 @@ namespace test
 			shader->SetUniformMat4f("u_Model", model);
 			shader->SetUniformMat3f("u_NormalMatrix", normalMatrix);
 
-			renderer.Draw(*inputModel->va, *inputModel->ib, *shader);
+			renderer.DrawModel(*inputModel, *shader);
 		}
 	}
 
