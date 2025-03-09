@@ -47,28 +47,45 @@ namespace Geometry
 			return false;
 		}
 		std::vector<std::shared_ptr<Hyperplane<N + 1>>> facets = this->convexHull->getFacets();
-		std::vector<std::shared_ptr<Hyperplane<N>>> triangles;
+		std::vector<std::shared_ptr<Simplex<N>>> simplices;
 		for (const std::shared_ptr<Hyperplane<N + 1>>&facet : facets)
 		{
 			Vector<N + 1> normal = facet->getNormal();
-			if (normal * (this->pointInfinity - *((*facet)[0])) > 0.0)
+			//if (normal * (this->pointInfinity - *((*facet)[0])) >= 0.0)
+			//{
+			//	std::array<std::shared_ptr<Point<N>>, N + 1> simplexVertices;
+			//	for (std::size_t i = 0; i < N + 1; i++)
+			//	{
+			//		simplexVertices[i] = projectOntoHyperplane<N>((*facet)[i]);
+			//	}
+			//	Simplex<N> simplex(simplexVertices);
+			//	if (simplex.initializeFacets())
+			//	{
+			//		simplices.push_back(std::make_shared<Simplex<N>>(simplex));
+			//	}
+			//}
+			if (normal[N] < 0)
 			{
-				std::array<std::shared_ptr<Point<N>>, N> triangleVertices;
-				for (std::size_t i = 0; i < N; i++)
+				std::array<std::shared_ptr<Point<N>>, N + 1> simplexVertices;
+				for (std::size_t i = 0; i < N + 1; i++)
 				{
-					triangleVertices[i] = projectOntoHyperplane<N>((*facet)[i]);
+					simplexVertices[i] = projectOntoHyperplane<N>((*facet)[i]);
 				}
-				triangles.push_back(std::make_shared<Hyperplane<N>>(triangleVertices));
+				Simplex<N> simplex(simplexVertices);
+				if (simplex.initializeFacets())
+				{
+					simplices.push_back(std::make_shared<Simplex<N>>(simplex));
+				}
 			}
 		}
-		this->triangles = triangles;
+		this->simplices = simplices;
 		return true;
 	}
 
 	template <std::size_t N>
-	std::vector<std::shared_ptr<Hyperplane<N>>> Delaunay<N>::getTriangles() const
+	std::vector<std::shared_ptr<Simplex<N>>> Delaunay<N>::getSimplices() const
 	{
-		return this->triangles;
+		return this->simplices;
 	}
 
 	// ÏÔÊ½ÊµÀý»¯

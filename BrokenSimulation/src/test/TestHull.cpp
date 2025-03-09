@@ -25,33 +25,6 @@ namespace test
 
 		numPoints = points.size();
 
-		std::ifstream hullsFile("res/etc/delaunay_simplex.txt");
-		int pointIndex = 0;
-		while (std::getline(hullsFile, line))
-		{
-			std::istringstream iss(line);
-			std::string point, indexs;
-			std::getline(iss, point, ',');
-			std::getline(iss, indexs);
-
-			std::istringstream issPoint(point);
-			double x, y, z;
-			if (!(issPoint >> x >> y >> z))
-			{
-				break;
-			}
-			std::array<double, 3> coordinates = { x, y, z };
-			std::shared_ptr<Geometry::Point<3>> p = std::make_shared<Geometry::Point<3>>(coordinates);
-
-			std::istringstream issIndexs(indexs);
-			int index;
-			while (issIndexs >> index)
-			{
-				pointSets[pointIndex].push_back(p);
-			}
-		}
-		hullsFile.close();
-
 		{
 			Geometry::ConvexHull<3> hull = Geometry::ConvexHull<3>(points);
 			hull.initialize();
@@ -72,8 +45,22 @@ namespace test
 			{
 				hullFile << "f ";
 				hullFile << pointIndices[(*facet)[0]] + 1 << "//" << index << " ";
-				hullFile << pointIndices[(*facet)[1]] + 1 << "//" << index << " ";
-				hullFile << pointIndices[(*facet)[2]] + 1 << "//" << index << std::endl;
+				if (facet->isReverseNormal())
+				{
+					std::array<std::shared_ptr<Geometry::Point<3>>, 3> vertices;
+					for (std::size_t i = 0; i < 3; i++)
+					{
+						vertices[i] = (*facet)[i];
+					}
+					Geometry::Hyperplane<3> tempFacet(vertices);
+					hullFile << pointIndices[(*facet)[2]] + 1 << "//" << index << " ";
+					hullFile << pointIndices[(*facet)[1]] + 1 << "//" << index << std::endl;
+				}
+				else
+				{
+					hullFile << pointIndices[(*facet)[1]] + 1 << "//" << index << " ";
+					hullFile << pointIndices[(*facet)[2]] + 1 << "//" << index << std::endl;
+				}
 				index++;
 			}
 			hullFile << std::endl;

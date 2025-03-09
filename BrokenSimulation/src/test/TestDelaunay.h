@@ -7,6 +7,7 @@
 #include "Renderer.h"
 #include "Test.h"
 #include "Geometry.h"
+#include "Delaunay.h"
 #include "util.h"
 #include "Timer.h"
 
@@ -15,11 +16,11 @@
 
 namespace test
 {
-	class TestHull : public Test
+	class TestDelaunay : public Test
 	{
 	public:
-		TestHull();
-		~TestHull();
+		TestDelaunay();
+		~TestDelaunay();
 
 		void OnUpdate(float deltaTime) override;
 		void OnRender() override;
@@ -27,7 +28,7 @@ namespace test
 
 	private:
 		int numPoints = 0;
-		std::vector<std::shared_ptr<Geometry::Point<3>>> points;
-		std::unordered_map<int, std::shared_ptr<Geometry::ConvexHull<3>>> convexHulls;
+		std::vector<std::shared_ptr<Geometry::Point<2>>> points;
+		std::unique_ptr<Geometry::Delaunay<2>> delaunay;
 	};
 }

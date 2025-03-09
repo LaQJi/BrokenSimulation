@@ -4,17 +4,20 @@ Model::Model(const std::string& path)
 {
 	Timer timer;
 
-	loadModel(path);
+	if (!loadModel(path))
+	{
+		std::cerr << "ERROR::MODEL::Failed to load model" << std::endl;
+	}
 
 	std::cout << "Model " << name << " loaded in " << timer.Elapsed() << "s" << std::endl;
 
 	// 创建顶点数组对象
 	va = std::make_unique<VertexArray>();
-	VertexBuffer vb = VertexBuffer(&vertices[0], vertices.size() * sizeof(Vertex));
-	VertexBufferLayout layout;
-	layout.Push<float>(3);
-	layout.Push<float>(3);
-	va->AddBuffer(vb, layout);
+	vb = std::make_unique<VertexBuffer>(&vertices[0], vertices.size() * sizeof(Vertex));
+	layout = std::make_unique<VertexBufferLayout>();
+	layout->Push<float>(3);
+	layout->Push<float>(3);
+	va->AddBuffer(*vb, *layout);
 
 	// 创建索引缓冲对象
 	ib = std::make_unique<IndexBuffer>(&indices[0], indices.size());
@@ -22,10 +25,6 @@ Model::Model(const std::string& path)
 
 Model::~Model()
 {
-	va->Unbind();
-	ib->Unbind();
-	va.reset();
-	ib.reset();
 }
 
 void Model::Bind() const
@@ -40,7 +39,7 @@ void Model::Unbind() const
 	ib->Unbind();
 }
 
-void Model::loadModel(const std::string& path)
+bool Model::loadModel(const std::string& path)
 {
 	// 读取模型文件
 	Assimp::Importer importer;
@@ -49,7 +48,7 @@ void Model::loadModel(const std::string& path)
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
 		std::cerr << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
-		return;
+		return false;
 	}
 
 	// 从文件路径中提取目录和文件名
@@ -57,6 +56,8 @@ void Model::loadModel(const std::string& path)
 	name = path.substr(path.find_last_of('/') + 1);
 
 	ProcessNode(scene->mRootNode, scene);
+	
+	return true;
 }
 
 void Model::ProcessNode(aiNode* node, const aiScene* scene)
@@ -66,13 +67,20 @@ void Model::ProcessNode(aiNode* node, const aiScene* scene)
 	{
 		// 获取网格
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		// 处理网格
-		for (unsigned int j = 0; j < mesh->mNumVertices; j++)
+		// 法线数据
+		if (mesh->HasNormals())
 		{
-			Vertex vertex;
-			vertex.position = glm::vec3(mesh->mVertices[j].x, mesh->mVertices[j].y, mesh->mVertices[j].z);
-			vertex.normal = glm::vec3(mesh->mNormals[j].x, mesh->mNormals[j].y, mesh->mNormals[j].z);
-			vertices.push_back(vertex);
+			for (unsigned int j = 0; j < mesh->mNumVertices; j++)
+			{
+				Vertex vertex;
+				vertex.position = glm::vec3(mesh->mVertices[j].x, mesh->mVertices[j].y, mesh->mVertices[j].z);
+				vertex.normal = glm::vec3(mesh->mNormals[j].x, mesh->mNormals[j].y, mesh->mNormals[j].z);
+				vertices.push_back(vertex);
+			}
+		}
+		else
+		{
+			std::cerr << "ERROR::MODEL::Mesh does not contain normal data" << std::endl;
 		}
 
 		// 处理索引

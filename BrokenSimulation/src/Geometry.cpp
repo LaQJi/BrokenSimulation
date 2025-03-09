@@ -178,24 +178,6 @@ namespace Geometry
 		return !(*this < point);
 	}
 
-	template <std::size_t N>
-	std::ostream& operator<<(std::ostream& output, const Point<N>& point)
-	{
-		if (!point)
-		{
-			output << "Point is not initialized";
-		}
-		else
-		{
-			output << "(";
-			for (std::size_t i = 0; i < N - 1; i++)
-			{
-				output << point[i] << ", ";
-			}
-			output << point[N - 1] << ")";
-		}
-		return output;
-	}
 
 	// 显式实例化
 	template class Point<2>;
@@ -207,6 +189,12 @@ namespace Geometry
 	Vector<N>::Vector()
 	{
 		this->components.fill(0.0);
+	}
+
+	template<std::size_t N>
+	Vector<N>::Vector(const std::array<double, N>& components)
+		: components(components)
+	{
 	}
 
 	template <std::size_t N>
@@ -228,7 +216,7 @@ namespace Geometry
 	void Vector<N>::normalize()
 	{
 		double magnitude = this->getMagnitude();
-		if (magnitude != 0.0)
+		if (magnitude > EPSILON)
 		{
 			for (std::size_t i = 0; i < N; i++)
 			{
@@ -361,7 +349,7 @@ namespace Geometry
 	template<std::size_t N>
 	Vector<N> Vector<N>::operator^(const Vector<N>& vector) const
 	{
-		if (N == 3)
+		if constexpr (N == 3)
 		{
 			Vector<N> crossProduct;
 
@@ -381,25 +369,6 @@ namespace Geometry
 	Vector<N> Vector<N>::operator-() const
 	{
 		return *this * -1.0;
-	}
-
-	template<std::size_t N>
-	std::ostream& operator<<(std::ostream& output, const Vector<N>& vector)
-	{
-		if (!vector)
-		{
-			output << "Vector is not initialized";
-		}
-		else
-		{
-			output << "(";
-			for (std::size_t i = 0; i < N - 1; i++)
-			{
-				output << vector[i] << ", ";
-			}
-			output << vector[N - 1] << ")";
-		}
-		return output;
 	}
 
 	// 显式实例化
@@ -425,8 +394,12 @@ namespace Geometry
 		{
 			sharedVertices[i] = std::make_shared<Point<N>>(vertices[i]);
 		}
-
+		std::sort(sharedVertices.begin(), sharedVertices.end(), [](const std::shared_ptr<Point<N>>& point1, const std::shared_ptr<Point<N>>& point2)
+			{
+				return *point1 < *point2;
+			});
 		Vector<N> normal = calculateNormal(sharedVertices);
+
 		if (normal == Vector<N>())
 		{
 			this->vertices.fill(nullptr);
@@ -435,10 +408,6 @@ namespace Geometry
 		}
 		else
 		{
-			std::sort(sharedVertices.begin(), sharedVertices.end(), [](const std::shared_ptr<Point<N>>& point1, const std::shared_ptr<Point<N>>& point2)
-				{
-					return *point1 < *point2;
-				});
 			this->vertices = sharedVertices;
 			this->normal = normal;
 			this->neighbors.fill(nullptr);
@@ -451,7 +420,12 @@ namespace Geometry
 	Hyperplane<N>::Hyperplane(const std::array<std::shared_ptr<Point<N>>, N>& vertices)
 		: vertices(vertices)
 	{
-		Vector<N> normal = calculateNormal(vertices);
+		std::sort(this->vertices.begin(), this->vertices.end(), [](const std::shared_ptr<Point<N>>& point1, const std::shared_ptr<Point<N>>& point2)
+			{
+				return *point1 < *point2;
+			});
+
+		Vector<N> normal = calculateNormal(this->vertices);
 		if (normal == Vector<N>())
 		{
 			this->vertices.fill(nullptr);
@@ -460,10 +434,6 @@ namespace Geometry
 		}
 		else
 		{
-			std::sort(this->vertices.begin(), this->vertices.end(), [](const std::shared_ptr<Point<N>>& point1, const std::shared_ptr<Point<N>>& point2)
-				{
-					return *point1 < *point2;
-				});
 			this->normal = normal;
 			this->neighbors.fill(nullptr);
 		}
@@ -505,16 +475,29 @@ namespace Geometry
 		{
 			direction[i] = (*pointBehind)[i] - (*this->vertices[0])[i];
 		}
-		if (normal * direction > 0.0)
+		if (normal * direction > EPSILON)
 		{
 			normal = -normal;
+			reverseFlag = !reverseFlag;
 		}
+	}
+
+	template<std::size_t N>
+	bool Hyperplane<N>::isReverseNormal() const
+	{
+		return this->reverseFlag;
 	}
 
 	template<std::size_t N>
 	bool Hyperplane<N>::isAbove(const Point<N>& point) const
 	{
-		return this->normal * (point - *this->vertices[0]) > 0.0;
+		return this->normal * (point - *this->vertices[0]) > EPSILON;
+	}
+
+	template<std::size_t N>
+	bool Hyperplane<N>::isOn(const Point<N>& point) const
+	{
+		return std::abs(this->normal * (point - *this->vertices[0])) < EPSILON;
 	}
 
 	template<std::size_t N>
@@ -606,10 +589,36 @@ namespace Geometry
 		{
 			Vector<N> vector = *point - *this->vertices[0];
 			// 如果点在超平面上方，则将点加入pointsAbove
-			if (normal * vector > 0.0)
+			if (normal * vector > EPSILON)
 			{
 				this->pointsAbove.push_back(point);
 				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
+
+	template<std::size_t N>
+	bool Hyperplane<N>::addPointOn(std::shared_ptr<Point<N>> point)
+	{
+		if (point != nullptr)
+		{
+			// 如果点在超平面上，则将点加入pointsOn
+			if (isOn(*point))
+			{
+				auto iter = this->pointsOn.find(point);
+				if (iter != this->pointsOn.end())
+				{
+					return false;
+				}
+				else
+				{
+					this->pointsOn.insert(point);
+					return true;
+				}
 			}
 			else
 			{
@@ -676,6 +685,17 @@ namespace Geometry
 		}
 	}
 
+	template<std::size_t N>
+	std::vector<std::shared_ptr<Point<N>>> Hyperplane<N>::getPointsOn() const
+	{
+		std::vector<std::shared_ptr<Point<N>>> pointsOn;
+		for (auto point : this->pointsOn)
+		{
+			pointsOn.push_back(point);
+		}
+		return pointsOn;
+	}
+
 	template <std::size_t N>
 	const std::shared_ptr<Point<N>>& Hyperplane<N>::operator[](std::size_t index) const
 	{
@@ -707,25 +727,6 @@ namespace Geometry
 	bool Hyperplane<N>::operator!=(const Hyperplane<N>& hyperplane) const
 	{
 		return !(*this == hyperplane);
-	}
-
-	template <std::size_t N>
-	std::ostream& operator<<(std::ostream& output, const Hyperplane<N>& hyperplane)
-	{
-		if (!hyperplane)
-		{
-			output << "Hyperplane is not initialized";
-		}
-		else
-		{
-			output << "{";
-			for (std::size_t i = 0; i < N - 1; i++)
-			{
-				output << *hyperplane[i] << ", ";
-			}
-			output << *hyperplane[N - 1] << "}";
-		}
-		return output;
 	}
 
 	template<std::size_t N>
@@ -812,25 +813,6 @@ namespace Geometry
 		return false;
 	}
 
-	template <std::size_t N>
-	std::ostream& operator<<(std::ostream& output, const HyperplanePencil<N>& hyperplanePencil)
-	{
-		if (!hyperplanePencil)
-		{
-			output << "HyperplanePencil is not initialized";
-		}
-		else
-		{
-			output << "{";
-			for (std::size_t i = 0; i < N - 2; i++)
-			{
-				output << *hyperplanePencil[i] << ", ";
-			}
-			output << *hyperplanePencil[N - 2] << "}";
-		}
-		return output;
-	}
-
 	// 显式实例化
 	template class HyperplanePencil<2>;
 	template class HyperplanePencil<3>;
@@ -848,7 +830,10 @@ namespace Geometry
 	Simplex<N>::Simplex(const std::array<Point<N>, N + 1>& vertices)
 	{
 		std::vector<Point<N>> points(vertices.begin(), vertices.end());
-		std::sort(points.begin(), points.end());
+		std::sort(points.begin(), points.end(), [](const Point<N>& point1, const Point<N>& point2)
+			{
+				return point1 < point2;
+			});
 		for (std::size_t i = 0; i < N + 1; i++)
 		{
 			this->vertices[i] = std::make_shared<Point<N>>(points[i]);
@@ -895,6 +880,7 @@ namespace Geometry
 		for (std::size_t i = 0; i < N + 1; i++)
 		{
 			std::array<std::shared_ptr<Point<N>>, N> facetVertices;
+			std::shared_ptr<Point<N>> pointBehind = this->vertices[i];
 			std::size_t index = 0;
 			for (std::size_t j = 0; j < N + 1; j++)
 			{
@@ -912,7 +898,7 @@ namespace Geometry
 				return false;
 			}
 			// 根据重心的位置设置面的法向量方向
-			facets[i]->setNormalDirection(centroid);
+			facets[i]->setNormalDirection(pointBehind);
 		}
 		for (std::size_t i = 0; i < N + 1; i++)
 		{
@@ -1038,25 +1024,6 @@ namespace Geometry
 	bool Simplex<N>::operator!=(const Simplex<N>& simplex) const
 	{
 		return !(*this == simplex);
-	}
-
-	template<std::size_t N>
-	std::ostream& operator<<(std::ostream& output, const Simplex<N>& simplex)
-	{
-		if (!simplex)
-		{
-			output << "Simplex is not initialized";
-		}
-		else
-		{
-			output << "{";
-			for (std::size_t i = 0; i < N; i++)
-			{
-				output << *simplex[i] << ", ";
-			}
-			output << *simplex[N] << "}";
-		}
-		return output;
 	}
 
 	// 显式实例化
@@ -1306,7 +1273,14 @@ namespace Geometry
 								vertices[i] = pencil[i];
 							}
 							vertices[N - 1] = furthestPoint;
+
+							Point<N> p1 = *vertices[0];
+							Point<N> p2 = *vertices[1];
+							double t1 = p1[0];
+							double t2 = p2[0];
+
 							std::shared_ptr<Hyperplane<N>> newFacet = std::make_shared<Hyperplane<N>>(vertices);
+
 							newFacet->setNormalDirection(centroid);
 							newFacet->setNeighbor(neighbor);
 							neighbor->setNeighbor(newFacet);
@@ -1388,25 +1362,6 @@ namespace Geometry
 		return !(*this == convexHull);
 	}
 
-	template <std::size_t N>
-	std::ostream& operator<<(std::ostream& output, const ConvexHull<N>& convexHull)
-	{
-		if (!convexHull)
-		{
-			output << "ConvexHull is not initialized";
-		}
-		else
-		{
-			output << "{";
-			for (std::size_t i = 0; i < convexHull.vertices.size() - 1; i++)
-			{
-				output << *convexHull.vertices[i] << ", ";
-			}
-			output << *convexHull.vertices[convexHull.vertices.size() - 1] << "}";
-		}
-		return output;
-	}
-
 	// 显式实例化
 	template class ConvexHull<2>;
 	template class ConvexHull<3>;
@@ -1422,6 +1377,10 @@ namespace Geometry
 
 		for (std::size_t col = 0; col < cols; col++)
 		{
+			if (rank >= rows)
+			{
+				break;
+			}
 			std::size_t maxRow = rank;
 			for (std::size_t row = rank + 1; row < rows; row++)
 			{
@@ -1516,7 +1475,7 @@ namespace Geometry
 		else if constexpr (N == 4)
 		{
 			normal = Vector<N>(matrix[0]);
-			for (std::size_t i = 1; i < N - 1; i++)
+			for (std::size_t i = 0; i < N - 2; i++)
 			{
 				double dotProduct = Vector<N>(matrix[i]) * Vector<N>(matrix[i + 1]);
 

@@ -8,6 +8,9 @@
 #include "test/Test.h"
 #include "test/TestMenu.h"
 #include "test/TestHull.h"
+#include "test/TestDelaunay.h"
+#include "test/TestLoadModel.h"
+#include "test/TestClearColor.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
@@ -83,11 +86,14 @@ int main(void)
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
 
 		// ´´½¨²âÊÔ²Ëµ¥
-		test::Test* currentTest = nullptr;
+		test::Test* currentTest;
 		test::TestMenu* testMenu = new test::TestMenu(currentTest);
 		currentTest = testMenu;
 
 		testMenu->RegisterTest<test::TestHull>("Convex Hull");
+		testMenu->RegisterTest<test::TestDelaunay>("Delaunay");
+		testMenu->RegisterTest<test::TestLoadModel>("Load Model");
+		testMenu->RegisterTest<test::TestClearColor>("Clear Color");
 
 		while (!glfwWindowShouldClose(window))
 		{

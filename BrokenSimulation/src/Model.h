@@ -33,18 +33,21 @@ public:
 	void Bind() const;
 	void Unbind() const;
 
-	inline const IndexBuffer* GetIndexBuffer() const { return ib.get(); }
+	const unsigned int GetIndexCount() const { return indices.size(); }
+
+	std::unique_ptr<VertexArray> va;
+	std::unique_ptr<VertexBuffer> vb;
+
+	std::unique_ptr<IndexBuffer> ib;
+	std::unique_ptr<VertexBufferLayout> layout;
 
 private:
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 
-	std::unique_ptr<VertexArray> va;
-	std::unique_ptr<IndexBuffer> ib;
-
 	std::string directory;
 	std::string name;
 
-	void loadModel(const std::string& path);
+	bool loadModel(const std::string& path);
 	void ProcessNode(aiNode* node, const aiScene* scene);
 };

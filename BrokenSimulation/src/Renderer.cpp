@@ -2,28 +2,28 @@
 
 void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const
 {
+	shader.Bind();
 	va.Bind();
 	ib.Bind();
-	shader.Bind();
 
 	GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
 }
 
 void Renderer::DrawPoints(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const
 {
+	shader.Bind();
 	va.Bind();
 	ib.Bind();
-	shader.Bind();
 
 	GLCall(glDrawElements(GL_POINTS, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
 }
 
 void Renderer::DrawModel(const Model& model, const Shader& shader) const
 {
-	model.Bind();
 	shader.Bind();
+	model.Bind();
 
-	GLCall(glDrawElements(GL_TRIANGLES, model.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr));
+	GLCall(glDrawElements(GL_TRIANGLES, model.GetIndexCount(), GL_UNSIGNED_INT, nullptr));
 }
 
 void Renderer::Clear() const

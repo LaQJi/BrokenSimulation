@@ -13,6 +13,9 @@
 
 namespace Geometry
 {
+	// Constants
+	#define EPSILON 1e-9
+
 	// Forward declarations
 	template <std::size_t N>
 	class Point;
@@ -64,7 +67,6 @@ namespace Geometry
 		bool operator>(const Point<N>& point) const;
 		bool operator<=(const Point<N>& point) const;
 		bool operator>=(const Point<N>& point) const;
-		friend std::ostream& operator<<(std::ostream& output, const Point<N>& point);
 
 	private:
 		std::array<double, N> coordinates;
@@ -78,6 +80,7 @@ namespace Geometry
 	public:
 		// 构造函数
 		Vector();
+		Vector(const std::array<double, N>& components);
 		Vector(const Point<N>& point);
 		Vector(const Vector<N>& vector);
 
@@ -101,7 +104,6 @@ namespace Geometry
 		double operator*(const Vector<N>& vector) const;
 		Vector<N> operator^(const Vector<N>& vector) const;
 		Vector<N> operator-() const;
-		friend std::ostream& operator<<(std::ostream& output, const Vector<N>& vector);
 
 	private:
 		std::array<double, N> components;
@@ -125,7 +127,9 @@ namespace Geometry
 		Vector<N> getNormal() const;
 		double getDistance(const Point<N>& point) const;
 		void setNormalDirection(std::shared_ptr<Point<N>> pointBehind);
+		bool isReverseNormal() const;
 		bool isAbove(const Point<N>& point) const;
+		bool isOn(const Point<N>& point) const;
 		bool isAdjacent(const Hyperplane<N>& hyperplane, std::size_t& index) const;
 		void setNeighbor(std::shared_ptr<Hyperplane<N>> neighbor);
 		void setNeighbor(std::size_t index, std::shared_ptr<Hyperplane<N>> neighbor);
@@ -133,10 +137,12 @@ namespace Geometry
 		std::array<std::shared_ptr<Hyperplane<N>>, N> getNeighbors() const;
 		void removeNeighbor(std::shared_ptr<Hyperplane<N>> neighbor);
 		bool addPointAbove(std::shared_ptr<Point<N>> point);
+		bool addPointOn(std::shared_ptr<Point<N>> point);
 		std::vector<std::shared_ptr<Point<N>>> getPointsAbove() const;
 		std::shared_ptr<Point<N>> getFurthestPointAbove() const;
 		std::array<HyperplanePencil<N>, N> getPencils() const;
 		std::size_t getVertexIndex(std::shared_ptr<Point<N>> vertex) const;
+		std::vector<std::shared_ptr<Point<N>>> getPointsOn() const;
 
 
 		// 重载运算符
@@ -144,13 +150,15 @@ namespace Geometry
 		std::shared_ptr<Point<N>>& operator[](std::size_t index);
 		bool operator==(const Hyperplane<N>& hyperplane) const;
 		bool operator!=(const Hyperplane<N>& hyperplane) const;
-		friend std::ostream& operator<<(std::ostream& output, const Hyperplane<N>& hyperplane);
 
 	private:
 		std::array<std::shared_ptr<Point<N>>, N> vertices;
 		Vector<N> normal;
 		std::array<std::shared_ptr<Hyperplane<N>>, N> neighbors;
 		std::vector<std::shared_ptr<Point<N>>> pointsAbove;
+		std::set<std::shared_ptr<Point<N>>> pointsOn;
+
+		bool reverseFlag = false;
 	};
 
 
@@ -175,7 +183,6 @@ namespace Geometry
 		bool operator==(const HyperplanePencil<N>& hyperplanePencil) const;
 		bool operator!=(const HyperplanePencil<N>& hyperplanePencil) const;
 		bool operator<(const HyperplanePencil<N>& hyperplanePencil) const;
-		friend std::ostream& operator<<(std::ostream& output, const HyperplanePencil<N>& hyperplanePencil);
 
 	private:
 		std::array<std::shared_ptr<Point<N>>, N - 1> vertices;
@@ -208,7 +215,6 @@ namespace Geometry
 		std::shared_ptr<Point<N>>& operator[](std::size_t index);
 		bool operator==(const Simplex<N>& simplex) const;
 		bool operator!=(const Simplex<N>& simplex) const;
-		friend std::ostream& operator<<(std::ostream& output, const Simplex<N>& simplex);
 
 	private:
 		std::array<std::shared_ptr<Point<N>>, N + 1> vertices;

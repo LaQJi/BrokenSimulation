@@ -16,13 +16,13 @@ namespace Geometry
 
 		// ³ÉÔ±º¯Êý
 		bool initialize();
-		std::vector<std::shared_ptr<Hyperplane<N>>> getTriangles() const;
+		std::vector<std::shared_ptr<Simplex<N>>> getSimplices() const;
 
 	private:
 		Point<N + 1> pointInfinity;
 		std::vector<std::shared_ptr<Point<N + 1>>> points;
 		std::shared_ptr<ConvexHull<N + 1>> convexHull;
-		std::vector<std::shared_ptr<Hyperplane<N>>> triangles;
+		std::vector<std::shared_ptr<Simplex<N>>> simplices;
 	};
 
 
