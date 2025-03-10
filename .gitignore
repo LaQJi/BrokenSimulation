@@ -6,9 +6,8 @@
 **.vcxproj.user
 
 # build folder
-build/
-Debug/
-Release/
+bin/
+bin-int/
 
 # dependencies and vendor
 dependencies/
@@ -16,3 +15,4 @@ vendor/
 
 # resoureces
 res/
+/BrokenSimulation/imgui.ini

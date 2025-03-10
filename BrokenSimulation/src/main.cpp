@@ -16,6 +16,7 @@
 #include "imgui/imgui_impl_opengl3.h"
 
 #include "glm/gtc/matrix_transform.hpp"
+#include <test/TestMultiModels.h>
 
 int main(void)
 {
@@ -92,6 +93,7 @@ int main(void)
 		testMenu->RegisterTest<test::TestHull>("Convex Hull");
 		testMenu->RegisterTest<test::TestDelaunay>("Delaunay");
 		testMenu->RegisterTest<test::TestLoadModel>("Load Model");
+		testMenu->RegisterTest<test::TestMultiModels>("Multi Models");
 
 		while (!glfwWindowShouldClose(window))
 		{
