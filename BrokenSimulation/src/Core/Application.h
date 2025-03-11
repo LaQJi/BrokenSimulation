@@ -20,13 +20,13 @@ namespace BrokenSim
 
 		//Window& GetWindow() { return *m_Window; }
 
+		void Run();
+
 		void Close();
 
 		static Application& Get() { return *s_Instance; }
 
 	private:
-		void Run();
-
 		//bool OnWindowClose(WindowCloseEvent& e);
 		//bool OnWindowResize(WindowResizeEvent& e);
 
@@ -38,6 +38,6 @@ namespace BrokenSim
 		static Application* s_Instance;
 	};
 
-	// 需在客户端调用
+	// 需在客户端定义
 	Application* CreateApplication();
 }

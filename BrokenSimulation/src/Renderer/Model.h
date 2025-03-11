@@ -15,39 +15,42 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 
-struct Vertex
+namespace BrokenSim
 {
-	// 顶点坐标
-	glm::vec3 position;
+	struct Vertex
+	{
+		// 顶点坐标
+		glm::vec3 position;
 
-	// 顶点法线
-	glm::vec3 normal;
-};
+		// 顶点法线
+		glm::vec3 normal;
+	};
 
-class Model
-{
-public:
-	Model(const std::string& path);
-	~Model();
+	class Model
+	{
+	public:
+		Model(const std::string& path);
+		~Model();
 
-	void Bind() const;
-	void Unbind() const;
+		void Bind() const;
+		void Unbind() const;
 
-	const unsigned int GetIndexCount() const { return indices.size(); }
+		const unsigned int GetIndexCount() const { return indices.size(); }
 
-private:
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
+	private:
+		std::vector<Vertex> vertices;
+		std::vector<unsigned int> indices;
 
-	std::unique_ptr<VertexArray> va;
-	std::unique_ptr<VertexBuffer> vb;
+		std::unique_ptr<VertexArray> va;
+		std::unique_ptr<VertexBuffer> vb;
 
-	std::unique_ptr<IndexBuffer> ib;
-	std::unique_ptr<VertexBufferLayout> layout;
+		std::unique_ptr<IndexBuffer> ib;
+		std::unique_ptr<VertexBufferLayout> layout;
 
-	std::string directory;
-	std::string name;
+		std::string directory;
+		std::string name;
 
-	bool loadModel(const std::string& path);
-	void ProcessNode(aiNode* node, const aiScene* scene);
-};
+		bool loadModel(const std::string& path);
+		void ProcessNode(aiNode* node, const aiScene* scene);
+	};
+}

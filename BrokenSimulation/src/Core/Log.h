@@ -1,10 +1,13 @@
 #pragma once
 
+#include <algorithm>
+
 #include "Logger/logger.h"
+#include "Core/Config.h"
 
 namespace BrokenSim
 {
-	class Log
+	class BS_API Log
 	{
 	public:
 		static void Init();

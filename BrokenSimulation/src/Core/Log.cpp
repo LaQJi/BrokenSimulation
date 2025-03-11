@@ -8,9 +8,12 @@ namespace BrokenSim
 	void Log::Init()
 	{
 		std::string date = Logger::Logger::getCurrentDate();
-		date.replace(date.begin(), date.end(), "-", "_");
-		std::string logFilePath = "logs/bs_" + date + ".log";
-		s_CoreLogger = std::make_shared<Logger::Logger>("BROKENSIMULATION", logFilePath);
+		std::replace(date.begin(), date.end(), '-', '_');
+		std::string logFilePath = "bs_" + date + ".log";
+		s_CoreLogger = std::make_shared<Logger::Logger>("CORE", logFilePath);
 		s_ClientLogger = std::make_shared<Logger::Logger>("APP", logFilePath);
+
+		s_CoreLogger->setColorMode(true);
+		s_ClientLogger->setColorMode(true);
 	}
 }

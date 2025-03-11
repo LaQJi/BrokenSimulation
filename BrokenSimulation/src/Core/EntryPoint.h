@@ -2,6 +2,7 @@
 
 #include "Core/Config.h"
 #include "Core/Application.h"
+#include "Core/Log.h"
 
 #ifdef BS_PLATFORM_WINDOWS
 
