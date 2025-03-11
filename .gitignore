@@ -16,3 +16,6 @@ vendor/
 # resoureces
 res/
 /BrokenSimulation/imgui.ini
+
+# other
+*.log
