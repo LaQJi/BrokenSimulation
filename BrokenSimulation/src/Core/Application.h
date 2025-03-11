@@ -4,6 +4,8 @@
 
 #include "Core/Config.h"
 #include "Core/Window.h"
+#include "Core/Log.h"
+#include "Events/ApplicationEvent.h"
 
 namespace BrokenSim
 {

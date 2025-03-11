@@ -28,6 +28,8 @@ namespace BrokenSim
 
 	void Application::Run()
 	{
+		WindowResizeEvent e(1280, 720);
+		BS_CORE_INFO(e);
 		while (m_Running)
 		{
 			//m_Window->OnUpdate();

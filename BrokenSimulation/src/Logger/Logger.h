@@ -52,17 +52,20 @@ namespace Logger
 		~Logger() {}
 
 
+
 		// 设置彩色输出
 		void setColorMode(bool colorMode)
 		{
 			this->colorMode = colorMode;
 		}
 
+
 		// 设置最低日志级别
 		void setMinSeverity(Severity minSeverity)
 		{
 			this->minSeverity = minSeverity;
 		}
+
 
 		// 设置日志文件路径
 		void setLogFilePath(const std::string& logFilePath)
@@ -71,7 +74,50 @@ namespace Logger
 			this->exportLogToFile = true;
 		}
 
+
 		// 日志输出函数
+		template <typename T>
+		void log(Severity severity, T message)
+		{
+			std::ostringstream oss;
+			oss << message;
+			log(severity, oss.str());
+		}
+
+		void log(Severity severity, const std::string& message)
+		{
+			// 判断日志级别
+			if (severity < minSeverity)
+			{
+				return;
+			}
+
+			// 判断日志级别
+			if (severity < minSeverity)
+			{
+				return;
+			}
+
+			// 格式化日志信息
+			std::string log = formatLog(severity, message);
+
+			// 输出到控制台
+			if (colorMode)
+			{
+				std::cout << getColorCode(severity) << log << "\033[0m" << std::endl;
+			}
+			else
+			{
+				std::cout << log << std::endl;
+			}
+
+			// 输出到文件
+			if (exportLogToFile)
+			{
+				exportLog(log);
+			}
+		}
+
 		template <typename... Args>
 		void log(Severity severity, const std::string& message, Args... args)
 		{
@@ -101,11 +147,37 @@ namespace Logger
 			}
 		}
 
+
 		// 快捷日志输出函数
+		// debug
+		template <typename T>
+		void debug(T message)
+		{
+			log(Severity::DEBUG, message);
+		}
+
+		void debug(const std::string& message)
+		{
+			log(Severity::DEBUG, message);
+		}
+
 		template <typename... Args>
 		void debug(const std::string& message, Args... args)
 		{
 			log(Severity::DEBUG, message, args...);
+		}
+
+
+		// info
+		template <typename T>
+		void info(T message)
+		{
+			log(Severity::INFO, message);
+		}
+
+		void info(const std::string& message)
+		{
+			log(Severity::INFO, message);
 		}
 
 		template <typename... Args>
@@ -114,10 +186,36 @@ namespace Logger
 			log(Severity::INFO, message, args...);
 		}
 
+
+		// warn
+		template <typename T>
+		void warn(T message)
+		{
+			log(Severity::WARN, message);
+		}
+
+		void warn(const std::string& message)
+		{
+			log(Severity::WARN, message);
+		}
+
 		template <typename... Args>
 		void warn(const std::string& message, Args... args)
 		{
 			log(Severity::WARN, message, args...);
+		}
+
+		
+		// error
+		template <typename T>
+		void error(T message)
+		{
+			log(Severity::ERROR, message);
+		}
+
+		void error(const std::string& message)
+		{
+			log(Severity::ERROR, message);
 		}
 
 		template <typename... Args>
@@ -126,11 +224,25 @@ namespace Logger
 			log(Severity::ERROR, message, args...);
 		}
 
+
+		// fatal
+		template <typename T>
+		void fatal(T message)
+		{
+			log(Severity::FATAL, message);
+		}
+
+		void fatal(const std::string& message)
+		{
+			log(Severity::FATAL, message);
+		}
+
 		template <typename... Args>
 		void fatal(const std::string& message, Args... args)
 		{
 			log(Severity::FATAL, message, args...);
 		}
+
 
 		// 获取当前日期
 		static const std::string getCurrentDate()
@@ -143,6 +255,7 @@ namespace Logger
 			ss << tm.tm_year + 1900 << "-" << tm.tm_mon + 1 << "-" << tm.tm_mday;
 			return ss.str();
 		}
+		
 
 		// 获取当前时间
 		static const std::string getCurrentTime()
@@ -162,6 +275,7 @@ namespace Logger
 		bool exportLogToFile;
 		bool colorMode;
 		Severity minSeverity;
+
 
 		// 获取日志级别字符串
 		std::string getSeverityString(Severity severity)
@@ -184,6 +298,15 @@ namespace Logger
 		}
 
 		// 格式化日志信息
+		std::string formatLog(Severity severity, const std::string& message)
+		{
+			std::string log;
+			log += "[" + getCurrentDate() + " " + getCurrentTime() + "]" +
+				"[" + getSeverityString(severity) + "] " +
+				loggerName + ": " + message;
+			return log;
+		}
+
 		template <typename... Args>
 		std::string formatLog(Severity severity, const std::string& message, Args... args)
 		{
@@ -195,6 +318,7 @@ namespace Logger
 				loggerName + ": " + formatMessage;
 			return log;
 		}
+
 
 		// 格式化参数
 		template <typename T>
@@ -212,6 +336,7 @@ namespace Logger
 		{
 			return std::string(arg);
 		}
+
 
 		// 格式化字符串
 		std::string formatString(const std::string& format, const std::vector<std::string>& argList)
@@ -232,6 +357,7 @@ namespace Logger
 
 			return result;
 		}
+
 
 		// 获取颜色代码
 		std::string getColorCode(Severity severity)
@@ -259,6 +385,7 @@ namespace Logger
 			}
 			return colorCode;
 		}
+
 
 		// 导出日志到文件
 		void exportLog(const std::string& log)

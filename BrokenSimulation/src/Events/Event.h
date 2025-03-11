@@ -1,12 +1,13 @@
 #pragma once
 
 #include <string>
+#include <ostream>
 
 #include "Core/Macros.h"
 
 namespace BrokenSim
 {
-	enum EventType
+	enum class EventType
 	{
 		None = 0,
 		WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
@@ -48,4 +49,32 @@ namespace BrokenSim
 			return GetCategoryFlags() & category;
 		}
 	};
+
+	class EventDispatcher
+	{
+	public:
+		EventDispatcher(Event& event)
+			: event(event)
+		{
+		}
+
+		template <typename T, typename F>
+		bool Dispatch(const F& func)
+		{
+			if (event.GetEventType() == T::GetStaticType())
+			{
+				event.handled = func(static_cast<T&>(event));
+				return true;
+			}
+			return false;
+		}
+
+	private:
+		Event& event;
+	};
+
+	inline std::ostream& operator<<(std::ostream& os, const Event& e)
+	{
+		return os << e.ToString();
+	}
 }
