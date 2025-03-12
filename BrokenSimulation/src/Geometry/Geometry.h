@@ -1,16 +1,5 @@
 #pragma once
 
-#include <iostream>
-#include <array>
-#include <set>
-#include <vector>
-#include <tuple>
-#include <map>
-#include <algorithm>
-#include <cmath>
-#include <memory>
-#include <cassert>
-
 namespace BrokenSim
 {
 	namespace Geometry

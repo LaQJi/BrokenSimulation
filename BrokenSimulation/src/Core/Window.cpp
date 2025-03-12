@@ -1,3 +1,4 @@
+#include "bspch.h"
 #include "Core/Window.h"
 
 namespace BrokenSim

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "Utils/util.h"
 
 namespace BrokenSim

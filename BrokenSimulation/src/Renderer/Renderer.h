@@ -1,9 +1,5 @@
 #pragma once
 
-#include <string>
-#include <fstream>
-#include <sstream>
-
 #include "Renderer/VertexArray.h"
 #include "Renderer/IndexBuffer.h"
 #include "Renderer/Shader.h"

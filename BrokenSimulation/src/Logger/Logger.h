@@ -14,11 +14,11 @@ namespace Logger
 	public:
 		enum class Severity
 		{
-			DEBUG,
-			INFO,
-			WARN,
-			ERROR,
-			FATAL
+			Debug,
+			Info,
+			Warn,
+			Error,
+			Fatal
 		};
 
 		// ¹¹Ôìº¯Êý
@@ -27,7 +27,7 @@ namespace Logger
 			logFilePath(""),
 			exportLogToFile(false),
 			colorMode(false),
-			minSeverity(Severity::INFO)
+			minSeverity(Severity::Info)
 		{
 		}
 
@@ -36,7 +36,7 @@ namespace Logger
 			logFilePath(""),
 			exportLogToFile(false),
 			colorMode(false),
-			minSeverity(Severity::INFO)
+			minSeverity(Severity::Info)
 		{
 		}
 
@@ -45,7 +45,7 @@ namespace Logger
 			logFilePath(logFilePath),
 			exportLogToFile(true),
 			colorMode(false),
-			minSeverity(Severity::INFO)
+			minSeverity(Severity::Info)
 		{
 		}
 
@@ -153,18 +153,18 @@ namespace Logger
 		template <typename T>
 		void debug(T message)
 		{
-			log(Severity::DEBUG, message);
+			log(Severity::Debug, message);
 		}
 
 		void debug(const std::string& message)
 		{
-			log(Severity::DEBUG, message);
+			log(Severity::Debug, message);
 		}
 
 		template <typename... Args>
 		void debug(const std::string& message, Args... args)
 		{
-			log(Severity::DEBUG, message, args...);
+			log(Severity::Debug, message, args...);
 		}
 
 
@@ -172,18 +172,18 @@ namespace Logger
 		template <typename T>
 		void info(T message)
 		{
-			log(Severity::INFO, message);
+			log(Severity::Info, message);
 		}
 
 		void info(const std::string& message)
 		{
-			log(Severity::INFO, message);
+			log(Severity::Info, message);
 		}
 
 		template <typename... Args>
 		void info(const std::string& message, Args... args)
 		{
-			log(Severity::INFO, message, args...);
+			log(Severity::Info, message, args...);
 		}
 
 
@@ -191,18 +191,18 @@ namespace Logger
 		template <typename T>
 		void warn(T message)
 		{
-			log(Severity::WARN, message);
+			log(Severity::Warn, message);
 		}
 
 		void warn(const std::string& message)
 		{
-			log(Severity::WARN, message);
+			log(Severity::Warn, message);
 		}
 
 		template <typename... Args>
 		void warn(const std::string& message, Args... args)
 		{
-			log(Severity::WARN, message, args...);
+			log(Severity::Warn, message, args...);
 		}
 
 		
@@ -210,18 +210,18 @@ namespace Logger
 		template <typename T>
 		void error(T message)
 		{
-			log(Severity::ERROR, message);
+			log(Severity::Error, message);
 		}
 
 		void error(const std::string& message)
 		{
-			log(Severity::ERROR, message);
+			log(Severity::Error, message);
 		}
 
 		template <typename... Args>
 		void error(const std::string& message, Args... args)
 		{
-			log(Severity::ERROR, message, args...);
+			log(Severity::Error, message, args...);
 		}
 
 
@@ -229,18 +229,18 @@ namespace Logger
 		template <typename T>
 		void fatal(T message)
 		{
-			log(Severity::FATAL, message);
+			log(Severity::Fatal, message);
 		}
 
 		void fatal(const std::string& message)
 		{
-			log(Severity::FATAL, message);
+			log(Severity::Fatal, message);
 		}
 
 		template <typename... Args>
 		void fatal(const std::string& message, Args... args)
 		{
-			log(Severity::FATAL, message, args...);
+			log(Severity::Fatal, message, args...);
 		}
 
 
@@ -282,15 +282,15 @@ namespace Logger
 		{
 			switch (severity)
 			{
-			case Severity::DEBUG:
+			case Severity::Debug:
 				return "DEBUG";
-			case Severity::INFO:
+			case Severity::Info:
 				return "INFO";
-			case Severity::WARN:
+			case Severity::Warn:
 				return "WARN";
-			case Severity::ERROR:
+			case Severity::Error:
 				return "ERROR";
-			case Severity::FATAL:
+			case Severity::Fatal:
 				return "FATAL";
 			default:
 				return "UNKNOWN";
@@ -365,19 +365,19 @@ namespace Logger
 			std::string colorCode;
 			switch (severity)
 			{
-			case Severity::DEBUG:
+			case Severity::Debug:
 				colorCode = "\033[36m";
 				break;
-			case Severity::INFO:
+			case Severity::Info:
 				colorCode = "\033[32m";
 				break;
-			case Severity::WARN:
+			case Severity::Warn:
 				colorCode = "\033[33m";
 				break;
-			case Severity::ERROR:
+			case Severity::Error:
 				colorCode = "\033[31m";
 				break;
-			case Severity::FATAL:
+			case Severity::Fatal:
 				colorCode = "\033[35m";
 				break;
 			default:

@@ -1,3 +1,4 @@
+#include "bspch.h"
 #include "Geometry/VoronoiMapping.h"
 
 namespace BrokenSim

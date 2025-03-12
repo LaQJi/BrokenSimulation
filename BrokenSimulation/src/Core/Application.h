@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include "Core/Config.h"
 #include "Core/Window.h"
 #include "Core/Log.h"

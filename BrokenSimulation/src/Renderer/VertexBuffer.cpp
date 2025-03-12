@@ -1,3 +1,4 @@
+#include "bspch.h"
 #include "Renderer/VertexBuffer.h"
 
 namespace BrokenSim

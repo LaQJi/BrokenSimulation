@@ -1,7 +1,6 @@
 #pragma once
 
-#include <sstream>
-
+#include "bspch.h"
 #include "Core/Config.h"
 #include "Events/Event.h"
 

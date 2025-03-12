@@ -1,3 +1,4 @@
+#include "bspch.h"
 #include "Renderer/IndexBuffer.h"
 
 namespace BrokenSim

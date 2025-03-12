@@ -1,3 +1,4 @@
+#include "bspch.h"
 #include "Geometry/Delaunay.h"
 
 namespace BrokenSim

@@ -1,10 +1,5 @@
 #pragma once
 
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <unordered_map>
-
 #include "Utils/util.h"
 
 #include "glm/glm.hpp"

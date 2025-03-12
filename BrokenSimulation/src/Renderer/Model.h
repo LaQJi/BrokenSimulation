@@ -1,8 +1,5 @@
 #pragma once
 
-#include <fstream>
-#include <sstream>
-
 #include "Renderer/VertexArray.h"
 #include "Renderer/VertexBuffer.h"
 #include "Renderer/VertexBufferLayout.h"
