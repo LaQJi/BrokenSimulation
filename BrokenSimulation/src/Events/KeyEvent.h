@@ -25,24 +25,24 @@ namespace BrokenSim
 	class KeyPressedEvent : public KeyEvent
 	{
 	public:
-		KeyPressedEvent(int keyCode, int repeatCount)
-			: KeyEvent(keyCode), repeatCount(repeatCount)
+		KeyPressedEvent(int keyCode, bool isRepeat)
+			: KeyEvent(keyCode), isRepeat(isRepeat)
 		{
 		}
 
-		inline int GetRepeatCount() const { return repeatCount; }
+		inline bool IsRepeat() const { return isRepeat; }
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "KeyPressedEvent: " << keyCode << " (" << repeatCount << " repeats)";
+			ss << "KeyPressedEvent: " << keyCode << " (" << isRepeat << " repeats)";
 			return ss.str();
 		}
 
 		EVENT_CLASS_TYPE(KeyPressed)
 	
 	private:
-		int repeatCount;
+		bool isRepeat;
 	};
 
 	class KeyReleasedEvent : public KeyEvent

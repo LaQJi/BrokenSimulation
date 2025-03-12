@@ -77,7 +77,7 @@ namespace Logger
 
 		// 日志输出函数
 		template <typename T>
-		void log(Severity severity, T message)
+		void log(Severity severity, T& message)
 		{
 			std::ostringstream oss;
 			oss << message;
@@ -151,7 +151,7 @@ namespace Logger
 		// 快捷日志输出函数
 		// debug
 		template <typename T>
-		void debug(T message)
+		void debug(T& message)
 		{
 			log(Severity::Debug, message);
 		}
@@ -170,7 +170,7 @@ namespace Logger
 
 		// info
 		template <typename T>
-		void info(T message)
+		void info(T& message)
 		{
 			log(Severity::Info, message);
 		}
@@ -189,7 +189,7 @@ namespace Logger
 
 		// warn
 		template <typename T>
-		void warn(T message)
+		void warn(T& message)
 		{
 			log(Severity::Warn, message);
 		}
@@ -208,7 +208,7 @@ namespace Logger
 		
 		// error
 		template <typename T>
-		void error(T message)
+		void error(T& message)
 		{
 			log(Severity::Error, message);
 		}
@@ -227,7 +227,7 @@ namespace Logger
 
 		// fatal
 		template <typename T>
-		void fatal(T message)
+		void fatal(T& message)
 		{
 			log(Severity::Fatal, message);
 		}

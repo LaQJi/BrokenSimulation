@@ -1,4 +1,5 @@
 #include "bspch.h"
+#include "Core/Macros.h"
 #include "Core/Application.h"
 
 namespace BrokenSim
@@ -7,11 +8,25 @@ namespace BrokenSim
 
 	Application::Application()
 	{
-		//m_Window = std::unique_ptr<Window>(Window::Create());
+		if (!s_Instance)
+		{
+			s_Instance = this;
+		}
+		else
+		{
+			BS_CORE_ERROR("Application already exists!");
+		}
+		window = Window::Create();
+		window->SetEventCallback(BS_BIND_EVENT_FN(Application::OnEvent));
 	}
 
 	Application::~Application()
 	{
+	}
+
+	void Application::OnEvent(Event& e)
+	{
+		BS_CORE_INFO(e);
 	}
 
 	void Application::PushLayer()
@@ -22,6 +37,11 @@ namespace BrokenSim
 	{
 	}
 
+	Window& Application::GetWindow()
+	{
+		return *window;
+	}
+
 	void Application::Close()
 	{
 		m_Running = false;
@@ -29,11 +49,9 @@ namespace BrokenSim
 
 	void Application::Run()
 	{
-		WindowResizeEvent e(1280, 720);
-		BS_CORE_INFO(e);
 		while (m_Running)
 		{
-			//m_Window->OnUpdate();
+			window->OnUpdate();
 		}
 	}
 }

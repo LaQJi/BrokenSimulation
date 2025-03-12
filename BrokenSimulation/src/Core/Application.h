@@ -3,7 +3,7 @@
 #include "Core/Config.h"
 #include "Core/Window.h"
 #include "Core/Log.h"
-#include "Events/ApplicationEvent.h"
+#include "Events/Event.h"
 
 namespace BrokenSim
 {
@@ -13,12 +13,12 @@ namespace BrokenSim
 		Application();
 		virtual ~Application();
 
-		//void OnEvent();
+		void OnEvent(Event& e);
 
 		void PushLayer();
 		void PushOverlay();
 
-		//Window& GetWindow() { return *m_Window; }
+		Window& GetWindow();
 
 		void Run();
 
@@ -31,7 +31,7 @@ namespace BrokenSim
 		//bool OnWindowResize(WindowResizeEvent& e);
 
 	private:
-		//std::unique_ptr<Window> m_Window;
+		std::unique_ptr<Window> window;
 		bool m_Running = true;
 
 	private:
