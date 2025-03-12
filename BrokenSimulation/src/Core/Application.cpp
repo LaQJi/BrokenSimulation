@@ -1,6 +1,8 @@
 #include "bspch.h"
 #include "Core/Macros.h"
 #include "Core/Application.h"
+#include "Core/Log.h"
+#include "Events/ApplicationEvent.h"
 
 namespace BrokenSim
 {
@@ -26,6 +28,10 @@ namespace BrokenSim
 
 	void Application::OnEvent(Event& e)
 	{
+		EventDispatcher dispatcher(e);
+		dispatcher.Dispatch<WindowCloseEvent>(BS_BIND_EVENT_FN(Application::OnWindowClose));
+		dispatcher.Dispatch<WindowResizeEvent>(BS_BIND_EVENT_FN(Application::OnWindowResize));
+
 		BS_CORE_INFO(e);
 	}
 
@@ -45,6 +51,24 @@ namespace BrokenSim
 	void Application::Close()
 	{
 		m_Running = false;
+	}
+
+	bool Application::OnWindowClose(WindowCloseEvent& e)
+	{
+		m_Running = false;
+		return true;
+	}
+
+	bool Application::OnWindowResize(WindowResizeEvent& e)
+	{
+		if (e.GetWidth() == 0 || e.GetHeight() == 0)
+		{
+			m_Minimized = true;
+			return false;
+		}
+
+		m_Minimized = false;
+		return false;
 	}
 
 	void Application::Run()

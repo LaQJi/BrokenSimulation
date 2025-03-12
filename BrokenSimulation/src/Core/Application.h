@@ -2,8 +2,8 @@
 
 #include "Core/Config.h"
 #include "Core/Window.h"
-#include "Core/Log.h"
 #include "Events/Event.h"
+#include "Events/ApplicationEvent.h"
 
 namespace BrokenSim
 {
@@ -27,12 +27,14 @@ namespace BrokenSim
 		static Application& Get() { return *s_Instance; }
 
 	private:
-		//bool OnWindowClose(WindowCloseEvent& e);
-		//bool OnWindowResize(WindowResizeEvent& e);
+		bool OnWindowClose(WindowCloseEvent& e);
+		bool OnWindowResize(WindowResizeEvent& e);
 
 	private:
 		std::unique_ptr<Window> window;
+
 		bool m_Running = true;
+		bool m_Minimized = false;
 
 	private:
 		static Application* s_Instance;
