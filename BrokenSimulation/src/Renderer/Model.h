@@ -1,11 +1,11 @@
 #pragma once
 
+#include "Core/Timer.h"
 #include "Renderer/VertexArray.h"
 #include "Renderer/VertexBuffer.h"
 #include "Renderer/VertexBufferLayout.h"
 #include "Renderer/IndexBuffer.h"
-#include "Utils/util.h"
-#include "Core/Timer.h"
+#include "Utils/Utils.h"
 
 #include "glm/glm.hpp"
 #include "assimp/Importer.hpp"

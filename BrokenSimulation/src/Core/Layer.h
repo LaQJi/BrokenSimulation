@@ -1,7 +1,7 @@
 #pragma once
 
 #include "bspch.h"
-#include "Core/TimeStamp.h"
+#include "Core/TimeStep.h"
 #include "Events/Event.h"
 
 namespace BrokenSim
@@ -17,7 +17,7 @@ namespace BrokenSim
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}
 
-		virtual void OnUpdate(TimeStamp ts) {}
+		virtual void OnUpdate(TimeStep ts) {}
 		virtual void OnEvent(Event& event) {}
 		virtual void OnImGuiRender() {}
 

@@ -2,7 +2,7 @@
 
 #include "Renderer/VertexBuffer.h"
 #include "Renderer/VertexBufferLayout.h"
-#include "Utils/util.h"
+#include "Utils/Utils.h"
 
 namespace BrokenSim
 {

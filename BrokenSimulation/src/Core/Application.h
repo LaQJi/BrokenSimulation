@@ -4,6 +4,7 @@
 #include "Core/Window.h"
 #include "Events/Event.h"
 #include "Events/ApplicationEvent.h"
+#include "Platform/ImGuiLayer.h"
 
 namespace BrokenSim
 {
@@ -19,6 +20,7 @@ namespace BrokenSim
 		void PushOverlay();
 
 		Window& GetWindow();
+		ImGuiLayer& GetImGuiLayer();
 
 		void Run();
 
@@ -31,7 +33,10 @@ namespace BrokenSim
 		bool OnWindowResize(WindowResizeEvent& e);
 
 	private:
-		std::unique_ptr<Window> window;
+		std::unique_ptr<Window> m_Window;
+		ImGuiLayer* m_ImGuiLayer;
+
+		float m_lastFrameTime = 0.0f;
 
 		bool m_Running = true;
 		bool m_Minimized = false;

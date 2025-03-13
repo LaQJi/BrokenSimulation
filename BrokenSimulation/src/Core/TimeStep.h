@@ -2,10 +2,10 @@
 
 namespace BrokenSim
 {
-	class TimeStamp
+	class TimeStep
 	{
 	public:
-		TimeStamp(float time = 0.0f)
+		TimeStep(float time = 0.0f)
 			: m_Time(time)
 		{
 		}

@@ -4,7 +4,7 @@
 #include "Renderer/IndexBuffer.h"
 #include "Renderer/Shader.h"
 #include "Renderer/Model.h"
-#include "Utils/util.h"
+#include "Utils/Utils.h"
 
 namespace BrokenSim
 {
