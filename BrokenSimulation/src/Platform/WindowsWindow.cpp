@@ -5,6 +5,7 @@
 #include "Events/KeyEvent.h"
 #include "Events/MouseEvent.h"
 
+#include "GL/glew.h"
 #include "GLFW/glfw3.h"
 
 namespace BrokenSim
@@ -83,10 +84,6 @@ namespace BrokenSim
 
 		{
 			// 创建窗口并创建OpenGL上下文
-			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-			glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
 			window = glfwCreateWindow((int)props.width, (int)props.height, props.title.c_str(), nullptr, nullptr);
 
 			if (!window)

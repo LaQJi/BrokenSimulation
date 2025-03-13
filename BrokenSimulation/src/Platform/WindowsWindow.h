@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Core/Window.h"
+
+#include "GL/glew.h"
 #include "GLFW/glfw3.h""
 
 namespace BrokenSim
@@ -21,8 +23,8 @@ namespace BrokenSim
 
 		bool IsVSync() const;
 
-		unsigned int GetWidth() const;
-		unsigned int GetHeight() const;
+		virtual unsigned int GetWidth() const override;
+		virtual unsigned int GetHeight() const override;
 
 		void* GetNativeWindow() const;
 

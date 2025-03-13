@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef  BS_PLATFORM_WINDOWS
+#ifdef BS_PLATFORM_WINDOWS
 	#ifdef BS_BUILD_DLL
 		#define BS_API __declspec(dllexport)
 	#else
