@@ -8,7 +8,7 @@
 
 namespace BrokenSim
 {
-	class BS_API Application
+	class Application
 	{
 	public:
 		Application();
