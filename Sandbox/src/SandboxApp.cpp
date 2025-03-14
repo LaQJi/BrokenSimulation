@@ -1,11 +1,14 @@
 #include "BrokenSimulation.h"
 #include "Core/EntryPoint.h"
 
+#include "TestLayer.h"
+
 class Sanbox : public BrokenSim::Application
 {
 public:
 	Sanbox()
 	{
+		PushLayer(new TestLayer());
 	}
 	~Sanbox()
 	{

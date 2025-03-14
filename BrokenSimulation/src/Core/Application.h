@@ -2,6 +2,8 @@
 
 #include "Core/Config.h"
 #include "Core/Window.h"
+#include "Core/Layer.h"
+#include "Core/LayerStack.h"
 #include "Events/Event.h"
 #include "Events/ApplicationEvent.h"
 #include "Platform/ImGuiLayer.h"
@@ -16,8 +18,8 @@ namespace BrokenSim
 
 		void OnEvent(Event& e);
 
-		void PushLayer();
-		void PushOverlay();
+		void PushLayer(Layer* layer);
+		void PushOverlay(Layer* overlay);
 
 		Window& GetWindow();
 		ImGuiLayer& GetImGuiLayer();
@@ -35,6 +37,8 @@ namespace BrokenSim
 	private:
 		std::unique_ptr<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer;
+
+		LayerStack m_LayerStack;
 
 		float m_lastFrameTime = 0.0f;
 
