@@ -1,41 +1,50 @@
 #pragma once
 
-#include "Utils/Utils.h"
-
 namespace BrokenSim
 {
+	enum class DataType
+	{
+		None = 0,
+		Float, Float2, Float3, Float4,
+		Mat3, Mat4,
+		Int, Int2, Int3, Int4,
+		Bool
+	};
+
+	static unsigned int DataTypeSize(DataType type);
+
 	struct VertexBufferElement
 	{
-		unsigned int type;
-		unsigned int count;
-		unsigned char normalized;
+		std::string name;
+		DataType type;
+		unsigned int size;
+		size_t offset;
+		bool normalized;
+		
+		VertexBufferElement() = default;
+		VertexBufferElement(DataType type, const std::string& name, bool normalized = false);
 
-		static unsigned int GetSizeOfType(unsigned int type);
+		unsigned int GetComponentCount() const;
 	};
 
 	class VertexBufferLayout
 	{
 	public:
 		VertexBufferLayout();
-		~VertexBufferLayout();
+		VertexBufferLayout(const std::initializer_list<VertexBufferElement>& elements);
 
-		template<typename T>
-		void Push(unsigned int count);
+		const unsigned int GetStride() const { return m_Stride; }
+		const std::vector<VertexBufferElement>& GetElements() const { return m_Elements; }
 
-		template<>
-		void Push<float>(unsigned int count);
-
-		template<>
-		void Push<unsigned int>(unsigned int count);
-
-		template<>
-		void Push<unsigned char>(unsigned int count);
-
-		inline const std::vector<VertexBufferElement> GetElements() const { return elements; }
-		inline unsigned int GetStride() const { return stride; }
+		std::vector<VertexBufferElement>::iterator begin();
+		std::vector<VertexBufferElement>::iterator end();
+		std::vector<VertexBufferElement>::const_iterator begin() const;
+		std::vector<VertexBufferElement>::const_iterator end() const;
 
 	private:
-		std::vector<VertexBufferElement> elements;
-		unsigned int stride;
+		std::vector<VertexBufferElement> m_Elements;
+		unsigned int m_Stride = 0;
+
+		void CalculateOffsetsAndStride();
 	};
 }

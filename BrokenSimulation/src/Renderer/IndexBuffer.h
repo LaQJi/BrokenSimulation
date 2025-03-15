@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Utils/Utils.h"
-
 namespace BrokenSim
 {
 	class IndexBuffer
@@ -13,10 +11,10 @@ namespace BrokenSim
 		void Bind() const;
 		void Unbind() const;
 
-		inline unsigned int GetCount() const { return count; }
+		inline unsigned int GetCount() const { return m_Count; }
 
 	private:
 		unsigned int rendererID;
-		unsigned int count;
+		unsigned int m_Count;
 	};
 }

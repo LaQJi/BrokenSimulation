@@ -1,21 +1,25 @@
 #pragma once
 
-#include "Renderer/VertexArray.h"
-#include "Renderer/IndexBuffer.h"
+#include <memory>
+
+#include "VertexArray.h"
 #include "Renderer/Shader.h"
-#include "Renderer/Model.h"
-#include "Utils/Utils.h"
 
 namespace BrokenSim
 {
 	class Renderer
 	{
 	public:
-		void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
-		void DrawPoints(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
-		void DrawModel(const Model& model, const Shader& shader) const;
+		static void Init();
+		static void Shutdown();
 
-		// 清理颜色缓冲区和深度缓冲区
-		void Clear() const;
+		static void OnWindowResize(unsigned int width, unsigned int height);
+
+		static void BeginScene();
+		static void EndScene();
+
+		static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray);
+
+		void Draw(const VertexArray& va, unsigned int count = 0) const;
 	};
 }

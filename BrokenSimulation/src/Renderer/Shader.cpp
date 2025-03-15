@@ -1,4 +1,5 @@
 #include "bspch.h"
+#include "Core/Log.h"
 #include "Renderer/Shader.h"
 
 namespace BrokenSim
@@ -90,7 +91,7 @@ namespace BrokenSim
 		GLCall(int location = glGetUniformLocation(rendererID, name.c_str()));
 		if (location == -1)
 		{
-			std::cerr << "Warning: uniform '" << name << "' doesn't exist!" << std::endl;
+			BS_CORE_ERROR("Warning: uniform '{0}' doesn't exist!", name);
 		}
 		uniformLocationCache[name] = location;
 		return location;
@@ -101,7 +102,7 @@ namespace BrokenSim
 		std::ifstream file(filepath, std::ios::in);
 		if (!file.is_open())
 		{
-			std::cerr << "Error: Failed to open file" << std::endl;
+			BS_CORE_ERROR("Failed to open file: {0}", filepath);
 			file.close();
 			return "";
 		}
@@ -133,8 +134,8 @@ namespace BrokenSim
 			GLCall(glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length));
 			char* message = (char*)_malloca(length * sizeof(char));
 			GLCall(glGetShaderInfoLog(id, length, &length, message));
-			std::cerr << "Failed to compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader!" << std::endl;
-			std::cerr << message << std::endl;
+			BS_CORE_ERROR("Failed to compile {0} shader!", (type == GL_VERTEX_SHADER ? "vertex" : "fragment"));
+			BS_CORE_ERROR(message);
 			_freea(message);
 			GLCall(glDeleteShader(id));
 			return 0;
@@ -161,8 +162,8 @@ namespace BrokenSim
 			GLCall(glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length));
 			char* message = (char*)_malloca(length * sizeof(char));
 			GLCall(glGetProgramInfoLog(program, length, &length, message));
-			std::cerr << "Failed to link shader program!" << std::endl;
-			std::cerr << message << std::endl;
+			BS_CORE_ERROR("Failed to link shader program!");
+			BS_CORE_ERROR(message);
 			_freea(message);
 			GLCall(glDeleteProgram(program));
 			return 0;

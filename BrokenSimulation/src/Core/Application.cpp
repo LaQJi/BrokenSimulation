@@ -2,6 +2,7 @@
 #include "Core/Macros.h"
 #include "Core/Application.h"
 #include "Core/Log.h"
+#include "Renderer/Renderer.h"
 #include "Events/ApplicationEvent.h"
 #include "Utils/Utils.h"
 
@@ -21,6 +22,9 @@ namespace BrokenSim
 		}
 		m_Window = Window::Create();
 		m_Window->SetEventCallback(BS_BIND_EVENT_FN(Application::OnEvent));
+
+		Renderer::Init();
+
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
 	}

@@ -1,10 +1,12 @@
 #include "bspch.h"
 #include "Renderer/IndexBuffer.h"
+#include "Utils/Utils.h"
+
 
 namespace BrokenSim
 {
 	IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int count)
-		: count(count)
+		: m_Count(count)
 	{
 		ASSERT(sizeof(unsigned int) == sizeof(GLuint));
 
