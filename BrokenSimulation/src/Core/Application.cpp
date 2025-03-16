@@ -32,6 +32,7 @@ namespace BrokenSim
 
 	Application::~Application()
 	{
+		Renderer::Shutdown();
 	}
 
 	void Application::OnEvent(Event& e)
@@ -79,8 +80,8 @@ namespace BrokenSim
 		while (m_Running)
 		{
 			float time = Time::GetTime();
-			TimeStep ts = time - m_lastFrameTime;
-			m_lastFrameTime = time;
+			TimeStep ts = time - m_LastFrameTime;
+			m_LastFrameTime = time;
 
 			if (!m_Minimized)
 			{
@@ -129,6 +130,8 @@ namespace BrokenSim
 		}
 
 		m_Minimized = false;
+		Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
+
 		return false;
 	}
 }

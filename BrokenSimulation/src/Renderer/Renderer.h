@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "VertexArray.h"
+#include "Renderer/OrthographicCamera.h"
 #include "Renderer/Shader.h"
 
 namespace BrokenSim
@@ -15,11 +16,24 @@ namespace BrokenSim
 
 		static void OnWindowResize(unsigned int width, unsigned int height);
 
-		static void BeginScene();
+		static void BeginScene(OrthographicCamera camera);
 		static void EndScene();
 
-		static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray);
+		void SetViewportSize(unsigned int width, unsigned int height);
+
+		void SetClearColor(const glm::vec4& color);
+		void Clear();
+
+		static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform = glm::mat4(1.0f));
 
 		void Draw(const VertexArray& va, unsigned int count = 0) const;
+
+	private:
+		struct SceneData
+		{
+			glm::mat4 viewProjectionMatrix;
+		};
+
+		static std::unique_ptr<SceneData> s_SceneData;
 	};
 }

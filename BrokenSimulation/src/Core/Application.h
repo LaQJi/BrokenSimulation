@@ -40,7 +40,7 @@ namespace BrokenSim
 
 		LayerStack m_LayerStack;
 
-		float m_lastFrameTime = 0.0f;
+		float m_LastFrameTime = 0.0f;
 
 		bool m_Running = true;
 		bool m_Minimized = false;
