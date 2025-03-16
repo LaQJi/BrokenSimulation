@@ -26,19 +26,6 @@ namespace BrokenSim
 		return 0;
 	}
 
-	unsigned int VertexBufferElement::GetSizeOfType(unsigned int type)
-	{
-		switch (type)
-		{
-			case GL_FLOAT: return 4;
-			case GL_UNSIGNED_INT: return 4;
-			case GL_UNSIGNED_BYTE: return 1;
-		}
-
-		BS_CORE_ERROR("Unknown type!");
-		return 0;
-	}
-
 	VertexBufferElement::VertexBufferElement(DataType type, const std::string& name, bool normalized)
 		: type(type), name(name), size(DataTypeSize(type)), offset(0), normalized(normalized)
 	{

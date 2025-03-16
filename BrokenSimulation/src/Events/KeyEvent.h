@@ -2,6 +2,7 @@
 
 #include "bspch.h"
 #include "Core/Config.h"
+#include "Core/KeyCodes.h"
 #include "Events/Event.h"
 
 namespace BrokenSim
@@ -9,23 +10,23 @@ namespace BrokenSim
 	class KeyEvent : public Event
 	{
 	public:
-		inline int GetKeyCode() const { return keyCode; }
+		inline KeyCode GetKeyCode() const { return keyCode; }
 
 		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
 
 	protected:
-		KeyEvent(int keyCode)
+		KeyEvent(KeyCode keyCode)
 			: keyCode(keyCode)
 		{
 		}
 
-		int keyCode;
+		KeyCode keyCode;
 	};
 
 	class KeyPressedEvent : public KeyEvent
 	{
 	public:
-		KeyPressedEvent(int keyCode, bool isRepeat)
+		KeyPressedEvent(KeyCode keyCode, bool isRepeat)
 			: KeyEvent(keyCode), isRepeat(isRepeat)
 		{
 		}
@@ -48,7 +49,7 @@ namespace BrokenSim
 	class KeyReleasedEvent : public KeyEvent
 	{
 	public:
-		KeyReleasedEvent(int keyCode)
+		KeyReleasedEvent(KeyCode keyCode)
 			: KeyEvent(keyCode)
 		{
 		}
@@ -66,7 +67,7 @@ namespace BrokenSim
 	class KeyTypedEvent : public KeyEvent
 	{
 	public:
-		KeyTypedEvent(int keyCode)
+		KeyTypedEvent(KeyCode keyCode)
 			: KeyEvent(keyCode)
 		{
 		}

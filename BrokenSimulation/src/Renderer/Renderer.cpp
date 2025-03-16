@@ -1,6 +1,8 @@
 #include "bspch.h"
 #include "Renderer/Renderer.h"
 
+#include "Utils/Utils.h"
+
 namespace BrokenSim
 {
 	void Renderer::Init()

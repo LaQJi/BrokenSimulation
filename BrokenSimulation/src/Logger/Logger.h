@@ -1,12 +1,5 @@
 #pragma once
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <chrono>
-#include <string>
-#include <vector>
-
 namespace Logger
 {
 	class Logger

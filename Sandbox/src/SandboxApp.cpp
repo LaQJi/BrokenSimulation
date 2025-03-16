@@ -2,20 +2,25 @@
 #include "Core/EntryPoint.h"
 
 #include "TestLayer.h"
+#include "EditorLayer.h"
 
-class Sanbox : public BrokenSim::Application
+namespace BrokenSim
 {
-public:
-	Sanbox()
+	class Sanbox : public Application
 	{
-		PushLayer(new TestLayer());
-	}
-	~Sanbox()
-	{
-	}
-};
+	public:
+		Sanbox()
+		{
+			//PushLayer(new TestLayer());
+			PushLayer(new EditorLayer());
+		}
+		~Sanbox()
+		{
+		}
+	};
 
-BrokenSim::Application* BrokenSim::CreateApplication()
-{
-	return new Sanbox();
+	Application* CreateApplication()
+	{
+		return new Sanbox();
+	}
 }

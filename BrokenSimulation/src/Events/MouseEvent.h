@@ -2,6 +2,7 @@
 
 #include "bspch.h"
 #include "Core/Config.h"
+#include "Core/MouseCodes.h"
 #include "Events/Event.h"
 
 namespace BrokenSim
@@ -9,23 +10,23 @@ namespace BrokenSim
 	class MouseButtonEvent : public Event
 	{
 	public:
-		inline int GetButton() const { return button; }
+		inline MouseCode GetButton() const { return button; }
 
 		EVENT_CLASS_CATEGORY(EventCategoryMouseButton | EventCategoryMouse | EventCategoryInput)
 
 	protected:
-		MouseButtonEvent(int button)
+		MouseButtonEvent(MouseCode button)
 			: button(button)
 		{
 		}
 
-		int button;
+		MouseCode button;
 	};
 
 	class MouseButtonPressedEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonPressedEvent(int button)
+		MouseButtonPressedEvent(MouseCode button)
 			: MouseButtonEvent(button)
 		{
 		}
@@ -43,7 +44,7 @@ namespace BrokenSim
 	class MouseButtonReleasedEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonReleasedEvent(int button)
+		MouseButtonReleasedEvent(MouseCode button)
 			: MouseButtonEvent(button)
 		{
 		}

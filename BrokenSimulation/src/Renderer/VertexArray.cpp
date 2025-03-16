@@ -22,7 +22,7 @@ namespace BrokenSim
 			case DataType::Bool:     return GL_BOOL;
 		}
 
-		BS_CORE_ERROR(false, "Unknown DataType!");
+		BS_CORE_ERROR("Unknown DataType!");
 		return 0;
 	}
 

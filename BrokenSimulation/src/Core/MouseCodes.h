@@ -9,19 +9,19 @@ namespace BrokenSim
 	{
 		enum : MouseCode
 		{
-			BUTTON_1					 = 0,
-			BUTTON_2					 = 1,
-			BUTTON_3					 = 2,
-			BUTTON_4					 = 3,
-			BUTTON_5					 = 4,
-			BUTTON_6					 = 5,
-			BUTTON_7					 = 6,
-			BUTTON_8					 = 7,
+			Button_1					 = 0,
+			Button_2					 = 1,
+			Button_3					 = 2,
+			Button_4					 = 3,
+			Button_5					 = 4,
+			Button_6					 = 5,
+			Button_7					 = 6,
+			Button_8					 = 7,
 
-			BUTTON_LAST					 = BUTTON_8,
-			BUTTON_LEFT					 = BUTTON_1,
-			BUTTON_RIGHT				 = BUTTON_2,
-			BUTTON_MIDDLE				 = BUTTON_3
+			Button_Last					 = Button_8,
+			Button_Left					 = Button_1,
+			Button_Right				 = Button_2,
+			Button_Middle				 = Button_3
 		};
 	}
 }

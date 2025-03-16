@@ -1,6 +1,7 @@
 #include "bspch.h"
 #include "Core/Log.h"
 #include "Renderer/Shader.h"
+#include "Utils/Utils.h"
 
 namespace BrokenSim
 {
