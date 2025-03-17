@@ -1,5 +1,6 @@
 #include "bspch.h"
 #include "Core/Log.h"
+#include "Core/Macros.h"
 #include "Renderer/VertexBufferLayout.h"
 #include "Utils/Utils.h"
 
@@ -22,7 +23,7 @@ namespace BrokenSim
 			case DataType::Bool:		 return 1;
 		}
 
-		BS_CORE_DEBUG("Unknown DataType!");
+		BS_CORE_ASSERT(false, "Unknown DataType!");
 		return 0;
 	}
 
@@ -48,7 +49,7 @@ namespace BrokenSim
 			case DataType::Bool:		 return 1;
 		}
 
-		BS_CORE_ERROR("Unknown DataType!");
+		BS_CORE_ASSERT(false, "Unknown DataType!");
 		return 0;
 	}
 

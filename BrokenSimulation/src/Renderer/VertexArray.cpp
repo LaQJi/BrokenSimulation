@@ -1,5 +1,6 @@
 #include "bspch.h"
 #include "Core/Log.h"
+#include "Core/Macros.h"
 #include "Renderer/VertexArray.h"
 #include "Utils/Utils.h"
 
@@ -22,7 +23,7 @@ namespace BrokenSim
 			case DataType::Bool:     return GL_BOOL;
 		}
 
-		BS_CORE_ERROR("Unknown DataType!");
+		BS_CORE_ASSERT(false, "Unknown DataType!");
 		return 0;
 	}
 
@@ -48,11 +49,7 @@ namespace BrokenSim
 
 	void VertexArray::AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer)
 	{
-		if (vertexBuffer->GetLayout().GetElements().empty())
-		{
-			BS_CORE_ERROR("Vertex Buffer has no layout!");
-			return;
-		}
+		BS_CORE_ASSERT(vertexBuffer->GetLayout().GetElements().size(), "Vertex Buffer has no layout!");
 
 		Bind();
 		vertexBuffer->Bind();
@@ -109,6 +106,8 @@ namespace BrokenSim
 					m_VertexBufferIndex++;
 					break;
 				}
+				default:
+					BS_CORE_ASSERT(false, "Unknown DataType!");
 			}
 		}
 	}

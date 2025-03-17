@@ -1,6 +1,7 @@
 #include "bspch.h"
 #include "Platform/WindowsWindow.h"
 #include "Core/Log.h"
+#include "Core/Macros.h"
 #include "Events/ApplicationEvent.h"
 #include "Events/KeyEvent.h"
 #include "Events/MouseEvent.h"
@@ -75,11 +76,12 @@ namespace BrokenSim
 
 		if (glfwWindowCount == 0)
 		{
-			if (!glfwInit())
-			{
-				BS_CORE_ERROR("Failed to initialize GLFW!");
-				return;
-			}
+			int success = glewInit();
+			BS_CORE_ASSERT(success == GLEW_OK, "Failed to initialize GLEW!");
+			glfwSetErrorCallback([](int error, const char* description)
+				{
+					BS_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
+				});
 		}
 
 		{
