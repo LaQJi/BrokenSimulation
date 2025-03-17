@@ -5,7 +5,7 @@ namespace BrokenSim
 	namespace Geometry
 	{
 		// 定义常量
-		#define EPSILON 1e-9
+		constexpr auto EPSILON = 1e-9;
 
 		// 提前声明
 		template <std::size_t N>
