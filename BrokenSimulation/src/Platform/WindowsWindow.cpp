@@ -76,8 +76,8 @@ namespace BrokenSim
 
 		if (glfwWindowCount == 0)
 		{
-			int success = glewInit();
-			BS_CORE_ASSERT(success == GLEW_OK, "Failed to initialize GLEW!");
+			int success = glfwInit();
+			BS_CORE_ASSERT(success, "Failed to initialize GLFW!");
 			glfwSetErrorCallback([](int error, const char* description)
 				{
 					BS_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
@@ -100,6 +100,10 @@ namespace BrokenSim
 
 		// 使OpenGL的上下文为当前窗口的上下文
 		glfwMakeContextCurrent(window);
+
+		// 初始化GLEW
+		int success = glewInit();
+		BS_CORE_ASSERT(success == GLEW_OK, "Failed to initialize GLEW!");
 
 		glfwSetWindowUserPointer(window, &data);
 		SetVSync(true);

@@ -14,7 +14,7 @@ namespace BrokenSim
 
 	Application::Application()
 	{
-		BS_CORE_ASSERT(s_Instance, "Application already exists!");
+		BS_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
 
 		m_Window = Window::Create();

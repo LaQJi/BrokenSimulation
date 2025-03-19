@@ -67,44 +67,44 @@ namespace BrokenSim
 				GLCall(glBindTexture(target, m_ColorAttachments[i]));
 				switch (m_ColorAttachmentSpecs[i].textureFormat)
 				{
-					case TextureFormat::RGBA8:
+				case TextureFormat::RGBA8:
+				{
+					if (multisample)
 					{
-						if (multisample)
-						{
-							GLCall(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_Specification.samples, GL_RGBA8, m_Specification.width, m_Specification.height, GL_FALSE));
-						}
-						else
-						{
-							GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Specification.width, m_Specification.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
-							GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-							GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-							GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
-							GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-							GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-						}
-						GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, target, m_ColorAttachments[i], 0));
-						break;
+						GLCall(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_Specification.samples, GL_RGBA8, m_Specification.width, m_Specification.height, GL_FALSE));
 					}
-					case TextureFormat::RED_INTEGER:
+					else
 					{
-						if (multisample)
-						{
-							GLCall(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_Specification.samples, GL_R32I, m_Specification.width, m_Specification.height, GL_FALSE));
-						}
-						else
-						{
-							GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, m_Specification.width, m_Specification.height, 0, GL_RED_INTEGER, GL_INT, nullptr));
-							GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-							GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-							GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
-							GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-							GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-						}
-						GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, target, m_ColorAttachments[i], 0));
-						break;
+						GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Specification.width, m_Specification.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+						GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+						GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+						GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
+						GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+						GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 					}
-					default:
-						BS_CORE_ASSERT(false, "Unknown TextureFormat!");
+					GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, target, m_ColorAttachments[i], 0));
+					break;
+				}
+				case TextureFormat::RED_INTEGER:
+				{
+					if (multisample)
+					{
+						GLCall(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_Specification.samples, GL_R32I, m_Specification.width, m_Specification.height, GL_FALSE));
+					}
+					else
+					{
+						GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, m_Specification.width, m_Specification.height, 0, GL_RED_INTEGER, GL_INT, nullptr));
+						GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+						GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+						GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
+						GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+						GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+					}
+					GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, target, m_ColorAttachments[i], 0));
+					break;
+				}
+				default:
+					BS_CORE_ASSERT(false, "Unknown TextureFormat!");
 				}
 			}
 		}
@@ -114,26 +114,26 @@ namespace BrokenSim
 		{
 			GLCall(glCreateTextures(target, 1, &m_DepthAttachment));
 			GLCall(glBindTexture(target, m_DepthAttachment));
-			
+
 			switch (m_DepthAttachmentSpec.textureFormat)
 			{
-				case TextureFormat::DEPTH24STENCIL8:
+			case TextureFormat::DEPTH24STENCIL8:
+			{
+				if (multisample)
 				{
-					if (multisample)
-					{
-						GLCall(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_Specification.samples, GL_DEPTH24_STENCIL8, m_Specification.width, m_Specification.height, GL_FALSE));
-					}
-					else
-					{
-						GLCall(glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH24_STENCIL8, m_Specification.width, m_Specification.height));
-						GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-						GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-						GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
-						GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-						GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-					}
-					GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, target, m_DepthAttachment, 0));
+					GLCall(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_Specification.samples, GL_DEPTH24_STENCIL8, m_Specification.width, m_Specification.height, GL_FALSE));
 				}
+				else
+				{
+					GLCall(glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH24_STENCIL8, m_Specification.width, m_Specification.height));
+					GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+					GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+					GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
+					GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+					GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+				}
+				GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, target, m_DepthAttachment, 0));
+			}
 			}
 		}
 
@@ -196,12 +196,12 @@ namespace BrokenSim
 		GLenum format = 0;
 		switch (spec.textureFormat)
 		{
-			case TextureFormat::RGBA8:
-				format = GL_RGBA;
-				break;
-			case TextureFormat::RED_INTEGER:
-				format = GL_RED_INTEGER;
-				break;
+		case TextureFormat::RGBA8:
+			format = GL_RGBA;
+			break;
+		case TextureFormat::RED_INTEGER:
+			format = GL_RED_INTEGER;
+			break;
 		}
 		GLCall(glClearTexImage(m_ColorAttachments[attachmentIndex], 0, format, GL_INT, &value));
 	}
