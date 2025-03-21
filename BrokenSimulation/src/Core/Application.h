@@ -45,6 +45,9 @@ namespace BrokenSim
 		bool m_Running = true;
 		bool m_Minimized = false;
 
+
+		unsigned int va, vb, ib;
+
 	private:
 		static Application* s_Instance;
 	};

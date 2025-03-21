@@ -8,7 +8,7 @@ namespace BrokenSim
 	{
 	public:
 		VertexBuffer(unsigned int size);
-		VertexBuffer(const void* data, unsigned int size);
+		VertexBuffer(const float* data, unsigned int size);
 		~VertexBuffer();
 
 		void Bind() const;

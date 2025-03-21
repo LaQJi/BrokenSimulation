@@ -29,7 +29,7 @@ namespace BrokenSim
 
 	VertexArray::VertexArray()
 	{
-		GLCall(glCreateVertexArrays(1, &rendererID));
+		GLCall(glGenVertexArrays(1, &rendererID));
 	}
 
 	VertexArray::~VertexArray()
@@ -110,12 +110,15 @@ namespace BrokenSim
 					BS_CORE_ASSERT(false, "Unknown DataType!");
 			}
 		}
+
+		m_VertexBuffers.push_back(vertexBuffer);
 	}
 
 	void VertexArray::SetIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer)
 	{
 		Bind();
 		indexBuffer->Bind();
+
 		m_IndexBuffer = indexBuffer;
 	}
 

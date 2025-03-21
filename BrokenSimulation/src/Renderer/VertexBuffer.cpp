@@ -11,7 +11,7 @@ namespace BrokenSim
 		GLCall(glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW));
 	}
 
-	VertexBuffer::VertexBuffer(const void* data, unsigned int size)
+	VertexBuffer::VertexBuffer(const float* data, unsigned int size)
 	{
 		GLCall(glGenBuffers(1, &rendererID));
 		GLCall(glBindBuffer(GL_ARRAY_BUFFER, rendererID));

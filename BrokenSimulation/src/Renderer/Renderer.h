@@ -26,7 +26,7 @@ namespace BrokenSim
 
 		static void Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform = glm::mat4(1.0f));
 
-		void Draw(const VertexArray& va, unsigned int count = 0) const;
+		static void DrawIndexed(const std::shared_ptr<VertexArray>& va, unsigned int count = 0);
 
 	private:
 		struct SceneData
