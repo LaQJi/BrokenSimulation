@@ -16,21 +16,38 @@ namespace BrokenSim
 	class ModelObject : public Object
 	{
 	public:
-		ModelObject(unsigned int id, const std::string& path, Object* parent = nullptr, const std::string& name = "Model");
+		ModelObject(unsigned int id, const std::string& name = "Model", Object* parent = nullptr, const std::string& path = "");
 		virtual ~ModelObject();
 
-		void Bind() const;
-		void Unbind() const;
+		virtual void OnUpdate(TimeStep ts, std::shared_ptr<Shader> shader) override;
 
-		virtual void OnUpdate(TimeStep ts) override;
-
-		virtual void OnRender() override;
+		virtual void OnRender(std::shared_ptr<Shader> shader) override;
 
 		virtual void OnEvent(Event& e) override;
 
+		std::vector<std::shared_ptr<VertexArray>>& GetVertexArrays() { return m_VertexArrays; }
+
+		glm::vec4& GetColor() { return m_Color; }
+
 	private:
 		std::vector<std::shared_ptr<VertexArray>> m_VertexArrays;
-		std::shared_ptr<Shader> m_Shader;
+
+		glm::vec4 m_Color = { 0.6f, 0.6f, 0.6f, 1.0f };
+
+		float m_Shininess = 32.0f;
+
+		float m_AmbientStrength = 0.2f;
+		float m_DiffuseStrength = 0.7f;
+		float m_SpecularStrength = 0.8f;
+
+		bool LoadModel(const std::string& path);
+
+		struct Vertex
+		{
+			glm::vec3 Position;
+			glm::vec3 Normal;
+			glm::vec2 TexCoords;
+		};
 
 		std::string m_Name;
 		std::string m_Path;

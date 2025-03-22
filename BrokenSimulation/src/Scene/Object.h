@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Core/TimeStep.h"
+#include "Renderer/Shader.h"
 #include "Events/Event.h"
 
 #include <glm/glm.hpp>
@@ -25,9 +26,9 @@ namespace BrokenSim
 
 
 		// 更新对象状态
-		virtual void OnUpdate(TimeStep ts) = 0;
+		virtual void OnUpdate(TimeStep ts, std::shared_ptr<Shader> shader) = 0;
 		// 渲染对象
-		virtual void OnRender() = 0;
+		virtual void OnRender(std::shared_ptr<Shader> shader) = 0;
 		// 处理事件
 		virtual void OnEvent(Event& e) = 0;
 
@@ -49,11 +50,11 @@ namespace BrokenSim
 		// 获取启用性
 		const bool GetEnabled() const;
 		// 获取位置
-		const glm::vec3& GetPosition() const;
+		glm::vec3& GetPosition();
 		// 获取旋转
-		const glm::vec3& GetRotation() const;
+		glm::vec3& GetRotation();
 		// 获取缩放
-		const glm::vec3& GetScale() const;
+		glm::vec3& GetScale();
 		// 获取模型矩阵
 		const glm::mat4 GetModelMatrix() const;
 
@@ -97,7 +98,7 @@ namespace BrokenSim
 		// 名称
 		std::string m_Name;
 		// 变换矩阵
-		glm::mat4 m_Transform;
+		glm::mat4 m_Transform = glm::mat4(1.0f);
 		// 父对象
 		Object* m_Parent;
 		// 子对象

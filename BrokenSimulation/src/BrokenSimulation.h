@@ -23,5 +23,10 @@
 #include "Events/KeyEvent.h"
 #include "Events/MouseEvent.h"
 
+#include "Scene/Scene.h"
+#include "Scene/Object.h"
+#include "Scene/ModelObject.h"
+#include "Scene/EmptyObject.h"
+
 #include "Platform/ImGuiLayer.h"
 

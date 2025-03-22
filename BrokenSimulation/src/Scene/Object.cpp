@@ -45,17 +45,17 @@ namespace BrokenSim
 		return m_Enabled;
 	}
 
-	const glm::vec3& Object::GetPosition() const
+	glm::vec3& Object::GetPosition()
 	{
 		return m_Position;
 	}
 
-	const glm::vec3& Object::GetRotation() const
+	glm::vec3& Object::GetRotation()
 	{
 		return m_Rotation;
 	}
 
-	const glm::vec3& Object::GetScale() const
+	glm::vec3& Object::GetScale()
 	{
 		return m_Scale;
 	}
@@ -122,6 +122,8 @@ namespace BrokenSim
 		}
 		else
 			BS_CORE_WARN("Object::RemoveChild: child not found");
+
+		return removedIDs;
 	}
 
 	std::vector<unsigned int> Object::RemoveAllChildren()
@@ -138,6 +140,8 @@ namespace BrokenSim
 			}
 		}
 		m_Children.clear();
+
+		return removedIDs;
 	}
 
 	void Object::SetVisible(bool visible)

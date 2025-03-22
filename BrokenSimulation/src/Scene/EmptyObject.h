@@ -7,12 +7,12 @@ namespace BrokenSim
 	class EmptyObject : public Object
 	{
 	public:
-		EmptyObject(unsigned int id, Object* parent = nullptr, const std::string& name = "Empty");
+		EmptyObject(unsigned int id, const std::string& name = "Empty", Object* parent = nullptr);
 		virtual ~EmptyObject() override;
 
-		virtual void OnUpdate(TimeStep ts) override;
+		virtual void OnUpdate(TimeStep ts, std::shared_ptr<Shader> shader) override;
 
-		virtual void OnRender() override;
+		virtual void OnRender(std::shared_ptr<Shader> shader) override;
 
 		virtual void OnEvent(Event& e) override;
 

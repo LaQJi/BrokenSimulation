@@ -3,7 +3,7 @@
 
 namespace BrokenSim
 {
-	EmptyObject::EmptyObject(unsigned int id, Object* parent, const std::string& name)
+	EmptyObject::EmptyObject(unsigned int id, const std::string& name, Object* parent)
 	{
 		this->id = id;
 		this->type = Type::Empty;
@@ -16,11 +16,11 @@ namespace BrokenSim
 		this->RemoveAllChildren();
 	}
 
-	void EmptyObject::OnUpdate(TimeStep ts)
+	void EmptyObject::OnUpdate(TimeStep ts, std::shared_ptr<Shader> shader)
 	{
 	}
 
-	void EmptyObject::OnRender()
+	void EmptyObject::OnRender(std::shared_ptr<Shader> shader)
 	{
 	}
 

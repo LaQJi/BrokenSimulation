@@ -3,6 +3,9 @@
 
 #include "Core/Log.h"
 
+#include <imgui/imgui.h>
+#include <glm/gtc/type_ptr.hpp>
+
 namespace BrokenSim
 {
 	Scene::Scene()
@@ -10,70 +13,137 @@ namespace BrokenSim
 		// 初始化ID
 		m_AvailableIDs.push(0);
 
-		// TODO: 注册所有Object的工厂函数
+		m_Shader = std::make_shared<Shader>("res/Shaders/scene_v.shader", "res/Shaders/scene_f.shader");
 	}
 
 	Scene::~Scene()
 	{
 	}
 
-	void Scene::OnUpdate(TimeStep ts)
+	void Scene::OnUpdate(TimeStep ts, Camera& camera)
 	{
+		m_Shader->Bind();
+		m_Shader->SetUniformMat4f("u_ViewProjection", camera.GetViewProjectionMatrix());
+		m_Shader->SetUniform3f("u_ViewPos", camera.GetPosition());
+		
+
+		// 更新所有Object
 		for (auto& object : m_Objects)
 		{
-			object.second->OnUpdate(ts);
+			if (object.second->GetEnabled())
+			{
+				std::shared_ptr<ModelObject> modelObject = std::dynamic_pointer_cast<ModelObject>(object.second);
+				if (modelObject)
+				{
+					modelObject->OnUpdate(ts, m_Shader);
+				}
+			}
 		}
 	}
 
-	void Scene::OnRender()
-	{
-		for (auto& object : m_Objects)
-		{
-			object.second->OnRender();
-		}
-	}
 
-	template <typename T>
-	void Scene::RegisterFactoryFunction(const Object::Type& type)
+	std::shared_ptr<EmptyObject> Scene::CreateEmptyObject(const Object::Type& type, const std::string& name, Object* parent)
 	{
-		m_FactoryFunctionMap[type] = [](int id, const std::string& name) {
-			return std::make_shared<T>(id, name);
-			};
-	}
-
-	template<typename T, typename ...Args>
-	std::shared_ptr<T> Scene::CreateObject(const Object::Type& type, const std::string& name, Args&&... args)
-	{
-		if (m_FactoryFunctionMap.find(T) == m_FactoryFunctionMap.end())
-		{
-			BS_CORE_ERROR(false, "Factory function not registered!");
-			return nullptr;
-		}
-
-		// 生成ID
+		// 获取ID
 		unsigned int id = m_AvailableIDs.top();
-
-		// 从可用ID中移除
 		m_AvailableIDs.pop();
 
-		// 维护可用ID
 		if (m_AvailableIDs.empty())
 		{
 			m_AvailableIDs.push(id + 1);
 		}
 
-		// 创建Object
-		auto object = m_FactoryFunctionMap[type](id, name);
-		m_Objects[id] = object;
-		
-		return std::dynamic_pointer_cast<T>(object);
+		if (parent != nullptr)
+		{
+			// 查找父Object是否在Scene中
+			Object* root = parent;
+			while (root->GetParent() != nullptr)
+			{
+				root = root->GetParent();
+			}
+			unsigned int rootID = root->GetID();
+
+			if (m_Objects.find(rootID) == m_Objects.end())
+			{
+				BS_CORE_ERROR("Parent Object not found in Scene!");
+				return std::shared_ptr<EmptyObject>();
+			}
+			else if (m_Objects[rootID].get() != root)
+			{
+				BS_CORE_ERROR("Parent Object not found in Scene!");
+				return std::shared_ptr<EmptyObject>();
+			}
+			else
+			{
+				// 创建Object
+				std::shared_ptr<EmptyObject> object = std::make_shared<EmptyObject>(id, name, parent);
+				m_Objects[id] = object;
+				parent->AddChild(object);
+				return object;
+			}
+		}
+		else
+		{
+			// 创建Object
+			std::shared_ptr<EmptyObject> object = std::make_shared<EmptyObject>(id, name, parent);
+			m_Objects[id] = object;
+			return object;
+		}
 	}
 
-	template<typename T, typename ...Args>
-	std::shared_ptr<T> Scene::CreateChildObject(const Object::Type& type, const std::string& name, EmptyObject* parent, Args && ...args)
+	std::shared_ptr<ModelObject> Scene::CreateModelObject(const Object::Type& type, const std::string& path, const std::string& name, Object* parent)
 	{
+		// 获取ID
+		unsigned int id = m_AvailableIDs.top();
+		m_AvailableIDs.pop();
+
+		if (m_AvailableIDs.empty())
+		{
+			m_AvailableIDs.push(id + 1);
+		}
+
+		if (parent != nullptr)
+		{
+			// 查找父Object是否在Scene中
+			Object* root = parent;
+			while (root->GetParent() != nullptr)
+			{
+				root = root->GetParent();
+			}
+			unsigned int rootID = root->GetID();
+			if (m_Objects.find(rootID) == m_Objects.end())
+			{
+				BS_CORE_ERROR("Parent Object not found in Scene!");
+				return std::shared_ptr<ModelObject>();
+			}
+			else if (m_Objects[rootID].get() != root)
+			{
+				BS_CORE_ERROR("Parent Object not found in Scene!");
+				return std::shared_ptr<ModelObject>();
+			}
+			else
+			{
+				// 创建Object
+				std::shared_ptr<ModelObject> object = std::make_shared<ModelObject>(id, name, parent, path);
+				m_Objects[id] = object;
+				parent->AddChild(object);
+				return object;
+			}
+		}
+		else
+		{
+			// 创建Object
+			std::shared_ptr<ModelObject> object = std::make_shared<ModelObject>(id, name, parent, path);
+			m_Objects[id] = object;
+			return object;
+		}
+	}
+
+	void Scene::DeleteObject(std::shared_ptr<Object> object)
+	{
+		std::vector<unsigned int> ids;
 		// 查找根Object是否在Scene中
-		Object* root = parent;
+		Object* root = object.get();
 		while (root->GetParent() != nullptr)
 		{
 			root = root->GetParent();
@@ -82,59 +152,12 @@ namespace BrokenSim
 
 		if (m_Objects.find(rootID) == m_Objects.end())
 		{
-			BS_CORE_ERROR(false, "Root Object not found in Scene!");
-			return nullptr;
-		}
-		else if (m_Objects[rootID].get() != root)
-		{
-			BS_CORE_ERROR(false, "Root Object not found in Scene!");
-			return nullptr;
-		}
-
-		if (m_FactoryFunctionMap.find(T) == m_FactoryFunctionMap.end())
-		{
-			BS_CORE_ERROR(false, "Factory function not registered!");
-			return nullptr;
-		}
-
-		// 生成ID
-		unsigned int id = m_AvailableIDs.top();
-
-		// 从可用ID中移除
-		m_AvailableIDs.pop();
-
-		// 维护可用ID
-		if (m_AvailableIDs.empty())
-		{
-			m_AvailableIDs.push(id + 1);
-		}
-
-		// 创建Object
-		auto object = m_FactoryFunctionMap[type](id, name);
-		parent->AddChild(object);
-
-		return std::dynamic_pointer_cast<T>(object);
-	}
-
-	void Scene::DeleteObject(std::shared_ptr<Object> object)
-	{
-		std::vector<unsigned int> ids;
-		// 查找根Object是否在Scene中
-		Object* root = object.get();
-		while (root != nullptr)
-		{
-			root = root->GetParent();
-		}
-		unsigned int rootID = root->GetID();
-
-		if (m_Objects.find(rootID) == m_Objects.end())
-		{
-			BS_CORE_ERROR(false, "Object not found in Scene!");
+			BS_CORE_ERROR("Object not found in Scene!");
 			return;
 		}
 		else if (m_Objects[rootID].get() != root)
 		{
-			BS_CORE_ERROR(false, "Object not found in Scene!");
+			BS_CORE_ERROR("Object not found in Scene!");
 			return;
 		}
 		else
@@ -157,8 +180,19 @@ namespace BrokenSim
 			// 若Object为根Object，则从Scene中删除
 			if (object->GetParent() == nullptr)
 			{
-				m_Objects.erase(id);
+				m_Objects.erase(object->GetID());
 			}
+		}
+	}
+
+	void Scene::OnImGuiRender()
+	{
+		for (auto object : m_Objects)
+		{
+			ImGui::Text("Object Name: %d", object.second->GetName());
+			ImGui::SliderFloat3("Position", glm::value_ptr(object.second->GetPosition()), -10.0f, 10.0f);
+			ImGui::SliderFloat3("Rotation", glm::value_ptr(object.second->GetRotation()), -180.0f, 180.0f);
+			ImGui::SliderFloat3("Scale", glm::value_ptr(object.second->GetScale()), 0.0f, 10.0f);
 		}
 	}
 }
