@@ -25,7 +25,14 @@ namespace BrokenSim
 		m_Shader->Bind();
 		m_Shader->SetUniformMat4f("u_ViewProjection", camera.GetViewProjectionMatrix());
 		m_Shader->SetUniform3f("u_ViewPos", camera.GetPosition());
-		
+
+		float lightOffsetX = 2.0f;
+		float lightOffsetY = 2.0f;
+
+		glm::vec3 lightPos = camera.GetPosition() + camera.GetRight() * lightOffsetX + camera.GetUp() * lightOffsetY;
+		m_Shader->SetUniform3f("u_LightPos", lightPos);
+
+		m_Shader->SetUniform3f("u_LightColor", glm::vec3(1.0f, 1.0f, 1.0f));		
 
 		// 更新所有Object
 		for (auto& object : m_Objects)

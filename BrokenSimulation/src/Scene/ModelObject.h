@@ -40,8 +40,6 @@ namespace BrokenSim
 		float m_DiffuseStrength = 0.7f;
 		float m_SpecularStrength = 0.8f;
 
-		bool LoadModel(const std::string& path);
-
 		struct Vertex
 		{
 			glm::vec3 Position;

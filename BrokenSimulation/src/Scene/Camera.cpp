@@ -2,8 +2,9 @@
 #include "Scene/Camera.h"
 #include "Core/Input.h"
 
-#include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
+
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
 namespace BrokenSim
@@ -27,6 +28,7 @@ namespace BrokenSim
 	{
 		m_ViewportWidth = width;
 		m_ViewportHeight = height;
+		this->UpdateProjection();
 	}
 
 	void Camera::SetPosition(const glm::vec3& position)
@@ -50,15 +52,15 @@ namespace BrokenSim
 			glm::vec2 delta = (mouse - m_InitialMousePosition) * 0.003f;
 			m_InitialMousePosition = mouse;
 
-			if (Input::IsMouseButtonPressed(MouseButton::ButtonMiddle))
+			if (Input::IsMouseButtonPressed(Mouse::Button_Middle))
 			{
 				MousePan(delta);
 			}
-			else if (Input::IsMouseButtonPressed(MouseButton::ButtonLeft))
+			else if (Input::IsMouseButtonPressed(Mouse::Button_Left))
 			{
 				MouseRotate(delta);
 			}
-			else if (Input::IsMouseButtonPressed(MouseButton::ButtonRight))
+			else if (Input::IsMouseButtonPressed(Mouse::Button_Right))
 			{
 				MouseZoom(delta.y);
 			}
@@ -128,6 +130,46 @@ namespace BrokenSim
 		return glm::quat(glm::vec3(-m_Pitch, -m_Yaw, 0.0f));
 	}
 
+	float Camera::GetFOV() const
+	{
+		return m_FOV;
+	}
+
+	float Camera::GetAspectRatio() const
+	{
+		return m_AspectRatio;
+	}
+
+	float Camera::GetNear() const
+	{
+		return m_Near;
+	}
+
+	float Camera::GetFar() const
+	{
+		return m_Far;
+	}
+
+	float Camera::GetViewportWidth() const
+	{
+		return m_ViewportWidth;
+	}
+
+	float Camera::GetViewportHeight() const
+	{
+		return m_ViewportHeight;
+	}
+
+	float Camera::GetYaw() const
+	{
+		return m_Yaw;
+	}
+
+	float Camera::GetPitch() const
+	{
+		return m_Pitch;
+	}
+
 	bool Camera::OnMouseScrolled(MouseScrolledEvent& e)
 	{
 		float delta = e.GetYOffset() * 0.1f;
@@ -151,7 +193,7 @@ namespace BrokenSim
 		m_ViewMatrix = glm::inverse(m_ViewMatrix);
 	}
 
-	glm::vec3 CalculatePosition()
+	glm::vec3 Camera::CalculatePosition()
 	{
 		return m_FocalPoint - GetForward() * m_Distance;
 	}
@@ -207,5 +249,13 @@ namespace BrokenSim
 			m_FocalPoint += GetForward();
 			m_Distance = 1.0f;
 		}
+	}
+
+	void Camera::RecalculateViewMatrix()
+	{
+		glm::quat orientation = GetOrientation();
+		m_Position = CalculatePosition();
+		m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(orientation);
+		m_ViewMatrix = glm::inverse(m_ViewMatrix);
 	}
 }

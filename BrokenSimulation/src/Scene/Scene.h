@@ -42,11 +42,8 @@ namespace BrokenSim
 		// 当创建一个Object时，从m_AvailableIDs中取出一个ID
 		// 若取出一个ID后m_AvailableIDs为空，则添加一个新的ID至m_AvailableIDs
 		std::priority_queue<unsigned int, std::vector<unsigned int>, compare> m_AvailableIDs;
-
-
-		// TODO: 计划只将父类为nullptr的Object存储在m_Objects中，其他Object存储在其父类的m_Children中，便于后续加载
 		
-		// 用于存储所有的根Object，即父类为nullptr的Object
+		// 用于存储所有的Object，更新和渲染时遍历m_Objects，并根据其父对象的变换矩阵计算自身的变换矩阵
 		std::unordered_map<unsigned int, std::shared_ptr<Object>> m_Objects;
 
 		std::shared_ptr<Shader> m_Shader;

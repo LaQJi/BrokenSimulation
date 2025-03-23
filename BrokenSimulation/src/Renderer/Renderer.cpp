@@ -27,7 +27,12 @@ namespace BrokenSim
 		GLCall(glViewport(0, 0, width, height));
 	}
 
-	void Renderer::BeginScene(OrthographicCamera camera)
+	void Renderer::BeginScene(OrthographicCamera& camera)
+	{
+		s_SceneData->viewProjectionMatrix = camera.GetViewProjectionMatrix();
+	}
+
+	void Renderer::BeginScene(Camera& camera)
 	{
 		s_SceneData->viewProjectionMatrix = camera.GetViewProjectionMatrix();
 	}
