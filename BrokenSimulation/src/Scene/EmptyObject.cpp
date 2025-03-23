@@ -16,7 +16,7 @@ namespace BrokenSim
 		this->RemoveAllChildren();
 	}
 
-	void EmptyObject::OnUpdate(TimeStep ts, std::shared_ptr<Shader> shader)
+	void EmptyObject::OnUpdate(TimeStep ts, std::shared_ptr<Shader>& shader)
 	{
 	}
 

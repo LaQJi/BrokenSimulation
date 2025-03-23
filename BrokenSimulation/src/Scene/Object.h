@@ -26,7 +26,7 @@ namespace BrokenSim
 
 
 		// 更新对象状态
-		virtual void OnUpdate(TimeStep ts, std::shared_ptr<Shader> shader) = 0;
+		virtual void OnUpdate(TimeStep ts, std::shared_ptr<Shader>& shader) = 0;
 		// 渲染对象
 		virtual void OnRender(std::shared_ptr<Shader> shader) = 0;
 		// 处理事件

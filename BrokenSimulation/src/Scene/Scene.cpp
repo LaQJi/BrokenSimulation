@@ -197,9 +197,13 @@ namespace BrokenSim
 		for (auto object : m_Objects)
 		{
 			ImGui::Text("Object Name: %d", object.second->GetName());
+
+			ImGui::PushID(object.second->GetID());
+
 			ImGui::SliderFloat3("Position", glm::value_ptr(object.second->GetPosition()), -10.0f, 10.0f);
 			ImGui::SliderFloat3("Rotation", glm::value_ptr(object.second->GetRotation()), -180.0f, 180.0f);
 			ImGui::SliderFloat3("Scale", glm::value_ptr(object.second->GetScale()), 0.0f, 10.0f);
+			ImGui::PopID();
 		}
 	}
 }

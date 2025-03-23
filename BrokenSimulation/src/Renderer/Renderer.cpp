@@ -69,6 +69,7 @@ namespace BrokenSim
 	void Renderer::DrawIndexed(const std::shared_ptr<VertexArray>& va, unsigned int count)
 	{
 		va->Bind();
+		va->GetIndexBuffer()->Bind();
 		unsigned int indexCount = count == 0 ? va->GetIndexBuffer()->GetCount() : count;
 		GLCall(glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr));
 	}

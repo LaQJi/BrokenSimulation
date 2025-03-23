@@ -19,7 +19,7 @@ namespace BrokenSim
 		ModelObject(unsigned int id, const std::string& name = "Model", Object* parent = nullptr, const std::string& path = "");
 		virtual ~ModelObject();
 
-		virtual void OnUpdate(TimeStep ts, std::shared_ptr<Shader> shader) override;
+		virtual void OnUpdate(TimeStep ts, std::shared_ptr<Shader>& shader) override;
 
 		virtual void OnRender(std::shared_ptr<Shader> shader) override;
 

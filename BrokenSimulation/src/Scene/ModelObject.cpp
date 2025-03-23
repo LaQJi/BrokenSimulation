@@ -27,7 +27,7 @@ namespace BrokenSim
 	{
 	}
 
-	void ModelObject::OnUpdate(TimeStep ts, std::shared_ptr<Shader> shader)
+	void ModelObject::OnUpdate(TimeStep ts, std::shared_ptr<Shader>& shader)
 	{
 		// 更新模型
 		glm::mat4 model = this->GetModelMatrix();
