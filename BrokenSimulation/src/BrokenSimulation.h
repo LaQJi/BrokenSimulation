@@ -24,9 +24,10 @@
 #include "Events/MouseEvent.h"
 
 #include "Scene/Scene.h"
+#include "Scene/Scene2D.h"
+#include "Scene/Scene3D.h"
 #include "Scene/Object.h"
 #include "Scene/ModelObject.h"
 #include "Scene/EmptyObject.h"
 
 #include "Platform/ImGuiLayer.h"
-
