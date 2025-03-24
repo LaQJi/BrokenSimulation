@@ -1,152 +1,77 @@
 #include "bspch.h"
 #include "Scene/Scene.h"
 
-#include "Core/Log.h"
-
-#include <imgui/imgui.h>
-#include <glm/gtc/type_ptr.hpp>
-
 namespace BrokenSim
 {
-	Scene::Scene()
+	std::shared_ptr<Object> Scene::CreateObject(const Object::Type type, const std::string& name, Object* parent, const std::vector<std::any>& params)
 	{
-		// 初始化ID
-		m_AvailableIDs.push(0);
-
-		m_Shader = std::make_shared<Shader>("res/Shaders/scene_v.shader", "res/Shaders/scene_f.shader");
-	}
-
-	Scene::~Scene()
-	{
-	}
-
-	void Scene::OnUpdate(TimeStep ts, Camera& camera)
-	{
-		m_Shader->Bind();
-		m_Shader->SetUniformMat4f("u_ViewProjection", camera.GetViewProjectionMatrix());
-		m_Shader->SetUniform3f("u_ViewPos", camera.GetPosition());
-
-		float lightOffsetX = 2.0f;
-		float lightOffsetY = 2.0f;
-
-		glm::vec3 lightPos = camera.GetPosition() + camera.GetRight() * lightOffsetX + camera.GetUp() * lightOffsetY;
-		m_Shader->SetUniform3f("u_LightPos", lightPos);
-
-		m_Shader->SetUniform3f("u_LightColor", glm::vec3(1.0f, 1.0f, 1.0f));		
-
-		// 更新所有Object
-		for (auto& object : m_Objects)
+		if (auto iter = m_ObjectFactory.find(type); iter != m_ObjectFactory.end())
 		{
-			if (object.second->GetEnabled())
+			if (parent != nullptr)
 			{
-				std::shared_ptr<ModelObject> modelObject = std::dynamic_pointer_cast<ModelObject>(object.second);
-				if (modelObject)
+				unsigned int parentID = parent->GetID();
+
+				if (m_Objects.find(parentID) == m_Objects.end())
 				{
-					modelObject->OnUpdate(ts, m_Shader);
+					BS_CORE_ERROR("Parent object not found!");
+					return NullObject;
+				}
+				else if (m_Objects[parentID].get() != parent)
+				{
+					BS_CORE_ERROR("Parent object not found!");
+					return NullObject;
+				}
+				else
+				{
+					unsigned int id = AssignID();
+					std::string objectName;
+
+					if (name == "")
+					{
+						objectName = GetTypeName(type);
+					}
+					else
+					{
+						objectName = name;
+					}
+
+					std::shared_ptr<Object> object = iter->second(id, objectName, parent, params);
+
+					m_Objects[id] = object;
+					parent->AddChild(object);
+
+					return object;
 				}
 			}
-		}
-	}
-
-
-	std::shared_ptr<EmptyObject> Scene::CreateEmptyObject(const Object::Type& type, const std::string& name, Object* parent)
-	{
-		// 获取ID
-		unsigned int id = m_AvailableIDs.top();
-		m_AvailableIDs.pop();
-
-		if (m_AvailableIDs.empty())
-		{
-			m_AvailableIDs.push(id + 1);
-		}
-
-		if (parent != nullptr)
-		{
-			// 查找父Object是否在Scene中
-			Object* root = parent;
-			while (root->GetParent() != nullptr)
-			{
-				root = root->GetParent();
-			}
-			unsigned int rootID = root->GetID();
-
-			if (m_Objects.find(rootID) == m_Objects.end())
-			{
-				BS_CORE_ERROR("Parent Object not found in Scene!");
-				return std::shared_ptr<EmptyObject>();
-			}
-			else if (m_Objects[rootID].get() != root)
-			{
-				BS_CORE_ERROR("Parent Object not found in Scene!");
-				return std::shared_ptr<EmptyObject>();
-			}
 			else
 			{
-				// 创建Object
-				std::shared_ptr<EmptyObject> object = std::make_shared<EmptyObject>(id, name, parent);
+				unsigned int id = AssignID();
+				std::string objectName;
+
+				if (name == "")
+				{
+					objectName = GetTypeName(type);
+				}
+				else
+				{
+					objectName = name;
+				}
+
+				std::shared_ptr<Object> object = iter->second(id, objectName, parent, params);
+
 				m_Objects[id] = object;
-				parent->AddChild(object);
+
 				return object;
 			}
 		}
 		else
 		{
-			// 创建Object
-			std::shared_ptr<EmptyObject> object = std::make_shared<EmptyObject>(id, name, parent);
-			m_Objects[id] = object;
-			return object;
+			BS_CORE_ERROR("Object type not found!");
+			return NullObject;
 		}
 	}
 
-	std::shared_ptr<ModelObject> Scene::CreateModelObject(const Object::Type& type, const std::string& path, const std::string& name, Object* parent)
-	{
-		// 获取ID
-		unsigned int id = m_AvailableIDs.top();
-		m_AvailableIDs.pop();
-
-		if (m_AvailableIDs.empty())
-		{
-			m_AvailableIDs.push(id + 1);
-		}
-
-		if (parent != nullptr)
-		{
-			// 查找父Object是否在Scene中
-			Object* root = parent;
-			while (root->GetParent() != nullptr)
-			{
-				root = root->GetParent();
-			}
-			unsigned int rootID = root->GetID();
-			if (m_Objects.find(rootID) == m_Objects.end())
-			{
-				BS_CORE_ERROR("Parent Object not found in Scene!");
-				return std::shared_ptr<ModelObject>();
-			}
-			else if (m_Objects[rootID].get() != root)
-			{
-				BS_CORE_ERROR("Parent Object not found in Scene!");
-				return std::shared_ptr<ModelObject>();
-			}
-			else
-			{
-				// 创建Object
-				std::shared_ptr<ModelObject> object = std::make_shared<ModelObject>(id, name, parent, path);
-				m_Objects[id] = object;
-				parent->AddChild(object);
-				return object;
-			}
-		}
-		else
-		{
-			// 创建Object
-			std::shared_ptr<ModelObject> object = std::make_shared<ModelObject>(id, name, parent, path);
-			m_Objects[id] = object;
-			return object;
-		}
-	}
-
-	void Scene::DeleteObject(std::shared_ptr<Object> object)
+	void Scene::DeleteObject(std::shared_ptr<Object>& object)
 	{
 		std::vector<unsigned int> ids;
 		// 查找根Object是否在Scene中
@@ -192,18 +117,82 @@ namespace BrokenSim
 		}
 	}
 
-	void Scene::OnImGuiRender()
+
+	bool Scene::IsObjectInScene(std::shared_ptr<Object>& object)
 	{
-		for (auto object : m_Objects)
+		auto iter = m_Objects.find(object->GetID());
+		if (iter == m_Objects.end())
 		{
-			ImGui::Text("Object Name: %d", object.second->GetName());
+			BS_CORE_ERROR("Object not found in Scene!");
+			return false;
+		}
+		else if (iter->second.get() != object.get())
+		{
+			BS_CORE_ERROR("Object not found in Scene!");
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
 
-			ImGui::PushID(object.second->GetID());
+	void Scene::Init(std::shared_ptr<Shader>& shader)
+	{
+		m_AvailableIDs.push(0);
 
-			ImGui::SliderFloat3("Position", glm::value_ptr(object.second->GetPosition()), -10.0f, 10.0f);
-			ImGui::SliderFloat3("Rotation", glm::value_ptr(object.second->GetRotation()), -180.0f, 180.0f);
-			ImGui::SliderFloat3("Scale", glm::value_ptr(object.second->GetScale()), 0.0f, 10.0f);
-			ImGui::PopID();
+		m_Shader = shader;
+	}
+
+	unsigned int Scene::AssignID()
+	{
+		// 若可用ID池为空，则创建新ID
+		if (m_AvailableIDs.empty())
+		{
+			BS_CORE_WARN("Illegal operation in using ID pool, create a new ID!");
+			unsigned int id = m_Objects.size();
+			
+			// 查找是否存在相同ID，若存在则自增
+			auto iter = m_Objects.find(id);
+			while (iter != m_Objects.end())
+			{
+				id++;
+				iter = m_Objects.find(id);
+			}
+
+			return id;
+		}
+		else
+		{
+			unsigned int id = m_AvailableIDs.top();
+			m_AvailableIDs.pop();
+
+			// 维护可用ID池
+			if (m_AvailableIDs.empty())
+			{
+				m_AvailableIDs.push(id + 1);
+			}
+
+			return id;
+		}
+	}
+
+	void Scene::FreeID(unsigned int id)
+	{
+		m_AvailableIDs.push(id);
+	}
+
+	std::shared_ptr<Object>& Scene::GetObject(unsigned int id)
+	{
+		auto iter = m_Objects.find(id);
+		if (iter == m_Objects.end())
+		{
+			BS_CORE_ERROR("Object not found in Scene!");
+			return NullObject;
+		}
+		else
+		{
+			return iter->second;
 		}
 	}
 }

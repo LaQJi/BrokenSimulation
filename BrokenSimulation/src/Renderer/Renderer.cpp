@@ -63,14 +63,15 @@ namespace BrokenSim
 		shader->SetUniformMat4f("u_Transform", transform);
 
 		vertexArray->Bind();
+		vertexArray->GetIndexBuffer()->Bind();
 		GLCall(glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr));
 	}
 
-	void Renderer::DrawIndexed(const std::shared_ptr<VertexArray>& va, unsigned int count)
+	void Renderer::DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, unsigned int count)
 	{
-		va->Bind();
-		va->GetIndexBuffer()->Bind();
-		unsigned int indexCount = count == 0 ? va->GetIndexBuffer()->GetCount() : count;
+		vertexArray->Bind();
+		vertexArray->GetIndexBuffer()->Bind();
+		unsigned int indexCount = count == 0 ? vertexArray->GetIndexBuffer()->GetCount() : count;
 		GLCall(glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr));
 	}
 }

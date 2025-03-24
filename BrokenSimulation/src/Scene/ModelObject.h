@@ -36,7 +36,7 @@ namespace BrokenSim
 
 		float m_Shininess = 32.0f;
 
-		float m_AmbientStrength = 0.2f;
+		float m_AmbientStrength = 0.3f;
 		float m_DiffuseStrength = 0.7f;
 		float m_SpecularStrength = 0.8f;
 

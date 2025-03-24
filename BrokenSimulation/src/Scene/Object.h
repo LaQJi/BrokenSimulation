@@ -121,4 +121,9 @@ namespace BrokenSim
 
 		void Scale(const glm::vec3& scale);
 	};
+
+	static std::shared_ptr<Object> NullObject = nullptr;
+
+
+	static std::string GetTypeName(Object::Type type);
 }
