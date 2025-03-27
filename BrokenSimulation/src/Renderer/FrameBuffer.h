@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 namespace BrokenSim
 {
 	enum class TextureFormat
@@ -52,6 +54,8 @@ namespace BrokenSim
 		unsigned int GetColorAttachmentRendererID(unsigned int index = 0);
 
 		const FrameBufferSpecification& GetSpecification() const { return m_Specification; }
+
+		const glm::vec2& GetSize() const { return { m_Specification.width, m_Specification.height }; }
 
 	private:
 		unsigned int m_RendererID = 0;

@@ -3,74 +3,6 @@
 
 namespace BrokenSim
 {
-	std::shared_ptr<Object> Scene::CreateObject(const Object::Type type, const std::string& name, Object* parent, const std::vector<std::any>& params)
-	{
-		if (auto iter = m_ObjectFactory.find(type); iter != m_ObjectFactory.end())
-		{
-			if (parent != nullptr)
-			{
-				unsigned int parentID = parent->GetID();
-
-				if (m_Objects.find(parentID) == m_Objects.end())
-				{
-					BS_CORE_ERROR("Parent object not found!");
-					return NullObject;
-				}
-				else if (m_Objects[parentID].get() != parent)
-				{
-					BS_CORE_ERROR("Parent object not found!");
-					return NullObject;
-				}
-				else
-				{
-					unsigned int id = AssignID();
-					std::string objectName;
-
-					if (name == "")
-					{
-						objectName = GetTypeName(type);
-					}
-					else
-					{
-						objectName = name;
-					}
-
-					std::shared_ptr<Object> object = iter->second(id, objectName, parent, params);
-
-					m_Objects[id] = object;
-					parent->AddChild(object);
-
-					return object;
-				}
-			}
-			else
-			{
-				unsigned int id = AssignID();
-				std::string objectName;
-
-				if (name == "")
-				{
-					objectName = GetTypeName(type);
-				}
-				else
-				{
-					objectName = name;
-				}
-
-				std::shared_ptr<Object> object = iter->second(id, objectName, parent, params);
-
-				m_Objects[id] = object;
-
-				return object;
-			}
-		}
-		else
-		{
-			BS_CORE_ERROR("Object type not found!");
-			return NullObject;
-		}
-	}
-
 	void Scene::DeleteObject(std::shared_ptr<Object>& object)
 	{
 		std::vector<unsigned int> ids;
@@ -116,7 +48,6 @@ namespace BrokenSim
 			}
 		}
 	}
-
 
 	bool Scene::IsObjectInScene(std::shared_ptr<Object>& object)
 	{

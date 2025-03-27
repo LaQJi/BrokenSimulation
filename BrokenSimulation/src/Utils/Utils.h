@@ -17,10 +17,11 @@ namespace BrokenSim
 	void GLClearError();
 	bool GLLogCall(const char* function, const char* file, int line);
 
+	float RandomFloat(float min, float max);
+
 	class Time
 	{
 	public:
 		static float GetTime();
 	};
-
 }

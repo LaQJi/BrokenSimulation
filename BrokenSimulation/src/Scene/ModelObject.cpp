@@ -5,7 +5,7 @@
 
 namespace BrokenSim
 {
-	ModelObject::ModelObject(unsigned int id, const std::string& name, Object* parent, const std::string& path)
+	ModelObject::ModelObject(unsigned int id, const std::string& name, Object* parent, const std::string path)
 	{
 		this->id = id;
 		this->type = Type::Model;
@@ -15,6 +15,21 @@ namespace BrokenSim
 
 		if (this->LoadModel(path))
 		{
+			if (m_Vertices.size() > 0)
+			{
+				// 创建顶点数组
+				m_VertexArray = std::make_shared<VertexArray>();
+				std::shared_ptr<VertexBuffer> vb = std::make_shared<VertexBuffer>(&m_Vertices[0].Position.x, m_Vertices.size() * sizeof(Vertex));
+				std::shared_ptr<IndexBuffer> ib = std::make_shared<IndexBuffer>(&m_Indices[0], m_Indices.size());
+				VertexBufferLayout layout({
+					{ DataType::Float3, "a_Position" },
+					{ DataType::Float3, "a_Normal" },
+					{ DataType::Float2, "a_TexCoords" }
+					});
+				vb->SetLayout(layout);
+				m_VertexArray->AddVertexBuffer(vb);
+				m_VertexArray->SetIndexBuffer(ib);
+			}
 			BS_CORE_INFO("Model \' {0} \' loaded successfully!", m_Path);
 		}
 		else
@@ -29,7 +44,11 @@ namespace BrokenSim
 
 	void ModelObject::OnUpdate(TimeStep ts, std::shared_ptr<Shader>& shader)
 	{
-		// 更新模型
+	}
+
+	void ModelObject::OnRender(std::shared_ptr<Shader> shader)
+	{
+		// 更新模型矩阵
 		glm::mat4 model = this->GetModelMatrix();
 
 		// 获取父对象的模型矩阵
@@ -52,15 +71,8 @@ namespace BrokenSim
 		shader->SetUniform1f("u_DiffuseStrength", m_DiffuseStrength);
 		shader->SetUniform1f("u_SpecularStrength", m_SpecularStrength);
 
-		// 渲染模型
-		for (auto& va : m_VertexArrays)
-		{
-			Renderer::DrawIndexed(va);
-		}
-	}
+		Renderer::DrawIndexed(m_VertexArray);
 
-	void ModelObject::OnRender(std::shared_ptr<Shader> shader)
-	{
 	}
 
 	void ModelObject::OnEvent(Event& e)
@@ -87,8 +99,6 @@ namespace BrokenSim
 
 	void ModelObject::ProcessNode(aiNode* node, const aiScene* scene)
 	{
-		std::vector<Vertex> vertices;
-		std::vector<unsigned int> indices;
 		// 处理节点所有的网格
 		for (unsigned int i = 0; i < node->mNumMeshes; i++)
 		{
@@ -124,7 +134,7 @@ namespace BrokenSim
 					vertex.TexCoords = glm::vec2(0.0f, 0.0f);
 				}
 
-				vertices.push_back(vertex);
+				m_Vertices.push_back(vertex);
 			}
 
 			// 处理网格中的所有面
@@ -134,27 +144,8 @@ namespace BrokenSim
 				// 处理面中的所有索引
 				for (unsigned int k = 0; k < face.mNumIndices; k++)
 				{
-					indices.push_back(face.mIndices[k]);
+					m_Indices.push_back(face.mIndices[k]);
 				}
-			}
-
-			if (vertices.size() > 0)
-			{
-				// 创建顶点数组
-				std::shared_ptr<VertexArray> va = std::make_shared<VertexArray>();
-				std::shared_ptr<VertexBuffer> vb = std::make_shared<VertexBuffer>(&vertices[0].Position.x, vertices.size() * sizeof(Vertex));
-				std::shared_ptr<IndexBuffer> ib = std::make_shared<IndexBuffer>(&indices[0], indices.size());
-				VertexBufferLayout layout({
-					{ DataType::Float3, "a_Position" },
-					{ DataType::Float3, "a_Normal" },
-					{ DataType::Float2, "a_TexCoords" }
-					});
-				vb->SetLayout(layout);
-				va->AddVertexBuffer(vb);
-				va->SetIndexBuffer(ib);
-
-				// 添加顶点数组
-				m_VertexArrays.push_back(va);
 			}
 		}
 

@@ -5,23 +5,6 @@
 
 namespace BrokenSim
 {
-	std::string GetTypeName(Object::Type type)
-	{
-		switch (type)
-		{
-			case Object::Type::Empty:
-				return "Empty";
-			case Object::Type::Model:
-				return "Model";
-			case Object::Type::Light:
-				return "Light";
-			case Object::Type::Camera:
-				return "Camera";
-			default:
-				return "Unknown";
-		}
-	}
-
 	unsigned int Object::GetID() const
 	{
 		return id;

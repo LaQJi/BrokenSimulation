@@ -19,7 +19,8 @@ namespace BrokenSim
 			Empty,		// 空对象
 			Model,		// 模型
 			Light,		// 光源
-			Camera		// 相机
+			Camera,		// 相机
+			Point2D		// 二维点
 		};
 
 		virtual ~Object() = default;
@@ -125,5 +126,23 @@ namespace BrokenSim
 	static std::shared_ptr<Object> NullObject = nullptr;
 
 
-	static std::string GetTypeName(Object::Type type);
+	static std::string GetTypeName(Object::Type type)
+
+	{
+		switch (type)
+		{
+		case Object::Type::Empty:
+			return "Empty";
+		case Object::Type::Model:
+			return "Model";
+		case Object::Type::Light:
+			return "Light";
+		case Object::Type::Camera:
+			return "Camera";
+		case Object::Type::Point2D:
+			return "Point2D";
+		default:
+			return "Unknown";
+		}
+	}
 }

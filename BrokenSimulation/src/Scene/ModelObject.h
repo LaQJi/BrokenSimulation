@@ -16,7 +16,7 @@ namespace BrokenSim
 	class ModelObject : public Object
 	{
 	public:
-		ModelObject(unsigned int id, const std::string& name = "Model", Object* parent = nullptr, const std::string& path = "");
+		ModelObject(unsigned int id, const std::string& name = "Model", Object* parent = nullptr, const std::string path = "");
 		virtual ~ModelObject();
 
 		virtual void OnUpdate(TimeStep ts, std::shared_ptr<Shader>& shader) override;
@@ -25,12 +25,12 @@ namespace BrokenSim
 
 		virtual void OnEvent(Event& e) override;
 
-		std::vector<std::shared_ptr<VertexArray>>& GetVertexArrays() { return m_VertexArrays; }
+		std::shared_ptr<VertexArray>& GetVertexArray() { return m_VertexArray; }
 
 		glm::vec4& GetColor() { return m_Color; }
 
 	private:
-		std::vector<std::shared_ptr<VertexArray>> m_VertexArrays;
+		std::shared_ptr<VertexArray> m_VertexArray;
 
 		glm::vec4 m_Color = { 0.6f, 0.6f, 0.6f, 1.0f };
 
@@ -47,7 +47,9 @@ namespace BrokenSim
 			glm::vec2 TexCoords;
 		};
 
-		std::string m_Name;
+		std::vector<Vertex> m_Vertices;
+		std::vector<unsigned int> m_Indices;
+
 		std::string m_Path;
 
 		bool LoadModel(const std::string& path);

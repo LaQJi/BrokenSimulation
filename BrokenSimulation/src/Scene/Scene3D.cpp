@@ -13,10 +13,6 @@ namespace BrokenSim
 		std::shared_ptr<Shader> shader = std::make_shared<Shader>("res/Shaders/scene_v.shader", "res/Shaders/scene_f.shader");
 
 		Init(shader);
-
-		// 注册Object工厂
-		RegisterObjectFactory<EmptyObject>(Object::Type::Empty);
-		RegisterObjectFactory<ModelObject,const std::string&>(Object::Type::Model);
 	}
 
 	Scene3D::~Scene3D()
@@ -35,9 +31,12 @@ namespace BrokenSim
 
 		glm::vec3 lightPos = camera.GetPosition() + camera.GetRight() * lightOffsetX + camera.GetUp() * lightOffsetY;
 		m_Shader->SetUniform3f("u_LightPos", lightPos);
-
 		m_Shader->SetUniform3f("u_LightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 
+	}
+
+	void Scene3D::OnRender()
+	{
 		// 更新所有Object
 		for (auto& object : m_Objects)
 		{
@@ -46,15 +45,10 @@ namespace BrokenSim
 				std::shared_ptr<ModelObject> modelObject = std::dynamic_pointer_cast<ModelObject>(object.second);
 				if (modelObject)
 				{
-					modelObject->OnUpdate(ts, m_Shader);
+					modelObject->OnRender(m_Shader);
 				}
 			}
 		}
-	}
-
-	void Scene3D::OnRender()
-	{
-		// TODO:将渲染代码移动到OnUpdate函数中
 	}
 
 	void Scene3D::OnImGuiRender()
@@ -62,7 +56,7 @@ namespace BrokenSim
 		for (auto object : m_Objects)
 		{
 			// TODO: 为每个Object添加ImGui面板，完善显示内容
-			ImGui::Text("Object Name: %d", object.second->GetName());
+			ImGui::Text("Object Name: %d", object.second->GetName().c_str());
 
 			ImGui::PushID(object.second->GetID());
 
@@ -72,5 +66,83 @@ namespace BrokenSim
 
 			ImGui::PopID();
 		}
+	}
+
+	std::shared_ptr<Object> Scene3D::CreateModelObject(const std::string& path, const std::string& name, Object* parent)
+	{
+		if (parent != nullptr)
+		{
+			unsigned int parentID = parent->GetID();
+			if (auto iter = m_Objects.find(parentID); iter == m_Objects.end())
+			{
+				BS_CORE_ERROR("Parent object not found!");
+				return std::shared_ptr<Object>();
+			}
+			else if (iter->second->GetType() != Object::Type::Empty)
+			{
+				BS_CORE_ERROR("Parent object is not an EmptyObject!");
+				return std::shared_ptr<Object>();
+			}
+			else if (parent != iter->second.get())
+			{
+				BS_CORE_ERROR("Parent object not found!");
+				return std::shared_ptr<Object>();
+			}
+			else
+			{
+				unsigned int id = AssignID();
+				std::shared_ptr<ModelObject> modelObject = std::make_shared<ModelObject>(id, name, parent, path);
+				m_Objects[id] = modelObject;
+				return modelObject;
+			}
+		}
+		else
+		{
+			unsigned int id = AssignID();
+			std::shared_ptr<ModelObject> modelObject = std::make_shared<ModelObject>(id, name, parent, path);
+			m_Objects[id] = modelObject;
+			return modelObject;
+		}
+	}
+
+	std::shared_ptr<Object> Scene3D::CreateEmptyObject(const std::string& name, Object* parent)
+	{
+		if (parent != nullptr)
+		{
+			unsigned int parentID = parent->GetID();
+			if (auto iter = m_Objects.find(parentID); iter == m_Objects.end())
+			{
+				BS_CORE_ERROR("Parent object not found!");
+				return std::shared_ptr<Object>();
+			}
+			else if (iter->second->GetType() != Object::Type::Empty)
+			{
+				BS_CORE_ERROR("Parent object is not an EmptyObject!");
+				return std::shared_ptr<Object>();
+			}
+			else if (parent != iter->second.get())
+			{
+				BS_CORE_ERROR("Parent object not found!");
+				return std::shared_ptr<Object>();
+			}
+			else
+			{
+				unsigned int id = AssignID();
+				std::shared_ptr<EmptyObject> emptyObject = std::make_shared<EmptyObject>(id, name, parent);
+				m_Objects[id] = emptyObject;
+				return emptyObject;
+			}
+		}
+		else
+		{
+			unsigned int id = AssignID();
+			std::shared_ptr<EmptyObject> emptyObject = std::make_shared<EmptyObject>(id, name, parent);
+			m_Objects[id] = emptyObject;
+			return emptyObject;
+		}
+	}
+	std::shared_ptr<Object> Scene3D::CreatePoint2D(const std::string& name)
+	{
+		return nullptr;
 	}
 }

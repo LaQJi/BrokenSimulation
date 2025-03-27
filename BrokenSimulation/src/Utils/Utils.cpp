@@ -21,6 +21,15 @@ namespace BrokenSim
 		return true;
 	}
 
+	float RandomFloat(float min, float max)
+	{
+		// 生成0.0到1.0之间的随机数
+		float random = ((float)rand()) / (float)RAND_MAX;
+
+		// 将随机数映射到min到max之间
+		return min + random * (max - min);
+	}
+
 	float Time::GetTime()
 	{
 		return glfwGetTime();
