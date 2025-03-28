@@ -102,6 +102,8 @@ namespace BrokenSim
 									m_NearClip,
 									m_FarClip);
 		}
+		// 更新视图投影矩阵
+		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 	}
 
 	glm::vec3 SceneCamera::GetUpDirection() const

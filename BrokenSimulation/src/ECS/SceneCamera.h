@@ -84,7 +84,6 @@ namespace BrokenSim
 		// Å·À­½Ç
 		float m_Yaw = 0.0f;					// Æ«º½½Ç
 		float m_Pitch = 0.0f;				// ¸©Ñö½Ç
-		float m_Roll = 0.0f;				// ¹ö×ª½Ç
 
 		// ÉãÏñ»úÎ»ÖÃ
 		glm::vec3 m_Position = { 0.0f, 0.0f, 0.0f };
