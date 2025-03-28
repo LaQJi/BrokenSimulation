@@ -9,6 +9,7 @@
 #include "Core/Log.h"
 #include "ECS/Component.h"
 #include "ECS/Scene.h"
+#include "Renderer/Shader.h"
 
 #include <glm/glm.hpp>
 
@@ -21,6 +22,10 @@ namespace BrokenSim
 		Entity(unsigned int id, Scene* scene, const std::string& name = "Entity");
 
 		~Entity();
+
+		void OnUpdate(TimeStep ts);
+		void OnRender(Shader* shader);
+
 
 		// 获取唯一标识符
 		unsigned int GetID() const { return m_ID; }

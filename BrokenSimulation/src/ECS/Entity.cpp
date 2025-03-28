@@ -14,8 +14,16 @@ namespace BrokenSim
 
 	Entity::~Entity()
 	{
-		RemoveFormParent();
+		RemoveFromParent();
 		RemoveAllChildren();
+	}
+
+	void Entity::OnUpdate(TimeStep ts)
+	{
+	}
+
+	void Entity::OnRender(Shader* shader)
+	{
 	}
 
 	void Entity::SetParent(Entity* parent)
