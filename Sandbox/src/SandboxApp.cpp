@@ -1,7 +1,6 @@
 #include "BrokenSimulation.h"
 #include "Core/EntryPoint.h"
 
-#include "TestLayer.h"
 #include "EditorLayer.h"
 
 namespace BrokenSim
@@ -11,7 +10,6 @@ namespace BrokenSim
 	public:
 		Sanbox()
 		{
-			//PushLayer(new TestLayer());
 			PushLayer(new EditorLayer());
 		}
 		~Sanbox()

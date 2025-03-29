@@ -26,21 +26,26 @@ namespace BrokenSim
 
 	private:
 		// 该帧缓冲用于渲染场景
-		std::shared_ptr<FrameBuffer> sceneFrameBuffer;
+		std::shared_ptr<FrameBuffer> m_SceneFrameBuffer;
 		// 该帧缓冲用于渲染Voronoi图，仅在破碎模式下使用
-		std::shared_ptr<FrameBuffer> voronoiFrameBuffer;
+		std::shared_ptr<FrameBuffer> m_VoronoiFrameBuffer;
 
 		// 场景
-		std::shared_ptr<Scene3D> m_Scene;
-		std::shared_ptr<Voronoi2DScene> m_VoronoiScene;
+		std::shared_ptr<Scene> m_Scene;
 
-		// 当前活动的场景
-		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
+		// 当前选中的对象
+		std::shared_ptr<Entity> m_SelectedEntity;
+		// 当前选中的对象的Voronoi图组件
+		VoronoiComponent* m_VoronoiComponent = nullptr;
 
-		// 当前鼠标是否悬停在窗口上
-		bool m_Hovered = false;
-		// 当前窗口是否被聚焦
-		bool m_Focused = false;
+		// 当前用于渲染帧缓冲的ImGui窗口大小
+		glm::vec2 m_SceneViewportSize = { 0.0f, 0.0f };
+		glm::vec2 m_VoronoiViewportSize = { 0.0f, 0.0f };
+
+		// 当前鼠标是否悬停在场景窗口上
+		bool m_SceneHovered = false;
+		// 当前场景窗口是否被聚焦
+		bool m_SceneFocused = false;
 
 		enum class EngineMode
 		{
