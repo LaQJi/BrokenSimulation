@@ -3,7 +3,7 @@
 
 namespace BrokenSim
 {
-	Entity* Scene::CreateEntity(const std::string& name)
+	Entity* Scene::CreateEntity(const std::string& name, Entity* parent)
 	{
 		// 创建实体
 		unsigned int id = AssignID();
@@ -11,6 +11,15 @@ namespace BrokenSim
 
 		// 获取实体指针
 		Entity* result = entity.get();
+
+		if (!parent)
+		{
+			entity->SetParent(m_RootEntity.get());
+		}
+		else
+		{
+			entity->SetParent(parent);
+		}
 
 		// 将实体添加到实体列表
 		m_Entities.push_back(std::move(entity));
@@ -61,6 +70,11 @@ namespace BrokenSim
 			// 未找到实体
 			return nullptr;
 		}
+	}
+
+	std::vector<Entity*> Scene::GetEntities() const
+	{
+		return m_RootEntity->GetChildren();
 	}
 
 	unsigned int Scene::AssignID()

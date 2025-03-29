@@ -39,6 +39,9 @@ namespace BrokenSim
 		// 获取视图投影矩阵
 		const glm::mat4& GetViewProjectionMatrix() const { return m_ViewProjectionMatrix; }
 
+		// 获取摄像机位置
+		const glm::vec3& GetPosition() const { return m_Position; }
+
 		// 获取方向信息
 		glm::vec3 GetUpDirection() const;
 		glm::vec3 GetRightDirection() const;

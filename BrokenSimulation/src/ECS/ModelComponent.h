@@ -17,9 +17,18 @@ namespace BrokenSim
 		~ModelComponent();
 
 		void OnUpdate(TimeStep ts) override;
-
+		
 		VertexArray* GetVertexArray() { return m_VertexArray.get(); }
+		// 获取模型颜色
 		glm::vec4& GetColor() { return m_Color; }
+		// 获取模型光照参数
+		float& GetShininess() { return m_Shininess; }
+		// 获取环境光强度
+		float& GetAmbientStrength() { return m_AmbientStrength; }
+		// 获取漫反射强度
+		float& GetDiffuseStrength() { return m_DiffuseStrength; }
+		// 获取镜面反射强度
+		float& GetSpecularStrength() { return m_SpecularStrength; }
 
 
 	private:

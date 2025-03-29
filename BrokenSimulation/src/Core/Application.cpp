@@ -24,6 +24,9 @@ namespace BrokenSim
 
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
+
+		m_ResourceManager = std::make_shared<ResourceManager>();
+		m_RenderSystem = std::make_shared<RenderSystem>(m_ResourceManager);
 	}
 
 	Application::~Application()

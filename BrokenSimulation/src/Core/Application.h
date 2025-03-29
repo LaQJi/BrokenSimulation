@@ -4,6 +4,8 @@
 #include "Core/Window.h"
 #include "Core/Layer.h"
 #include "Core/LayerStack.h"
+#include "Core/ResourceManager.h"
+#include "ECS/RenderSystem.h"
 #include "Events/Event.h"
 #include "Events/ApplicationEvent.h"
 #include "Platform/ImGuiLayer.h"
@@ -30,9 +32,15 @@ namespace BrokenSim
 
 		static Application& Get() { return *s_Instance; }
 
+		std::shared_ptr<RenderSystem> GetRenderSystem() { return m_RenderSystem; }
+
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
+
+	protected:
+		std::shared_ptr<ResourceManager> m_ResourceManager;
+		std::shared_ptr<RenderSystem> m_RenderSystem;
 
 	private:
 		std::unique_ptr<Window> m_Window;

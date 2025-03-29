@@ -5,6 +5,7 @@
 #include "Core/TimeStep.h"
 #include "ECS/Entity.h"
 #include "ECS/SceneCamera.h"
+#include "ECS/LightComponent.h"
 
 namespace BrokenSim
 {
@@ -17,11 +18,19 @@ namespace BrokenSim
 		virtual void OnRender() = 0;
 		virtual void OnImGuiRender() = 0;
 
-		Entity* CreateEntity(const std::string& name = "Entity");
+		Entity* CreateEntity(const std::string& name = "Entity", Entity* parent = nullptr);
 
 		void DestroyEntity(Entity* entity);
 
 		Entity* FindEntity(unsigned int id);
+
+		const Entity* GetRootEntity() const { return m_RootEntity.get(); }
+		std::vector<Entity*> GetEntities() const;
+
+		SceneCamera* GetCamera() { return m_Camera.get(); }
+
+		std::vector<LightComponent*> GetLights() { return m_Lights; }
+		void AddLight(LightComponent* light) { m_Lights.push_back(light); }
 
 
 	private:
@@ -35,11 +44,11 @@ namespace BrokenSim
 		// 用于根据id快速查找场景中的实体
 		std::unordered_map<unsigned int, Entity*> m_EntityMap;
 
-		SceneCamera m_Camera;
+		std::unique_ptr<SceneCamera> m_Camera = std::unique_ptr<SceneCamera>();
 		std::vector<LightComponent*> m_Lights;
 
 		// 根实体
-		Entity m_RootEntity;
+		std::unique_ptr<Entity> m_RootEntity = std::unique_ptr<Entity>();
 
 		// 定义最小堆
 		struct  compore

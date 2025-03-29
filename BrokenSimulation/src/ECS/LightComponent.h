@@ -9,9 +9,8 @@ namespace BrokenSim
 	public:
 		enum class LightType
 		{
-			Directional,
-			Point,
-			Spot
+			Point		= 0,	// 点光源
+			Directional	= 1		// 平行光
 		};
 
 		LightComponent(Entity* owner, LightType type = LightType::Point, glm::vec3 color = glm::vec3(1.0f), glm::vec3 position = glm::vec3(0.0f));

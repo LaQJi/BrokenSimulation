@@ -18,8 +18,9 @@ namespace BrokenSim
 		RemoveAllChildren();
 	}
 
-	void Entity::OnUpdate(TimeStep ts)
+	void Entity::OnUpdate(TimeStep ts, Shader* shader)
 	{
+
 	}
 
 	void Entity::OnRender(Shader* shader)
@@ -97,6 +98,22 @@ namespace BrokenSim
 			child->m_Parent = nullptr;
 		}
 		m_Children.clear();
+	}
+
+	const glm::mat4 Entity::GetModelMatrix() const
+	{
+		// ¼ÆËãÄ£ÐÍ¾ØÕó
+		glm::mat4 model = m_Transform;
+
+		model = glm::translate(glm::mat4(1.0f), m_Position) * model;
+
+		model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation.x), glm::vec3(1.0f, 0.0f, 0.0f)) * model;
+		model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation.y), glm::vec3(0.0f, 1.0f, 0.0f)) * model;
+		model = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation.z), glm::vec3(0.0f, 0.0f, 1.0f)) * model;
+
+		model = glm::scale(glm::mat4(1.0f), m_Scale) * model;
+
+		return model;
 	}
 
 	void Entity::ApplyTranslation()

@@ -8,6 +8,16 @@
 #include "Core/Timestep.h"
 #include "Core/Input.h"
 
+#include "ECS/RenderSystem.h"
+#include "ECS/Scene.h"
+#include "ECS/SceneCamera.h"
+#include "ECS/Entity.h"
+#include "ECS/Component.h"
+#include "ECS/ModelComponent.h"
+#include "ECS/LightComponent.h"
+#include "ECS/CameraComponent.h"
+#include "ECS/VoronoiComponent.h"
+
 #include "Renderer/Renderer.h"
 #include "Renderer/VertexArray.h"
 #include "Renderer/VertexBuffer.h"
@@ -22,12 +32,5 @@
 #include "Events/ApplicationEvent.h"
 #include "Events/KeyEvent.h"
 #include "Events/MouseEvent.h"
-
-#include "Scene/Scene.h"
-#include "Scene/Voronoi2DScene.h"
-#include "Scene/Scene3D.h"
-#include "Scene/Object.h"
-#include "Scene/ModelObject.h"
-#include "Scene/EmptyObject.h"
 
 #include "Platform/ImGuiLayer.h"

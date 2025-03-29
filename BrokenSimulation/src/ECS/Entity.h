@@ -23,7 +23,7 @@ namespace BrokenSim
 
 		~Entity();
 
-		void OnUpdate(TimeStep ts);
+		void OnUpdate(TimeStep ts, Shader* shader);
 		void OnRender(Shader* shader);
 
 
@@ -84,6 +84,9 @@ namespace BrokenSim
 
 		// 获取场景
 		Scene* GetScene() const { return m_Scene; }
+
+		// 获取模型矩阵
+		const glm::mat4 GetModelMatrix() const;
 
 		// 添加组件
 		template<typename T, typename... Args>
