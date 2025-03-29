@@ -1,6 +1,9 @@
 #include "bspch.h"
 #include "ECS/ModelComponent.h"
 
+#include "Core/Log.h"
+#include "Core/Macros.h"
+
 namespace BrokenSim
 {
 	ModelComponent::ModelComponent(Entity* owner, const std::string& path)
@@ -11,7 +14,7 @@ namespace BrokenSim
 			if (m_Vertices.size() > 0)
 			{
 				// 创建顶点数组
-				m_VertexArray = std::unique_ptr<VertexArray>();
+				m_VertexArray = std::make_unique<VertexArray>();
 				std::shared_ptr<VertexBuffer> vb = std::make_shared<VertexBuffer>(&m_Vertices[0].Position.x, m_Vertices.size() * sizeof(Vertex));
 				std::shared_ptr<IndexBuffer> ib = std::make_shared<IndexBuffer>(&m_Indices[0], m_Indices.size());
 				VertexBufferLayout layout({
@@ -53,6 +56,8 @@ namespace BrokenSim
 
 		// 处理节点
 		ProcessNode(scene->mRootNode, scene);
+		
+		return true;
 	}
 
 	void ModelComponent::ProcessNode(aiNode* node, const aiScene* scene)

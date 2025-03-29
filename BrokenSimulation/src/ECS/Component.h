@@ -1,10 +1,13 @@
 #pragma once
 
 #include "Core/TimeStep.h"
-#include "ECS/Entity.h"
+
+#include <glm/glm.hpp>
 
 namespace BrokenSim
 {
+	class Entity;
+
 	class Component
 	{
 	public:

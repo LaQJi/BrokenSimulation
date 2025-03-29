@@ -1,6 +1,7 @@
 #include "bspch.h"
 #include "ECS/RenderSystem.h"
 
+#include "ECS/LightComponent.h"
 #include "ECS/ModelComponent.h"
 #include "Utils/Utils.h"
 
@@ -59,7 +60,7 @@ namespace BrokenSim
 		GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 	}
 
-	void RenderSystem::SetShader(const std::string& name)
+	void RenderSystem::SetCurrentShader(const std::string& name)
 	{
 		m_CurrentShader = m_ResourceManager->GetShaderResource(name);
 	}
@@ -113,7 +114,14 @@ namespace BrokenSim
 		}
 	}
 
-	void RenderSystem::OnUpdate(TimeStep ts, VoronoiComponent* voronoiComponent)
+	void RenderSystem::OnWindowResize(unsigned int width, unsigned int height)
+	{
+		m_Width = width;
+		m_Height = height;
+		GLCall(glViewport(0, 0, width, height));
+	}
+
+	void RenderSystem::RenderVoronoi(TimeStep ts, VoronoiComponent* voronoiComponent)
 	{
 		m_VoronoiShader->Bind();
 		// äÖÈ¾VoronoiÍ¼

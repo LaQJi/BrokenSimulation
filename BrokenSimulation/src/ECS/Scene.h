@@ -12,11 +12,12 @@ namespace BrokenSim
 	class Scene
 	{
 	public:
-		virtual ~Scene() = default;
+		Scene();
+		~Scene();
 
-		virtual void OnUpdate(TimeStep ts) = 0;
-		virtual void OnRender() = 0;
-		virtual void OnImGuiRender() = 0;
+		void OnUpdate(TimeStep ts);
+		void OnRender();
+		void OnImGuiRender();
 
 		Entity* CreateEntity(const std::string& name = "Entity", Entity* parent = nullptr);
 
@@ -44,11 +45,11 @@ namespace BrokenSim
 		// 用于根据id快速查找场景中的实体
 		std::unordered_map<unsigned int, Entity*> m_EntityMap;
 
-		std::unique_ptr<SceneCamera> m_Camera = std::unique_ptr<SceneCamera>();
+		std::unique_ptr<SceneCamera> m_Camera;
 		std::vector<LightComponent*> m_Lights;
 
 		// 根实体
-		std::unique_ptr<Entity> m_RootEntity = std::unique_ptr<Entity>();
+		std::unique_ptr<Entity> m_RootEntity;
 
 		// 定义最小堆
 		struct  compore

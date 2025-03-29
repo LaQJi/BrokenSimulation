@@ -13,6 +13,14 @@ namespace BrokenSim
 		rendererID = CreateShader(vertexShader, fragmentShader);
 	}
 
+	Shader::Shader(const std::string vertexPath, const std::string fragmentPath)
+		: vertexFilePath(vertexPath), fragmentFilePath(fragmentPath)
+	{
+		std::string vertexShader = ParseShader(vertexPath.c_str());
+		std::string fragmentShader = ParseShader(fragmentPath.c_str());
+		rendererID = CreateShader(vertexShader, fragmentShader);
+	}
+
 	Shader::~Shader()
 	{
 		GLCall(glDeleteProgram(rendererID));

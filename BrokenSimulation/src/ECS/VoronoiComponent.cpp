@@ -1,6 +1,7 @@
 #include "bspch.h"
 #include "ECS/VoronoiComponent.h"
 
+#include "Core/Log.h"
 #include "Utils/Utils.h"
 
 namespace BrokenSim
@@ -65,7 +66,7 @@ namespace BrokenSim
 		else
 		{
 			BS_CORE_ERROR("Index out of range!");
-			return;
+			return m_Points[0].first;
 		}
 	}
 
@@ -78,7 +79,7 @@ namespace BrokenSim
 		else
 		{
 			BS_CORE_ERROR("Index out of range!");
-			return;
+			return m_Points[0].first;
 		}
 	}
 
@@ -91,7 +92,7 @@ namespace BrokenSim
 		else
 		{
 			BS_CORE_ERROR("Index out of range!");
-			return;
+			return m_Points[0].second;
 		}
 	}
 
@@ -104,7 +105,7 @@ namespace BrokenSim
 		else
 		{
 			BS_CORE_ERROR("Index out of range!");
-			return;
+			return m_Points[0].second;
 		}
 	}
 

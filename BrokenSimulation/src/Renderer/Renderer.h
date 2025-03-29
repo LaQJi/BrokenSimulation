@@ -4,7 +4,6 @@
 
 #include "VertexArray.h"
 #include "Renderer/OrthographicCamera.h"
-#include "Scene/Camera.h"
 #include "Renderer/Shader.h"
 
 namespace BrokenSim
@@ -18,7 +17,6 @@ namespace BrokenSim
 		static void OnWindowResize(unsigned int width, unsigned int height);
 
 		static void BeginScene(OrthographicCamera& camera);
-		static void BeginScene(Camera& camera);
 		static void EndScene();
 
 		void SetViewportSize(unsigned int width, unsigned int height);

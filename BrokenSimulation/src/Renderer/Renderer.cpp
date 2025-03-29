@@ -32,11 +32,6 @@ namespace BrokenSim
 		s_SceneData->viewProjectionMatrix = camera.GetViewProjectionMatrix();
 	}
 
-	void Renderer::BeginScene(Camera& camera)
-	{
-		s_SceneData->viewProjectionMatrix = camera.GetViewProjectionMatrix();
-	}
-
 	void Renderer::EndScene()
 	{
 	}

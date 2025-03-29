@@ -22,6 +22,7 @@ namespace BrokenSim
 	{
 		std::shared_ptr<Shader> shader = std::make_shared<Shader>(vertexPath, fragmentPath);
 		m_ShaderResources[name] = shader;
+		return shader;
 	}
 
 	std::shared_ptr<Shader> ResourceManager::GetShaderResource(const std::string& name)

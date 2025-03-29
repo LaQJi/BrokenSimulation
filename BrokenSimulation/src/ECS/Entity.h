@@ -8,13 +8,15 @@
 
 #include "Core/Log.h"
 #include "ECS/Component.h"
-#include "ECS/Scene.h"
+#include "ECS/SceneCamera.h"
 #include "Renderer/Shader.h"
 
 #include <glm/glm.hpp>
 
 namespace BrokenSim
 {
+	class Scene;
+
 	class Entity
 	{
 	public:

@@ -3,6 +3,31 @@
 
 namespace BrokenSim
 {
+	Scene::Scene()
+	{
+		// 设置根实体
+		unsigned int id = AssignID();
+		m_RootEntity = std::make_unique<Entity>(id, this, "Root");
+		// 设置相机
+		m_Camera = std::make_unique<SceneCamera>();
+	}
+
+	Scene::~Scene()
+	{
+	}
+
+	void Scene::OnUpdate(TimeStep ts)
+	{
+	}
+
+	void Scene::OnRender()
+	{
+	}
+
+	void Scene::OnImGuiRender()
+	{
+	}
+
 	Entity* Scene::CreateEntity(const std::string& name, Entity* parent)
 	{
 		// 创建实体

@@ -2,7 +2,8 @@
 
 #include "Core/ResourceManager.h"
 #include "ECS/VoronoiComponent.h"
-#include "ECS/Entity.h"
+#include "ECS/Scene.h"
+#include "Renderer/VertexArray.h"
 
 namespace BrokenSim
 {
@@ -16,7 +17,7 @@ namespace BrokenSim
 		void SetClearColor(const glm::vec4& color);
 		void Clear();
 
-		void SetShader(const std::string& name);
+		void SetCurrentShader(const std::string& name);
 		std::shared_ptr<Shader> GetCurrentShader() const;
 
 		// ‰÷»æ≥°æ∞
@@ -24,7 +25,7 @@ namespace BrokenSim
 		void OnWindowResize(unsigned int width, unsigned int height);
 
 		// ‰÷»ævoronoiÕº
-		void OnUpdate(TimeStep ts, VoronoiComponent* voronoiComponent);
+		void RenderVoronoi(TimeStep ts, VoronoiComponent* voronoiComponent);
 
 	private:
 		// ‰÷»æ µÃÂ
