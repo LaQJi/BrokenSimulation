@@ -10,12 +10,12 @@ namespace BrokenSim
 	void Renderer::Init()
 	{
 		// 启用混合
-		GLCall(glEnable(GL_BLEND));
-		GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// 启用深度测试和背面剔除
-		GLCall(glEnable(GL_DEPTH_TEST));
-		GLCall(glEnable(GL_CULL_FACE));
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
 	}
 
 	void Renderer::Shutdown()
@@ -24,7 +24,7 @@ namespace BrokenSim
 
 	void Renderer::OnWindowResize(unsigned int width, unsigned int height)
 	{
-		GLCall(glViewport(0, 0, width, height));
+		glViewport(0, 0, width, height);
 	}
 
 	void Renderer::BeginScene(OrthographicCamera& camera)
@@ -38,17 +38,17 @@ namespace BrokenSim
 
 	void Renderer::SetViewportSize(unsigned int width, unsigned int height)
 	{
-		GLCall(glViewport(0, 0, width, height));
+		glViewport(0, 0, width, height);
 	}
 
 	void Renderer::SetClearColor(const glm::vec4& color)
 	{
-		GLCall(glClearColor(color.r, color.g, color.b, color.a));
+		glClearColor(color.r, color.g, color.b, color.a);
 	}
 
 	void Renderer::Clear()
 	{
-		GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	void Renderer::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform)
@@ -59,7 +59,7 @@ namespace BrokenSim
 
 		vertexArray->Bind();
 		vertexArray->GetIndexBuffer()->Bind();
-		GLCall(glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr));
+		glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
 	void Renderer::DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray, unsigned int count)
@@ -67,6 +67,6 @@ namespace BrokenSim
 		vertexArray->Bind();
 		vertexArray->GetIndexBuffer()->Bind();
 		unsigned int indexCount = count == 0 ? vertexArray->GetIndexBuffer()->GetCount() : count;
-		GLCall(glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr));
+		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
 	}
 }

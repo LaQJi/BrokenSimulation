@@ -2,6 +2,8 @@
 
 #include "BrokenSimulation.h"
 
+#include "panels/SceneHierarchyPanel.h"
+
 namespace BrokenSim
 {
 	class EditorLayer : public Layer
@@ -34,7 +36,9 @@ namespace BrokenSim
 		std::shared_ptr<Scene> m_Scene;
 
 		// 当前选中的对象
-		std::shared_ptr<Entity> m_SelectedEntity;
+		Entity* m_SelectedEntity;
+		// 当前选中的组件
+		Component* m_SelectedComponent;
 		// 当前选中的对象的Voronoi图组件
 		VoronoiComponent* m_VoronoiComponent = nullptr;
 
@@ -68,5 +72,8 @@ namespace BrokenSim
 
 		// 当前工作目录
 		std::string m_WorkingDirectory;
+
+		// 场景层次面板
+		SceneHierarchyPanel m_SceneHierarchyPanel;
 	};
 }

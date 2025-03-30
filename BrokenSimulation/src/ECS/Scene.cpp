@@ -26,6 +26,11 @@ namespace BrokenSim
 
 	void Scene::OnImGuiRender()
 	{
+		// 渲染场景中的所有实体
+		for (Entity* entity : GetEntities())
+		{
+			entity->OnImGuiRender();
+		}
 	}
 
 	Entity* Scene::CreateEntity(const std::string& name, Entity* parent)

@@ -44,16 +44,16 @@ namespace BrokenSim
 		std::string m_Path;
 
 		// 模型颜色
-		glm::vec4 m_Color = { 0.6f, 0.6f, 0.6f, 1.0f };
+		glm::vec4 m_Color = { 0.8f, 0.8f, 0.8f, 1.0f };
 
 		// 模型光照参数
 		float m_Shininess = 32.0f;
 		// 环境光强度
 		float m_AmbientStrength = 0.3f;
 		// 漫反射强度
-		float m_DiffuseStrength = 0.7f;
+		float m_DiffuseStrength = 0.8f;
 		// 镜面反射强度
-		float m_SpecularStrength = 0.8f;
+		float m_SpecularStrength = 1.0f;
 
 		struct Vertex
 		{

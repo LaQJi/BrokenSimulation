@@ -6,37 +6,37 @@ namespace BrokenSim
 {
 	VertexBuffer::VertexBuffer(unsigned int size)
 	{
-		GLCall(glGenBuffers(1, &rendererID));
-		GLCall(glBindBuffer(GL_ARRAY_BUFFER, rendererID));
-		GLCall(glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW));
+		glGenBuffers(1, &rendererID);
+		glBindBuffer(GL_ARRAY_BUFFER, rendererID);
+		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
 	}
 
 	VertexBuffer::VertexBuffer(const float* data, unsigned int size)
 	{
-		GLCall(glGenBuffers(1, &rendererID));
-		GLCall(glBindBuffer(GL_ARRAY_BUFFER, rendererID));
-		GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW));
+		glGenBuffers(1, &rendererID);
+		glBindBuffer(GL_ARRAY_BUFFER, rendererID);
+		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 	}
 
 	VertexBuffer::~VertexBuffer()
 	{
-		GLCall(glDeleteBuffers(1, &rendererID));
+		glDeleteBuffers(1, &rendererID);
 	}
 
 	void VertexBuffer::Bind() const
 	{
-		GLCall(glBindBuffer(GL_ARRAY_BUFFER, rendererID));
+		glBindBuffer(GL_ARRAY_BUFFER, rendererID);
 	}
 
 	void VertexBuffer::Unbind() const
 	{
-		GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 	void VertexBuffer::SetData(const void* data, unsigned int size)
 	{
-		GLCall(glBindBuffer(GL_ARRAY_BUFFER, rendererID));
-		GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, size, data));
+		glBindBuffer(GL_ARRAY_BUFFER, rendererID);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
 	}
 
 	void VertexBuffer::SetLayout(const VertexBufferLayout& layout)

@@ -14,12 +14,12 @@ namespace BrokenSim
 		m_VoronoiShader = resMgr->GetVoronoiShader();
 		
 		// 启用混合
-		GLCall(glEnable(GL_BLEND));
-		GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// 启用深度测试和背面剔除
-		GLCall(glEnable(GL_DEPTH_TEST));
-		GLCall(glEnable(GL_CULL_FACE));
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
 
 		// 初始化Voronoi图的顶点数组
 		InitVoronoiVertexArray();
@@ -52,12 +52,12 @@ namespace BrokenSim
 
 	void RenderSystem::SetClearColor(const glm::vec4& color)
 	{
-		GLCall(glClearColor(color.r, color.g, color.b, color.a));		
+		glClearColor(color.r, color.g, color.b, color.a);		
 	}
 
 	void RenderSystem::Clear()
 	{
-		GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	void RenderSystem::SetCurrentShader(const std::string& name)
@@ -79,32 +79,33 @@ namespace BrokenSim
 		m_CurrentShader->SetUniform3f("u_ViewPos", camera->GetPosition());
 
 		std::vector<LightComponent*> lights = scene->GetLights();
-		// 如果场景中没有光源，添加一个默认光源
+		// 如果场景中没有光源，使用默认光源
 		if (lights.empty())
 		{
-			float lightOffsetX = 2.0f;
-			float lightOffsetY = 2.0f;
+			float lightOffsetX = 0.0f;
+			float lightOffsetY = 1.0f;
 
 			glm::vec3 lightPos = camera->GetPosition()
 				+ camera->GetRightDirection() * lightOffsetX
 				+ camera->GetUpDirection() * lightOffsetY;
-
-			LightComponent* light = new LightComponent(nullptr, LightComponent::LightType::Point, lightPos, glm::vec3(1.0f, 1.0f, 1.0f));
-			lights.push_back(light);
 			
-			// 添加到场景中
-			scene->AddLight(light);
+			m_CurrentShader->SetUniform1i("u_LightCount", 1);
+			m_CurrentShader->SetUniform1i("u_Lights[0].Type", (int)LightComponent::LightType::Point);
+			m_CurrentShader->SetUniform3f("u_Lights[0].Position", lightPos);
+			m_CurrentShader->SetUniform3f("u_Lights[0].Color", glm::vec3(1.0f, 1.0f, 1.0f));
 		}
-
-		// 设置光源
-		for (int i = 0; i < lights.size(); i++)
+		else
 		{
-			std::string lightName = "u_Lights[" + std::to_string(i) + "]";
-			m_CurrentShader->SetUniform1i(lightName + ".Type", (int)lights[i]->GetType());
-			m_CurrentShader->SetUniform3f(lightName + ".Position", lights[i]->GetPosition());
-			m_CurrentShader->SetUniform3f(lightName + ".Color", lights[i]->GetColor());
+			m_CurrentShader->SetUniform1i("u_LightCount", lights.size());
+			// 设置光源
+			for (int i = 0; i < lights.size(); i++)
+			{
+				std::string lightName = "u_Lights[" + std::to_string(i) + "]";
+				m_CurrentShader->SetUniform1i(lightName + ".Type", (int)lights[i]->GetType());
+				m_CurrentShader->SetUniform3f(lightName + ".Position", lights[i]->GetPosition());
+				m_CurrentShader->SetUniform3f(lightName + ".Color", lights[i]->GetColor());
+			}
 		}
-
 		// 渲染场景中的所有实体
 		std::vector<Entity*> entities = scene->GetEntities();
 
@@ -118,7 +119,7 @@ namespace BrokenSim
 	{
 		m_Width = width;
 		m_Height = height;
-		GLCall(glViewport(0, 0, width, height));
+		glViewport(0, 0, width, height);
 	}
 
 	void RenderSystem::RenderVoronoi(TimeStep ts, VoronoiComponent* voronoiComponent)
@@ -143,19 +144,22 @@ namespace BrokenSim
 	void RenderSystem::RenderEntity(TimeStep ts, Entity* entity, glm::mat4 parentMatrix)
 	{
 		// 获取实体的模型矩阵
-		glm::mat4 modelMatrix = parentMatrix * entity->GetModelMatrix();
-		
-		glm::mat3 normalMatrix = glm::mat3(glm::transpose(glm::inverse(modelMatrix)));
-
-		// 设置uniform
-		m_CurrentShader->SetUniformMat4f("u_Model", modelMatrix);
-		m_CurrentShader->SetUniformMat3f("u_NormalMatrix", normalMatrix);
+		glm::mat4 entityModelMatrix = parentMatrix * entity->GetModelMatrix();
 
 		// TODO: 将其它组件的影响传递给渲染组件
 		// 渲染模型
 		if (entity->HasComponent<ModelComponent>())
 		{
 			ModelComponent* model = entity->GetComponent<ModelComponent>();
+
+			glm::mat4 transform = model->GetTransform();
+
+			glm::mat4 modelMatrix = entityModelMatrix * transform;
+			glm::mat3 normalMatrix = glm::mat3(glm::transpose(glm::inverse(modelMatrix)));
+
+			// 设置uniform
+			m_CurrentShader->SetUniformMat4f("u_Model", modelMatrix);
+			m_CurrentShader->SetUniformMat3f("u_NormalMatrix", normalMatrix);
 
 			// 设置材质
 			m_CurrentShader->SetUniform4f("u_Color", model->GetColor());
@@ -171,7 +175,7 @@ namespace BrokenSim
 		// 递归渲染子对象
 		for (Entity* child : entity->GetChildren())
 		{
-			RenderEntity(ts, child, modelMatrix);
+			RenderEntity(ts, child, entityModelMatrix);
 		}
 	}
 
@@ -181,6 +185,6 @@ namespace BrokenSim
 		va->GetIndexBuffer()->Bind();
 		unsigned int indexCount = va->GetIndexBuffer()->GetCount();
 
-		GLCall(glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr));
+		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
 	}
 }

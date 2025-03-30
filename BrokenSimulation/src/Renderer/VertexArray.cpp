@@ -29,22 +29,22 @@ namespace BrokenSim
 
 	VertexArray::VertexArray()
 	{
-		GLCall(glGenVertexArrays(1, &rendererID));
+		glGenVertexArrays(1, &rendererID);
 	}
 
 	VertexArray::~VertexArray()
 	{
-		GLCall(glDeleteVertexArrays(1, &rendererID));
+		glDeleteVertexArrays(1, &rendererID);
 	}
 
 	void VertexArray::Bind() const
 	{
-		GLCall(glBindVertexArray(rendererID));
+		glBindVertexArray(rendererID);
 	}
 
 	void VertexArray::Unbind() const
 	{
-		GLCall(glBindVertexArray(0));
+		glBindVertexArray(0);
 	}
 
 	void VertexArray::AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer)
@@ -63,13 +63,13 @@ namespace BrokenSim
 				case DataType::Float3:
 				case DataType::Float4:
 				{
-					GLCall(glEnableVertexAttribArray(m_VertexBufferIndex));
-					GLCall(glVertexAttribPointer(m_VertexBufferIndex,
+					glEnableVertexAttribArray(m_VertexBufferIndex);
+					glVertexAttribPointer(m_VertexBufferIndex,
 						element.GetComponentCount(),
 						DataTypeToGLType(element.type),
 						element.normalized ? GL_TRUE : GL_FALSE,
 						layout.GetStride(),
-						(const void*)element.offset));
+						(const void*)element.offset);
 					m_VertexBufferIndex++;
 					break;
 				}
@@ -79,14 +79,14 @@ namespace BrokenSim
 					unsigned int count = element.GetComponentCount();
 					for (unsigned int i = 0; i < count; i++)
 					{
-						GLCall(glEnableVertexAttribArray(m_VertexBufferIndex));
-						GLCall(glVertexAttribPointer(m_VertexBufferIndex,
+						glEnableVertexAttribArray(m_VertexBufferIndex);
+						glVertexAttribPointer(m_VertexBufferIndex,
 							count,
 							DataTypeToGLType(element.type),
 							element.normalized ? GL_TRUE : GL_FALSE,
 							layout.GetStride(),
-							(const void*)(element.offset + sizeof(float) * count * i)));
-						GLCall(glVertexAttribDivisor(m_VertexBufferIndex, 1));
+							(const void*)(element.offset + sizeof(float) * count * i));
+						glVertexAttribDivisor(m_VertexBufferIndex, 1);
 						m_VertexBufferIndex++;
 					}
 					break;
@@ -97,12 +97,12 @@ namespace BrokenSim
 				case DataType::Int4:
 				case DataType::Bool:
 				{
-					GLCall(glEnableVertexAttribArray(m_VertexBufferIndex));
-					GLCall(glVertexAttribIPointer(m_VertexBufferIndex,
+					glEnableVertexAttribArray(m_VertexBufferIndex);
+					glVertexAttribIPointer(m_VertexBufferIndex,
 						element.GetComponentCount(),
 						DataTypeToGLType(element.type),
 						layout.GetStride(),
-						(const void*)element.offset));
+						(const void*)element.offset);
 					m_VertexBufferIndex++;
 					break;
 				}

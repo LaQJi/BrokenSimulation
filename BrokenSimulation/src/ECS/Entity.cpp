@@ -27,6 +27,10 @@ namespace BrokenSim
 	{
 	}
 
+	void Entity::OnImGuiRender()
+	{
+	}
+
 	void Entity::SetParent(Entity* parent)
 	{
 		if (parent == this || IsAncestor(parent))

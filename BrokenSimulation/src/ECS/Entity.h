@@ -27,6 +27,7 @@ namespace BrokenSim
 
 		void OnUpdate(TimeStep ts, Shader* shader);
 		void OnRender(Shader* shader);
+		void OnImGuiRender();
 
 
 		// 获取唯一标识符
@@ -138,7 +139,7 @@ namespace BrokenSim
 			std::type_index type = std::type_index(typeid(T));
 			if (m_Components.find(type) != m_Components.end())
 			{
-				std::unique_ptr<T> removedComponent = std::move(std::dynamic_pointer_cast<T>(m_Components[type]));
+				std::unique_ptr<T> removedComponent = std::unique_ptr<T>(static_cast<T*>(m_Components[type].release()));
 				m_Components.erase(type);
 				return removedComponent;
 			}

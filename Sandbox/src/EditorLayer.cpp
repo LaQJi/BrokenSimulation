@@ -39,7 +39,7 @@ namespace BrokenSim
 
 		m_Scene = std::make_shared<Scene>();
 
-		Application::Get().GetRenderSystem()->SetCurrentShader("Phong");
+		Application::Get().GetRenderSystem()->SetCurrentShader("BlinnPhong");
 
 		for (int i = 0; i < 8; i++)
 		{
@@ -48,6 +48,8 @@ namespace BrokenSim
 			Entity* entity = m_Scene->CreateEntity();
 			entity->AddComponent<ModelComponent>(ss.str());
 		}
+		
+		m_SceneHierarchyPanel = SceneHierarchyPanel(m_Scene);
 	}
 
 	void EditorLayer::OnDetach()
@@ -65,7 +67,7 @@ namespace BrokenSim
 		
 		m_SceneFrameBuffer->Bind();
 
-		Application::Get().GetRenderSystem()->SetClearColor({ 0.25f, 0.25f, 0.25f, 1.0f });
+		Application::Get().GetRenderSystem()->SetClearColor({ 0.24f, 0.24f, 0.24f, 1.0f });
 		Application::Get().GetRenderSystem()->Clear();
 		
 		Application::Get().GetRenderSystem()->OnUpdate(ts, m_Scene.get());
@@ -100,6 +102,71 @@ namespace BrokenSim
 
 	void EditorLayer::OnImGuiRender()
 	{
+		static bool dockspaceOpen = true;
+		static bool opt_fullscreen = true;
+		static bool opt_padding = false;
+		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+
+		if (opt_fullscreen)
+		{
+			const ImGuiViewport* viewport = ImGui::GetMainViewport();
+			ImGui::SetNextWindowPos(viewport->WorkPos);
+			ImGui::SetNextWindowSize(viewport->WorkSize);
+			ImGui::SetNextWindowViewport(viewport->ID);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+			window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+			window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		}
+
+		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+			window_flags |= ImGuiWindowFlags_NoBackground;
+
+		if (!opt_padding)
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+		ImGui::Begin("DockSpace Demo", &dockspaceOpen, window_flags);
+
+		if (!opt_padding)
+			ImGui::PopStyleVar();
+
+		if (opt_fullscreen)
+			ImGui::PopStyleVar(2);
+
+		ImGuiIO& io = ImGui::GetIO();
+		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+		{
+			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+		}
+
+		if (ImGui::BeginMenuBar())
+		{
+			if (ImGui::BeginMenu("File"))
+			{
+				if (ImGui::MenuItem("New Scene", "Ctrl+N")) {}
+				if (ImGui::MenuItem("Open Scene", "Ctrl+O")) {}
+				if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {}
+				if (ImGui::MenuItem("Exit")) {}
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Edit"))
+			{
+				if (ImGui::MenuItem("Undo", "Ctrl+Z")) {}
+				if (ImGui::MenuItem("Redo", "Ctrl+Y", false, false)) {}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMenuBar();
+		}
+		ImGui::End();
+
+		ImGui::ShowDemoWindow();
+
+		//m_Scene->OnImGuiRender();
+		m_SceneHierarchyPanel.OnImGuiRender();
+
 		ImGui::Begin("Scene");
 		m_SceneFocused = ImGui::IsWindowFocused();
 		m_SceneHovered = ImGui::IsWindowHovered();

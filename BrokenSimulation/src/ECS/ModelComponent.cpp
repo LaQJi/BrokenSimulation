@@ -4,6 +4,8 @@
 #include "Core/Log.h"
 #include "Core/Macros.h"
 
+#include "ECS/Entity.h"
+
 namespace BrokenSim
 {
 	ModelComponent::ModelComponent(Entity* owner, const std::string& path)

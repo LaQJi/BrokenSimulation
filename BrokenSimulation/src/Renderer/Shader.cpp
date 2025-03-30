@@ -23,67 +23,67 @@ namespace BrokenSim
 
 	Shader::~Shader()
 	{
-		GLCall(glDeleteProgram(rendererID));
+		glDeleteProgram(rendererID);
 	}
 
 	void Shader::Bind() const
 	{
-		GLCall(glUseProgram(rendererID));
+		glUseProgram(rendererID);
 	}
 
 	void Shader::Unbind() const
 	{
-		GLCall(glUseProgram(0));
+		glUseProgram(0);
 	}
 
 	void Shader::SetUniform1i(const std::string& name, int value)
 	{
-		GLCall(glUniform1i(GetUniformLocation(name), value));
+		glUniform1i(GetUniformLocation(name), value);
 	}
 
 	void Shader::SetUniform1f(const std::string& name, float value)
 	{
-		GLCall(glUniform1f(GetUniformLocation(name), value));
+		glUniform1f(GetUniformLocation(name), value);
 	}
 
 	void Shader::SetUniform2f(const std::string& name, const glm::vec2& vector)
 	{
-		GLCall(glUniform2f(GetUniformLocation(name), vector.x, vector.y));
+		glUniform2f(GetUniformLocation(name), vector.x, vector.y);
 	}
 
 	void Shader::SetUniform2f(const std::string& name, float v0, float v1)
 	{
-		GLCall(glUniform2f(GetUniformLocation(name), v0, v1));
+		glUniform2f(GetUniformLocation(name), v0, v1);
 	}
 
 	void Shader::SetUniform3f(const std::string& name, const glm::vec3& vector)
 	{
-		GLCall(glUniform3f(GetUniformLocation(name), vector.x, vector.y, vector.z));
+		glUniform3f(GetUniformLocation(name), vector.x, vector.y, vector.z);
 	}
 
 	void Shader::SetUniform3f(const std::string& name, float v0, float v1, float v2)
 	{
-		GLCall(glUniform3f(GetUniformLocation(name), v0, v1, v2));
+		glUniform3f(GetUniformLocation(name), v0, v1, v2);
 	}
 
 	void Shader::SetUniform4f(const std::string& name, const glm::vec4& vector)
 	{
-		GLCall(glUniform4f(GetUniformLocation(name), vector.x, vector.y, vector.z, vector.w));
+		glUniform4f(GetUniformLocation(name), vector.x, vector.y, vector.z, vector.w);
 	}
 
 	void Shader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
 	{
-		GLCall(glUniform4f(GetUniformLocation(name), v0, v1, v2, v3));
+		glUniform4f(GetUniformLocation(name), v0, v1, v2, v3);
 	}
 
 	void Shader::SetUniformMat3f(const std::string& name, const glm::mat3& matrix)
 	{
-		GLCall(glUniformMatrix3fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0]));
+		glUniformMatrix3fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0]);
 	}
 
 	void Shader::SetUniformMat4f(const std::string& name, const glm::mat4& matrix)
 	{
-		GLCall(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0]));
+		glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0]);
 	}
 
 	unsigned int Shader::GetRendererID() const
@@ -97,7 +97,7 @@ namespace BrokenSim
 		{
 			return uniformLocationCache[name];
 		}
-		GLCall(int location = glGetUniformLocation(rendererID, name.c_str()));
+		int location = glGetUniformLocation(rendererID, name.c_str());
 		if (location == -1)
 		{
 			BS_CORE_ERROR("Warning: uniform '{0}' doesn't exist!", name);
@@ -130,23 +130,23 @@ namespace BrokenSim
 
 	unsigned int Shader::CompileShader(unsigned int type, const std::string& source)
 	{
-		GLCall(unsigned int id = glCreateShader(type));
+		unsigned int id = glCreateShader(type);
 		const char* src = source.c_str();
-		GLCall(glShaderSource(id, 1, &src, nullptr));
-		GLCall(glCompileShader(id));
+		glShaderSource(id, 1, &src, nullptr);
+		glCompileShader(id);
 
 		int result;
-		GLCall(glGetShaderiv(id, GL_COMPILE_STATUS, &result));
+		glGetShaderiv(id, GL_COMPILE_STATUS, &result);
 		if (result == GL_FALSE)
 		{
 			int length;
-			GLCall(glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length));
+			glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
 			char* message = (char*)_malloca(length * sizeof(char));
-			GLCall(glGetShaderInfoLog(id, length, &length, message));
+			glGetShaderInfoLog(id, length, &length, message);
 			BS_CORE_ERROR("Failed to compile {0} shader!", (type == GL_VERTEX_SHADER ? "vertex" : "fragment"));
 			BS_CORE_ERROR(message);
 			_freea(message);
-			GLCall(glDeleteShader(id));
+			glDeleteShader(id);
 			return 0;
 		}
 
@@ -155,33 +155,33 @@ namespace BrokenSim
 
 	unsigned int Shader::CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
 	{
-		GLCall(unsigned int program = glCreateProgram());
+		unsigned int program = glCreateProgram();
 		unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
 		unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
 
-		GLCall(glAttachShader(program, vs));
-		GLCall(glAttachShader(program, fs));
-		GLCall(glLinkProgram(program));
+		glAttachShader(program, vs);
+		glAttachShader(program, fs);
+		glLinkProgram(program);
 
 		int result;
-		GLCall(glGetProgramiv(program, GL_LINK_STATUS, &result));
+		glGetProgramiv(program, GL_LINK_STATUS, &result);
 		if (result == GL_FALSE)
 		{
 			int length;
-			GLCall(glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length));
+			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
 			char* message = (char*)_malloca(length * sizeof(char));
-			GLCall(glGetProgramInfoLog(program, length, &length, message));
+			glGetProgramInfoLog(program, length, &length, message);
 			BS_CORE_ERROR("Failed to link shader program!");
 			BS_CORE_ERROR(message);
 			_freea(message);
-			GLCall(glDeleteProgram(program));
+			glDeleteProgram(program);
 			return 0;
 		}
 
-		GLCall(glValidateProgram(program));
+		glValidateProgram(program);
 
-		GLCall(glDeleteShader(vs));
-		GLCall(glDeleteShader(fs));
+		glDeleteShader(vs);
+		glDeleteShader(fs);
 
 		return program;
 	}
