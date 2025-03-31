@@ -51,7 +51,10 @@ namespace BrokenSim
 			// 处理选中
 			if (ImGui::IsItemClicked())
 			{
-				m_SelectionContext = const_cast<Entity*>(root);
+				if (!m_SelectionContext)
+				{
+					m_SelectionContext = const_cast<Entity*>(root);
+				}
 			}
 
 			bool entityDeleted = false;
@@ -175,18 +178,18 @@ namespace BrokenSim
 			ImGui::Separator();
 
 			ImGui::Text("Transform Properties");
-			ImGui::DragFloat3("Position", &mc->GetPosition().x, 0.1f);
-			ImGui::DragFloat3("Rotation", &mc->GetRotation().x, 0.1f);
-			ImGui::DragFloat3("Scale", &mc->GetScale().x, 0.1f);
+			ImGui::DragFloat3("Position", &mc->GetPosition().x, 0.01f);
+			ImGui::DragFloat3("Rotation", &mc->GetRotation().x, 0.5f);
+			ImGui::DragFloat3("Scale", &mc->GetScale().x, 0.01f);
 
 			ImGui::Separator();
 
 			ImGui::Text("Texture Properties");
 			ImGui::ColorEdit4("Color", glm::value_ptr(mc->GetColor()));
-			ImGui::DragFloat("Shininess", &mc->GetShininess(), 0.0f, 256.0f);
-			ImGui::DragFloat("Ambient Strength", &mc->GetAmbientStrength(), 0.0f, 1.0f);
-			ImGui::DragFloat("Diffuse Strength", &mc->GetDiffuseStrength(), 0.0f, 1.0f);
-			ImGui::DragFloat("Specular Strength", &mc->GetSpecularStrength(), 0.0f, 1.0f);
+			ImGui::DragFloat("Shininess", &mc->GetShininess(), 0.5f, 0.0f, 256.0f);
+			ImGui::DragFloat("Ambient Strength", &mc->GetAmbientStrength(), 0.005f, 0.0f, 1.0f);
+			ImGui::DragFloat("Diffuse Strength", &mc->GetDiffuseStrength(), 0.005f, 0.0f, 1.0f);
+			ImGui::DragFloat("Specular Strength", &mc->GetSpecularStrength(), 0.005f, 0.0f, 1.0f);
 
 			ImGui::Separator();
 

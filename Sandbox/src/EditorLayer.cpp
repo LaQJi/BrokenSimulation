@@ -164,6 +164,11 @@ namespace BrokenSim
 
 		ImGui::ShowDemoWindow();
 
+		if (ImGui::Button("Hello, world!"))
+		{
+			m_Scene->GetCamera()->SwitchProjectionType();
+		}
+
 		//m_Scene->OnImGuiRender();
 		m_SceneHierarchyPanel.OnImGuiRender();
 

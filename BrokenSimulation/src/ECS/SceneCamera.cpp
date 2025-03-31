@@ -169,12 +169,14 @@ namespace BrokenSim
 		glm::quat orientation = GetOrientation();
 		m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(orientation);
 		m_ViewMatrix = glm::inverse(m_ViewMatrix);
+
 		// 更新视图投影矩阵
 		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 	}
 
 	glm::vec3 SceneCamera::CalculatePosition()
 	{
+		// 计算摄像机位置
 		return m_FocalPoint - GetForwardDirection() * m_Distance;
 	}
 
@@ -197,13 +199,20 @@ namespace BrokenSim
 
 	float SceneCamera::ZoomSpeed() const
 	{
-		// 计算缩放速度
-		float distance = m_Distance * 0.2f;
-		distance = std::max(distance, 0.0f);
-		float speed = distance * distance;
-		speed = std::min(speed, 100.0f);
+		if (m_ProjectionType == ProjectionType::Perspective)
+		{
+			// 计算缩放速度
+			float distance = m_Distance * 0.2f;
+			distance = std::max(distance, 0.0f);
+			float speed = distance * distance;
+			speed = std::min(speed, 100.0f);
 
-		return speed;
+			return speed;
+		}
+		else
+		{
+			return m_OrthoSize * 0.2f;
+		}
 	}
 
 	void SceneCamera::MousePan(const glm::vec2& delta)
@@ -224,12 +233,31 @@ namespace BrokenSim
 
 	void SceneCamera::MouseZoom(float delta)
 	{
-		// 计算缩放距离
-		m_Distance -= delta * ZoomSpeed();
-		if (m_Distance < 1.0f)
+		if (m_ProjectionType == ProjectionType::Perspective)
 		{
-			m_FocalPoint += GetForwardDirection();
-			m_Distance = 1.0f;
+			// 透视投影：调整视野角度
+			m_Distance -= delta * ZoomSpeed();
+
+			// 防止视野角度过小
+			if (m_Distance < 1.0f)
+			{
+				m_FocalPoint += GetForwardDirection();
+				m_Distance = 1.0f;
+			}
+		}
+		else
+		{
+			// 正交投影：调整正交大小
+			m_OrthoSize -= delta * ZoomSpeed();
+
+			// 防止正交大小过小
+			if (m_OrthoSize < 1.0f)
+			{
+				m_FocalPoint += GetForwardDirection();
+				m_OrthoSize = 1.0f;
+			}
+
+			UpdateProjection();
 		}
 	}
 
@@ -237,11 +265,11 @@ namespace BrokenSim
 	{
 		if (m_ProjectionType == ProjectionType::Perspective)
 		{
-			m_OrthoSize = m_Distance * tan(glm::radians(m_FOV * 0.5f));
+			m_OrthoSize = m_Distance * tan(glm::radians(m_FOV));
 		}
 		else
 		{
-			m_FOV = glm::degrees(2.0f * atan(m_OrthoSize / m_Distance));
+			m_FOV = glm::degrees(atan(m_OrthoSize / m_Distance));
 		}
 	}
 }
