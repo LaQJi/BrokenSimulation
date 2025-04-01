@@ -24,6 +24,6 @@ namespace BrokenSim
 
 	private:
 		std::shared_ptr<Scene> m_Context;
-		Entity* m_SelectionContext;
+		Entity* m_SelectionContext = nullptr;
 	};
 }

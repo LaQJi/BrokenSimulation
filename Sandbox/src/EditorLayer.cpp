@@ -18,6 +18,8 @@ namespace BrokenSim
 		io.Fonts->AddFontFromFileTTF(m_FontPath.c_str(), 18.0f);
 		
 		m_WorkingDirectory = std::filesystem::current_path().string();
+
+		m_EngineMode = EngineMode::EditMode;
 	}
 
 	void EditorLayer::OnAttach()
@@ -26,13 +28,13 @@ namespace BrokenSim
 		m_VoronoiViewportSize = { 1280.0f, 720.0f };
 
 		FrameBufferSpecification sceneSpec;
-		sceneSpec.width = 1280;
+		sceneSpec.width = 720;
 		sceneSpec.height = 720;
 		sceneSpec.attachments = { {TextureFormat::RGBA8}, TextureFormat::DEPTH24STENCIL8 };
 		m_SceneFrameBuffer = std::make_shared<FrameBuffer>(sceneSpec);
 
 		FrameBufferSpecification voronoiSpec;
-		voronoiSpec.width = 1280;
+		voronoiSpec.width = 720;
 		voronoiSpec.height = 720;
 		voronoiSpec.attachments = { {TextureFormat::RGBA8} };
 		m_VoronoiFrameBuffer = std::make_shared<FrameBuffer>(voronoiSpec);
@@ -65,6 +67,8 @@ namespace BrokenSim
 			m_Scene->GetCamera()->OnUpdate(ts);
 		}
 		
+		Application::Get().GetRenderSystem()->OnWindowResize((unsigned int)m_SceneViewportSize.x, (unsigned int)m_SceneViewportSize.y);
+
 		m_SceneFrameBuffer->Bind();
 
 		Application::Get().GetRenderSystem()->SetClearColor({ 0.24f, 0.24f, 0.24f, 1.0f });
@@ -74,17 +78,41 @@ namespace BrokenSim
 
 		m_SceneFrameBuffer->Unbind();
 
+		if (m_SceneHierarchyPanel.GetSelectionContext())
+		{
+			m_SelectedEntity = m_SceneHierarchyPanel.GetSelectionContext();
+		}
+
+		// 若有选中的实体，则根据实体是否有VoronoiComponent切换场景状态
+		if (m_SelectedEntity)
+		{
+			if (m_SelectedEntity->HasComponent<VoronoiComponent>())
+			{
+				// 若选中的实体有VoronoiComponent，则进入破碎模式
+				m_VoronoiComponent = m_SelectedEntity->GetComponent<VoronoiComponent>();
+
+				m_EngineMode = EngineMode::FractureMode;
+			}
+			else
+			{
+				// 若选中的实体没有VoronoiComponent，则进入编辑模式
+				m_VoronoiComponent = nullptr;
+
+				m_EngineMode = EngineMode::EditMode;
+			}
+		}
+
 		// 若开启破碎模式，则渲染Voronoi图
 		if (m_EngineMode == EngineMode::FractureMode)
 		{
 			m_VoronoiFrameBuffer->Bind();
+
+			glm::vec2 size = m_VoronoiFrameBuffer->GetSize();
+
+			m_VoronoiComponent->SetViewportSize(size.x, size.y);
 			
 			Application::Get().GetRenderSystem()->Clear();
 
-			if (!m_VoronoiComponent)
-			{
-				m_VoronoiComponent = new VoronoiComponent(nullptr, 10);
-			}
 			Application::Get().GetRenderSystem()->RenderVoronoi(ts, m_VoronoiComponent);
 
 			m_VoronoiFrameBuffer->Unbind();
@@ -175,6 +203,7 @@ namespace BrokenSim
 		m_SceneHierarchyPanel.OnImGuiRender();
 
 		ImGui::Begin("Scene");
+		
 		m_SceneFocused = ImGui::IsWindowFocused();
 		m_SceneHovered = ImGui::IsWindowHovered();
 
@@ -189,7 +218,31 @@ namespace BrokenSim
 		}
 		unsigned int textureID = m_SceneFrameBuffer->GetColorAttachmentRendererID();
 		ImGui::Image((ImTextureID)(uintptr_t)textureID, ImVec2{ m_SceneViewportSize.x, m_SceneViewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
+		
 		ImGui::End();
+
+		if (m_EngineMode == EngineMode::FractureMode)
+		{
+			ImGui::Begin("Voronoi");
+			
+			ImVec2 voronoiPanelSize = ImGui::GetContentRegionAvail();
+
+			m_VoronoiComponent->SetViewportSize(voronoiPanelSize.x, voronoiPanelSize.y);
+			
+			unsigned int voronoiTextureID = m_VoronoiFrameBuffer->GetColorAttachmentRendererID();
+
+			float minXY = std::min(voronoiPanelSize.x, voronoiPanelSize.y);
+
+			float offsetX = (voronoiPanelSize.x - minXY) * 0.5f;
+			float offsetY = (voronoiPanelSize.y - minXY) * 0.5f;
+
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offsetX);
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + offsetY);
+
+			ImGui::Image((ImTextureID)(uintptr_t)voronoiTextureID, ImVec2{ minXY, minXY });
+			
+			ImGui::End();
+		}
 	}
 
 	bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)

@@ -149,6 +149,9 @@ namespace BrokenSim
 			return nullptr;
 		}
 
+		// 获取所有组件
+		const std::unordered_map<std::type_index, std::unique_ptr<Component>>& GetAllComponents() const;
+
 		// 应用位移
 		void ApplyTranslation();
 

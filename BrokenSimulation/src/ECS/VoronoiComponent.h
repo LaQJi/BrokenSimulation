@@ -33,6 +33,6 @@ namespace BrokenSim
 	private:
 		std::vector<std::pair<glm::vec3, glm::vec3>> m_Points;
 
-		glm::vec2 m_ViewportSize = { 1280.0f, 720.0f };
+		glm::vec2 m_ViewportSize = { 720.0f, 720.0f };
 	};
 }

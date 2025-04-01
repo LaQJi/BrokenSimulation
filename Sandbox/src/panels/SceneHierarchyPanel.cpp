@@ -264,65 +264,182 @@ namespace BrokenSim
 
 		if (entity->HasComponent<ModelComponent>())
 		{
-			auto* mc = entity->GetComponent<ModelComponent>();
-			
-			ImGui::Text("Model Component");
+			// 将其作为TreeNode展示
+			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen
+				| ImGuiTreeNodeFlags_AllowItemOverlap
+				| ImGuiTreeNodeFlags_SpanAvailWidth;
 
-			ImGui::Separator();
+			bool open = ImGui::TreeNodeEx("Model Component", flags);
 
-			ImGui::Text("Transform Properties");
-			ImGui::DragFloat3("Position", &mc->GetPosition().x, 0.01f);
-			ImGui::DragFloat3("Rotation", &mc->GetRotation().x, 0.5f);
-			ImGui::DragFloat3("Scale", &mc->GetScale().x, 0.01f);
-
-			if (ImGui::Button("Reset Transform"))
+			if (open)
 			{
-				mc->SetPosition({ 0.0f, 0.0f, 0.0f });
-				mc->SetRotation({ 0.0f, 0.0f, 0.0f });
-				mc->SetScale({ 1.0f, 1.0f, 1.0f });
+				auto* mc = entity->GetComponent<ModelComponent>();
+
+				ImGui::Text("Transform Properties");
+				ImGui::DragFloat3("Position", &mc->GetPosition().x, 0.01f);
+				ImGui::DragFloat3("Rotation", &mc->GetRotation().x, 0.5f);
+				ImGui::DragFloat3("Scale", &mc->GetScale().x, 0.01f);
+
+				if (ImGui::Button("Reset Transform"))
+				{
+					mc->SetPosition({ 0.0f, 0.0f, 0.0f });
+					mc->SetRotation({ 0.0f, 0.0f, 0.0f });
+					mc->SetScale({ 1.0f, 1.0f, 1.0f });
+				}
+
+				ImGui::Separator();
+
+				ImGui::Text("Texture Properties");
+				ImGui::ColorEdit4("Color", glm::value_ptr(mc->GetColor()));
+				ImGui::DragFloat("Shininess", &mc->GetShininess(), 0.5f, 0.0f, 256.0f);
+				ImGui::DragFloat("Ambient Strength", &mc->GetAmbientStrength(), 0.005f, 0.0f, 1.0f);
+				ImGui::DragFloat("Diffuse Strength", &mc->GetDiffuseStrength(), 0.005f, 0.0f, 1.0f);
+				ImGui::DragFloat("Specular Strength", &mc->GetSpecularStrength(), 0.005f, 0.0f, 1.0f);
+
+				if (ImGui::Button("Reset Texture Properties"))
+				{
+					mc->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+					mc->SetShininess(32.0f);
+					mc->SetAmbientStrength(0.3f);
+					mc->SetDiffuseStrength(0.8f);
+					mc->SetSpecularStrength(1.0f);
+				}
+
+				ImGui::Separator();
+
+				if (!entity->HasComponent<VoronoiComponent>())
+				{
+					static unsigned int numPoints = 6;
+
+					ImGui::DragInt("Num Points",
+						(int*)&numPoints,
+						1.0f,		// 拖拽速度
+						1,			// 最小值
+						100,		// 最大值
+						"%d",		// 格式化字符串
+						ImGuiSliderFlags_AlwaysClamp);	// 强制限制范围
+
+					if (ImGui::Button("Add Voronoi Component"))
+					{
+						entity->AddComponent<VoronoiComponent>(numPoints);
+					}
+				}
+
+				if (ImGui::Button("Remove Model Component"))
+				{
+					if (entity->HasComponent<VoronoiComponent>())
+					{
+						entity->RemoveComponent<VoronoiComponent>();
+					}
+
+					entity->RemoveComponent<ModelComponent>();
+					
+					if (m_SelectionContext == entity)
+					{
+						m_SelectionContext = nullptr;
+					}
+				}
+
+				ImGui::TreePop();
 			}
+		}
 
-			ImGui::Separator();
+		if (entity->HasComponent<VoronoiComponent>())
+		{
+			// 将其作为TreeNode展示
+			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen
+				| ImGuiTreeNodeFlags_AllowItemOverlap
+				| ImGuiTreeNodeFlags_SpanAvailWidth;
 
-			ImGui::Text("Texture Properties");
-			ImGui::ColorEdit4("Color", glm::value_ptr(mc->GetColor()));
-			ImGui::DragFloat("Shininess", &mc->GetShininess(), 0.5f, 0.0f, 256.0f);
-			ImGui::DragFloat("Ambient Strength", &mc->GetAmbientStrength(), 0.005f, 0.0f, 1.0f);
-			ImGui::DragFloat("Diffuse Strength", &mc->GetDiffuseStrength(), 0.005f, 0.0f, 1.0f);
-			ImGui::DragFloat("Specular Strength", &mc->GetSpecularStrength(), 0.005f, 0.0f, 1.0f);
+			bool open = ImGui::TreeNodeEx("Voronoi Component", flags);
 
-			if (ImGui::Button("Reset Texture Properties"))
+			if (open)
 			{
-				mc->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-				mc->SetShininess(32.0f);
-				mc->SetAmbientStrength(0.1f);
-				mc->SetDiffuseStrength(1.0f);
-				mc->SetSpecularStrength(0.5f);
-			}
+				auto* vc = entity->GetComponent<VoronoiComponent>();
 
-			ImGui::Separator();
+				ImGui::Text("Voronoi Properties");
 
-			static unsigned int numPoints = 6;
+				ImGui::Text("Num Points: %d", vc->GetNumPoints());
 
-			ImGui::DragInt("Num Points",
-				(int*)&numPoints,
-				1.0f,		// 拖拽速度
-				1,			// 最小值
-				100,		// 最大值
-				"%d",		// 格式化字符串
-				ImGuiSliderFlags_AlwaysClamp);	// 强制限制范围
+				ImGui::Separator();
 
+				ImGuiTreeNodeFlags pointFlags = ImGuiTreeNodeFlags_OpenOnArrow
+					| ImGuiTreeNodeFlags_SpanAvailWidth;
 
-			if (ImGui::Button("Add Voronoi Component"))
-			{
-				entity->AddComponent<VoronoiComponent>(numPoints);
-			}
+				bool pointsOpen = ImGui::TreeNodeEx("Points", pointFlags);
 
-			ImGui::Separator();
+				if (pointsOpen)
+				{
+					for (unsigned int i = 0; i < vc->GetNumPoints(); i++)
+					{
+						glm::vec3& point = vc->GetPoint(i);
+						glm::vec3& color = vc->GetColor(i);
 
-			if (ImGui::Button("Delete Model Component"))
-			{
-				entity->RemoveComponent<ModelComponent>();
+						std::string label = "Point " + std::to_string(i + 1);
+						ImGui::Text(label.c_str());
+
+						ImGui::PushID(i);
+
+						ImGui::DragFloat3("Position", glm::value_ptr(point), 0.001f, 0.0f, 1.0f);
+						ImGui::ColorEdit3("Color", glm::value_ptr(color));
+
+						ImGui::PopID();
+
+						ImGui::Separator();
+					}
+
+					ImGui::TreePop();
+				}
+
+				ImGui::Separator();
+
+				static int count = 1;
+
+				ImGui::InputInt("Num Points", &count);
+
+				count = std::clamp(count, 1, 100);
+
+				if (ImGui::Button("Add Points"))
+				{
+					if (vc->GetNumPoints() + count > 100)
+					{
+						count = 100 - vc->GetNumPoints() > 0 ? 100 - vc->GetNumPoints() : 0;
+					}
+					vc->AddPoints(count);
+				}
+
+				ImGui::Separator();
+
+				static int index = 0;
+
+				ImGui::InputInt("Point Index", &index);
+
+				index = std::clamp(index, 0, (int)vc->GetNumPoints() - 1);
+
+				if (ImGui::Button("Remove Point"))
+				{
+					vc->RemovePoint(index);
+				}
+
+				ImGui::Separator();
+
+				if (ImGui::Button("Clear Points"))
+				{
+					vc->ClearPoints();
+				}
+
+				ImGui::Separator();
+
+				if (ImGui::Button("Remove Voronoi Component"))
+				{
+					entity->RemoveComponent<VoronoiComponent>();
+					if (m_SelectionContext == entity)
+					{
+						m_SelectionContext = nullptr;
+					}
+				}
+
+				ImGui::TreePop();
 			}
 		}
 	}

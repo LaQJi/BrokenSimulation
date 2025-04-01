@@ -220,6 +220,11 @@ namespace BrokenSim
 		return model;
 	}
 
+	const std::unordered_map<std::type_index, std::unique_ptr<Component>>& Entity::GetAllComponents() const
+	{
+		return m_Components;
+	}
+
 	void Entity::ApplyTranslation()
 	{
 		m_Transform = glm::translate(glm::mat4(1.0f), m_Position) * m_Transform;

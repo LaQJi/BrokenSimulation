@@ -109,9 +109,11 @@ namespace BrokenSim
 		// 渲染场景中的所有实体
 		std::vector<Entity*> entities = scene->GetEntities();
 
+		glm::mat4 rootMatrix = scene->GetRootEntity()->GetModelMatrix();
+
 		for (Entity* entity : entities)
 		{
-			RenderEntity(ts, entity, glm::mat4(1.0f));
+			RenderEntity(ts, entity, rootMatrix);
 		}
 	}
 
