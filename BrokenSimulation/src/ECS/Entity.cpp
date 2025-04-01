@@ -31,6 +31,26 @@ namespace BrokenSim
 	{
 	}
 
+	unsigned int Entity::GetID() const
+	{
+		return m_ID;
+	}
+
+	const std::string& Entity::GetName() const
+	{
+		return m_Name;
+	}
+
+	void Entity::SetName(const std::string& name)
+	{
+		m_Name = name;
+	}
+
+	Entity* Entity::GetParent() const
+	{
+		return m_Parent;
+	}
+
 	void Entity::SetParent(Entity* parent)
 	{
 		if (parent == this || IsAncestor(parent))
@@ -58,6 +78,11 @@ namespace BrokenSim
 			root = root->m_Parent;
 		}
 		return root;
+	}
+
+	const std::vector<Entity*>& Entity::GetChildren() const
+	{
+		return m_Children;
 	}
 
 	void Entity::AddChild(Entity* child)
@@ -102,6 +127,81 @@ namespace BrokenSim
 			child->m_Parent = nullptr;
 		}
 		m_Children.clear();
+	}
+
+	bool Entity::GetVisible() const
+	{
+		return m_Visible;
+	}
+
+	void Entity::SetVisible(bool visible)
+	{
+		m_Visible = visible;
+	}
+
+	bool Entity::GetEnabled() const
+	{
+		return m_Enabled;
+	}
+
+	void Entity::SetEnabled(bool enabled)
+	{
+		m_Enabled = enabled;
+	}
+
+	const glm::mat4& Entity::GetTransform() const
+	{
+		return m_Transform;
+	}
+
+	glm::vec3& Entity::GetPosition()
+	{
+		return m_Position;
+	}
+
+	const glm::vec3& Entity::GetPosition() const
+	{
+		return m_Position;
+	}
+
+	void Entity::SetPosition(const glm::vec3& position)
+	{
+		m_Position = position;
+	}
+
+	glm::vec3& Entity::GetRotation()
+	{
+		return m_Rotation;
+	}
+
+	const glm::vec3& Entity::GetRotation() const
+	{
+		return m_Rotation;
+	}
+
+	void Entity::SetRotation(const glm::vec3& rotation)
+	{
+		m_Rotation = rotation;
+	}
+
+	glm::vec3& Entity::GetScale()
+	{
+		return m_Scale;
+	}
+
+	const glm::vec3& Entity::GetScale() const
+	{
+		return m_Scale;
+	}
+
+	void Entity::SetScale(const glm::vec3& scale)
+	{
+		m_Scale = scale;
+	}
+
+	Scene* Entity::GetScene() const
+	{
+		return m_Scene;
 	}
 
 	const glm::mat4 Entity::GetModelMatrix() const

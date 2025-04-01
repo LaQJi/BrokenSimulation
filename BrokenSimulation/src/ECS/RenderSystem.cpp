@@ -147,6 +147,15 @@ namespace BrokenSim
 		glm::mat4 entityModelMatrix = parentMatrix * entity->GetModelMatrix();
 
 		// TODO: 将其它组件的影响传递给渲染组件
+		
+		if (entity->HasComponent<VoronoiComponent>())
+		{
+			VoronoiComponent* voronoiComponent = entity->GetComponent<VoronoiComponent>();
+
+			// TODO: 将Voronoi图投射到实体上
+		}
+
+
 		// 渲染模型
 		if (entity->HasComponent<ModelComponent>())
 		{

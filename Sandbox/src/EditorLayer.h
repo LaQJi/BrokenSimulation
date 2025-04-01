@@ -37,8 +37,6 @@ namespace BrokenSim
 
 		// 当前选中的对象
 		Entity* m_SelectedEntity;
-		// 当前选中的组件
-		Component* m_SelectedComponent;
 		// 当前选中的对象的Voronoi图组件
 		VoronoiComponent* m_VoronoiComponent = nullptr;
 

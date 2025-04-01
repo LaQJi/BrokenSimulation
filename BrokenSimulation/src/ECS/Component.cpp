@@ -25,13 +25,28 @@ namespace BrokenSim
 		return m_Position;
 	}
 
+	void Component::SetPosition(const glm::vec3& position)
+	{
+		m_Position = position;
+	}
+
 	glm::vec3& Component::GetRotation()
 	{
 		return m_Rotation;
 	}
 
+	void Component::SetRotation(const glm::vec3& rotation)
+	{
+		m_Rotation = rotation;
+	}
+
 	glm::vec3& Component::GetScale()
 	{
 		return m_Scale;
+	}
+
+	void Component::SetScale(const glm::vec3& scale)
+	{
+		m_Scale = scale;
 	}
 }

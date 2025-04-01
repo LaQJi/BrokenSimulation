@@ -44,6 +44,56 @@ namespace BrokenSim
 	{
 	}
 
+	glm::vec4& ModelComponent::GetColor()
+	{
+		return m_Color;
+	}
+
+	void ModelComponent::SetColor(const glm::vec4& color)
+	{
+		m_Color = color;
+	}
+
+	float& ModelComponent::GetShininess()
+	{
+		return m_Shininess;
+	}
+
+	void ModelComponent::SetShininess(float shininess)
+	{
+		m_Shininess = shininess;
+	}
+
+	float& ModelComponent::GetAmbientStrength()
+	{
+		return m_AmbientStrength;
+	}
+
+	void ModelComponent::SetAmbientStrength(float strength)
+	{
+		m_AmbientStrength = strength;
+	}
+
+	float& ModelComponent::GetDiffuseStrength()
+	{
+		return m_DiffuseStrength;
+	}
+
+	void ModelComponent::SetDiffuseStrength(float strength)
+	{
+		m_DiffuseStrength = strength;
+	}
+
+	float& ModelComponent::GetSpecularStrength()
+	{
+		return m_SpecularStrength;
+	}
+
+	void ModelComponent::SetSpecularStrength(float strength)
+	{
+		m_SpecularStrength = strength;
+	}
+
 	bool ModelComponent::LoadModel(const std::string& path)
 	{
 		// ¶ÁÈ¡Ä£ÐÍ

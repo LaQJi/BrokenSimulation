@@ -31,15 +31,15 @@ namespace BrokenSim
 
 
 		// 获取唯一标识符
-		unsigned int GetID() const { return m_ID; }
+		unsigned int GetID() const;
 
 		// 获取名称
-		const std::string& GetName() const { return m_Name; }
+		const std::string& GetName() const;
 		// 设置名称
-		void SetName(const std::string& name) { m_Name = name; }
+		void SetName(const std::string& name);
 
 		// 获取父对象
-		Entity* GetParent() const { return m_Parent; }
+		Entity* GetParent() const;
 		// 设置父对象
 		void SetParent(Entity* parent);
 
@@ -47,7 +47,7 @@ namespace BrokenSim
 		Entity* GetRoot();
 
 		// 获取子对象
-		const std::vector<Entity*>& GetChildren() const { return m_Children; }
+		const std::vector<Entity*>& GetChildren() const;
 		// 添加子对象
 		void AddChild(Entity* child);
 		// 移除子对象
@@ -58,35 +58,38 @@ namespace BrokenSim
 		void RemoveAllChildren();
 
 		// 获取可见性
-		bool GetVisible() const { return m_Visible; }
+		bool GetVisible() const;
 		// 设置可见性
-		void SetVisible(bool visible) { m_Visible = visible; }
+		void SetVisible(bool visible);
 
 		// 获取启用性
-		bool GetEnabled() const { return m_Enabled; }
+		bool GetEnabled() const;
 		// 设置启用性
-		void SetEnabled(bool enabled) { m_Enabled = enabled; }
+		void SetEnabled(bool enabled);
 
 		// 获取变换矩阵
-		const glm::mat4& GetTransform() const { return m_Transform; }
+		const glm::mat4& GetTransform() const;
 
 		// 获取位置
-		const glm::vec3& GetPosition() const { return m_Position; }
+		glm::vec3& GetPosition();
+		const glm::vec3& GetPosition() const;
 		// 设置位置
-		void SetPosition(const glm::vec3& position) { m_Position = position; }
+		void SetPosition(const glm::vec3& position);
 
 		// 获取旋转
-		const glm::vec3& GetRotation() const { return m_Rotation; }
+		glm::vec3& GetRotation();
+		const glm::vec3& GetRotation() const;
 		// 设置旋转
-		void SetRotation(const glm::vec3& rotation) { m_Rotation = rotation; }
+		void SetRotation(const glm::vec3& rotation);
 
 		// 获取缩放
-		const glm::vec3& GetScale() const { return m_Scale; }
+		glm::vec3& GetScale();
+		const glm::vec3& GetScale() const;
 		// 设置缩放
-		void SetScale(const glm::vec3& scale) { m_Scale = scale; }
+		void SetScale(const glm::vec3& scale);
 
 		// 获取场景
-		Scene* GetScene() const { return m_Scene; }
+		Scene* GetScene() const;
 
 		// 获取模型矩阵
 		const glm::mat4 GetModelMatrix() const;

@@ -35,12 +35,18 @@ namespace BrokenSim
 
 		// 获取位置
 		glm::vec3& GetPosition();
+		// 设置位置
+		void SetPosition(const glm::vec3& position);
 		
 		// 获取旋转
 		glm::vec3& GetRotation();
+		// 设置旋转
+		void SetRotation(const glm::vec3& rotation);
 
 		// 获取缩放
 		glm::vec3& GetScale();
+		// 设置缩放
+		void SetScale(const glm::vec3& scale);
 
 	protected:
 		// 组件名称
