@@ -414,7 +414,9 @@ namespace BrokenSim
 
 				ImGui::InputInt("Point Index", &index);
 
-				index = std::clamp(index, 0, (int)vc->GetNumPoints() - 1);
+				index = std::clamp(index,
+					0,
+					(int)vc->GetNumPoints() - 1 > 0 ? (int)vc->GetNumPoints() - 1 > 0 : 0);
 
 				if (ImGui::Button("Remove Point"))
 				{

@@ -19,10 +19,13 @@ namespace BrokenSim
 
 		std::shared_ptr<Shader> GetVoronoiShader();
 
+		std::shared_ptr<Shader> GetVoronoiMappingShader();
+
 	private:
 		// 着色器资源
 		std::unordered_map<std::string, std::shared_ptr<Shader>> m_ShaderResources;
 		std::shared_ptr<Shader> m_DefaultShader;
 		std::shared_ptr<Shader> m_VoronoiShader;
+		std::shared_ptr<Shader> m_VoronoiMappingShader;
 	};
 }

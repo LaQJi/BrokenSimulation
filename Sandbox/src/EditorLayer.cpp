@@ -91,12 +91,16 @@ namespace BrokenSim
 				// 若选中的实体有VoronoiComponent，则进入破碎模式
 				m_VoronoiComponent = m_SelectedEntity->GetComponent<VoronoiComponent>();
 
+				Application::Get().GetRenderSystem()->SetCurrentEntity(m_SelectedEntity);
+
 				m_EngineMode = EngineMode::FractureMode;
 			}
 			else
 			{
 				// 若选中的实体没有VoronoiComponent，则进入编辑模式
 				m_VoronoiComponent = nullptr;
+
+				Application::Get().GetRenderSystem()->SetCurrentEntity(nullptr);
 
 				m_EngineMode = EngineMode::EditMode;
 			}

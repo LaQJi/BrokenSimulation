@@ -58,12 +58,12 @@ namespace BrokenSim
 		void RemoveAllChildren();
 
 		// 获取可见性
-		bool GetVisible() const;
+		bool IsVisible() const;
 		// 设置可见性
 		void SetVisible(bool visible);
 
 		// 获取启用性
-		bool GetEnabled() const;
+		bool IsEnabled() const;
 		// 设置启用性
 		void SetEnabled(bool enabled);
 

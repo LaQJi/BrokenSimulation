@@ -15,6 +15,9 @@ namespace BrokenSim
 		{
 			if (m_Vertices.size() > 0)
 			{
+				// 计算几何中心
+				m_GeometryCenter /= m_Vertices.size();
+
 				// 创建顶点数组
 				m_VertexArray = std::make_unique<VertexArray>();
 				std::shared_ptr<VertexBuffer> vb = std::make_shared<VertexBuffer>(&m_Vertices[0].Position.x, m_Vertices.size() * sizeof(Vertex));
@@ -94,6 +97,26 @@ namespace BrokenSim
 		m_SpecularStrength = strength;
 	}
 
+	const glm::vec3& ModelComponent::GetGeometryCenter() const
+	{
+		return m_GeometryCenter;
+	}
+
+	const std::string& ModelComponent::GetPath() const
+	{
+		return m_Path;
+	}
+
+	float ModelComponent::GetYMin() const
+	{
+		return yMin;
+	}
+
+	float ModelComponent::GetYMax() const
+	{
+		return yMax;
+	}
+
 	bool ModelComponent::LoadModel(const std::string& path)
 	{
 		// 读取模型
@@ -132,6 +155,20 @@ namespace BrokenSim
 				vertex.Position.x = mesh->mVertices[j].x;
 				vertex.Position.y = mesh->mVertices[j].y;
 				vertex.Position.z = mesh->mVertices[j].z;
+
+				// 计算几何中心
+				m_GeometryCenter += glm::vec3(vertex.Position.x, vertex.Position.y, vertex.Position.z);
+
+				// 计算y轴范围
+				if (vertex.Position.y < yMin)
+				{
+					yMin = vertex.Position.y;
+				}
+				if (vertex.Position.y > yMax)
+				{
+					yMax = vertex.Position.y;
+				}
+
 				// 顶点法线
 				vertex.Normal.x = mesh->mNormals[j].x;
 				vertex.Normal.y = mesh->mNormals[j].y;

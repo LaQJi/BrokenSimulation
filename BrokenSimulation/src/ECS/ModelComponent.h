@@ -45,6 +45,17 @@ namespace BrokenSim
 		// 设置镜面反射强度
 		void SetSpecularStrength(float strength);
 
+		// 获取模型几何中心
+		const glm::vec3& GetGeometryCenter() const;
+
+		// 获取模型路径
+		const std::string& GetPath() const;
+
+		// 获取模型y轴最小值
+		float GetYMin() const;
+
+		// 获取模型y轴最大值
+		float GetYMax() const;
 
 	private:
 		bool LoadModel(const std::string& path);
@@ -81,5 +92,11 @@ namespace BrokenSim
 		std::vector<Vertex> m_Vertices;
 		// 模型索引
 		std::vector<unsigned int> m_Indices;
+
+		// 几何中心
+		glm::vec3 m_GeometryCenter = { 0.0f, 0.0f, 0.0f };
+
+		float yMin = FLT_MAX;
+		float yMax = FLT_MIN;
 	};
 }

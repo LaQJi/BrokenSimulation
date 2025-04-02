@@ -129,7 +129,7 @@ namespace BrokenSim
 		m_Children.clear();
 	}
 
-	bool Entity::GetVisible() const
+	bool Entity::IsVisible() const
 	{
 		return m_Visible;
 	}
@@ -139,7 +139,7 @@ namespace BrokenSim
 		m_Visible = visible;
 	}
 
-	bool Entity::GetEnabled() const
+	bool Entity::IsEnabled() const
 	{
 		return m_Enabled;
 	}

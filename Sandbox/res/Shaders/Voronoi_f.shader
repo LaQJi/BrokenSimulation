@@ -3,8 +3,8 @@
 out vec4 fragColor;
 
 uniform int u_NumPoints;
-uniform vec3 u_Colors[10];
-uniform vec2 u_Points[10];
+uniform vec3 u_Colors[100];
+uniform vec2 u_Points[100];
 uniform vec2 u_ViewportSize;
 
 void main()
@@ -16,6 +16,12 @@ void main()
 	for (int i = 0; i < u_NumPoints; i++)
 	{
 		vec2 point = u_Points[i] * u_ViewportSize;
+
+		if (point.x - fragCoord.x > u_ViewportSize.x / 2.0)
+			point.x -= u_ViewportSize.x;
+		else if (fragCoord.x - point.x > u_ViewportSize.x / 2.0)
+			point.x += u_ViewportSize.x;
+
 		float dist = distance(fragCoord, point);
 		if (dist < minDist)
 		{
@@ -24,7 +30,7 @@ void main()
 		}
 	}
 
-	if (minDist < 10.0)
+	if (minDist < u_ViewportSize.x / 100.0)
 		fragColor = vec4(0.0, 0.0, 0.0, 1.0);
 	else
 		fragColor = vec4(u_Colors[closestPoint], 1.0);
