@@ -317,7 +317,9 @@ namespace Logger
 		template <typename T>
 		std::string formatArgs(const T& arg)
 		{
-			return std::to_string(arg);
+			std::ostringstream oss;
+			oss << arg;
+			return oss.str();
 		}
 
 		std::string formatArgs(const std::string& arg)

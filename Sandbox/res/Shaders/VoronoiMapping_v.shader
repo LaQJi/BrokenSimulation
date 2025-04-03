@@ -28,13 +28,13 @@ void main()
 	// 计算法线
 	v_Normal = u_NormalMatrix * a_Normal;
 
-	// 计算裁剪空间坐标
-	gl_Position = u_ViewProjection * u_Model * vec4(a_Position, 1.0);
-
 	// 计算几何中心
 	v_GeometryCenter = vec3(u_Model * vec4(u_GeometryCenter, 1.0));
 
 	// 计算高度最值
 	v_YMax = vec3(u_Model * vec4(0.0, u_YMax, 0.0, 1.0)).y;
 	v_YMin = vec3(u_Model * vec4(0.0, u_YMin, 0.0, 1.0)).y;
+
+	// 计算裁剪空间坐标
+	gl_Position = u_ViewProjection * u_Model * vec4(a_Position, 1.0);
 }

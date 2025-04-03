@@ -91,6 +91,24 @@ namespace BrokenSim
 		return rendererID;
 	}
 
+	void Shader::PrintActiveUniforms() const
+	{
+		GLint count;
+		glGetProgramiv(rendererID, GL_ACTIVE_UNIFORMS, &count);
+
+		BS_CORE_INFO("Active Uniforms: {0}", count);
+
+		for (int i = 0; i < count; i++)
+		{
+			GLchar name[256];
+			GLsizei length;
+			GLenum type;
+			GLint size;
+			glGetActiveUniform(rendererID, i, sizeof(name), &length, &size, &type, name);
+			BS_CORE_INFO("Uniform {0}: {1}", i, name);
+		}
+	}
+
 	int Shader::GetUniformLocation(const std::string& name)
 	{
 		if (uniformLocationCache.find(name) != uniformLocationCache.end())

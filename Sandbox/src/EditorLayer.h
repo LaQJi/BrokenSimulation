@@ -36,7 +36,7 @@ namespace BrokenSim
 		std::shared_ptr<Scene> m_Scene;
 
 		// 当前选中的对象
-		Entity* m_SelectedEntity;
+		Entity* m_SelectedEntity = nullptr;
 		// 当前选中的对象的Voronoi图组件
 		VoronoiComponent* m_VoronoiComponent = nullptr;
 

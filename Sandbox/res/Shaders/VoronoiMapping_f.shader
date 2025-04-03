@@ -71,7 +71,7 @@ vec3 CalculateLight(Light light, vec3 norm, vec3 viewDir, vec3 fragPos)
 	vec3 specular = u_SpecularStrength * spec * light.Color;
 
 	// 返回光照系数
-	return (ambient + diffuse + specular) * u_Color.rgb * attenuation;
+	return (ambient + diffuse + specular) * attenuation;
 }
 
 void main()
@@ -85,28 +85,29 @@ void main()
 	// 计算光照
 	vec3 result = vec3(0.0);
 
-	for (int i = 0; i < u_LightCount; i++)
+	for (int i = 0; i < min(u_LightCount, 10); i++)
 	{
 		result += CalculateLight(u_Lights[i], norm, viewDir, v_Position);
 	}
 
 	// 计算voronoi颜色
-	float minDist = 1.0 / 0.0;
+	float minDist = 2.0;
 	int closetPoint = 0;
 
-	for (int i = 0; i < u_NumPoints; i++)
+	// atan 范围 [-pi, pi]]
+	float theta = atan(v_Position.z - v_GeometryCenter.z, v_Position.x - v_GeometryCenter.x);
+
+	// 转换到[0, 1]
+	float normalizedTheta = (theta + 3.14159265359) / (2 * 3.14159265359);
+
+	// 将 y 转换到[0, 1]
+	float normalizeY = (v_Position.y - v_YMin) / (v_YMax - v_YMin);
+
+	vec2 fragCoord = vec2(normalizedTheta, normalizeY);
+
+	for (int i = 0; i < min(u_NumPoints, 100); i++)
 	{
 		vec2 point = u_Points[i].xy;
-		// atan 范围 [-pi, pi]]
-		float theta = atan(v_Position.z - v_GeometryCenter.z, v_Position.x - v_GeometryCenter.x);
-
-		// 转换到[0, 1]
-		float normalizedTheta = (theta + 3.14159265359) / (2 * 3.14159265359);
-
-		// 将 y 转换到[0, 1]
-		float normalizeY = (v_Position.y - v_YMin) / (v_YMax - v_YMin);
-
-		vec2 fragCoord = vec2(normalizedTheta, normalizeY);
 
 		if (point.x - fragCoord.x > 0.5)
 			point.x -= 1.0;
@@ -121,7 +122,8 @@ void main()
 		}
 	}
 
-	result = result;
+	result = result * u_Colors[closetPoint];
 
 	fragColor = vec4(result, u_Color.a);
+	//fragColor = vec4(0.0, 0.0, u_LightCount, 1.0);
 }

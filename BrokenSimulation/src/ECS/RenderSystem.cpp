@@ -109,7 +109,7 @@ namespace BrokenSim
 			// 若存在选中的实体，设置VoronoiMappingShader的光源
 			if (m_CurrentEntity)
 			{
-				m_VoronoiShader->Bind();
+				m_VoronoiMappingShader->Bind();
 
 				m_VoronoiMappingShader->SetUniform1i("u_LightCount", 1);
 				m_VoronoiMappingShader->SetUniform1i("u_Lights[0].Type", (int)LightComponent::LightType::Point);
@@ -238,13 +238,14 @@ namespace BrokenSim
 			if (entity->HasComponent<VoronoiComponent>())
 			{
 				VoronoiComponent* voronoiComponent = entity->GetComponent<VoronoiComponent>();
+				unsigned int numPoints = voronoiComponent->GetNumPoints();
 
-				m_VoronoiMappingShader->SetUniform1i("u_NumPoints", voronoiComponent->GetNumPoints());
+				m_VoronoiMappingShader->SetUniform1i("u_NumPoints", numPoints);
 
-				for (unsigned int i = 0; i < voronoiComponent->GetNumPoints(); i++)
+				for (unsigned int i = 0; i < numPoints; i++)
 				{
 					m_VoronoiMappingShader->SetUniform3f("u_Colors[" + std::to_string(i) + "]", voronoiComponent->GetColor(i));
-					m_VoronoiMappingShader->SetUniform2f("u_Points[" + std::to_string(i) + "]", voronoiComponent->GetPoint(i));
+					m_VoronoiMappingShader->SetUniform3f("u_Points[" + std::to_string(i) + "]", voronoiComponent->GetPoint(i));
 				}
 			}
 

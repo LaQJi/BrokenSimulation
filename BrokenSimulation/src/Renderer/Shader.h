@@ -30,6 +30,8 @@ namespace BrokenSim
 
 		unsigned int GetRendererID() const;
 
+		void PrintActiveUniforms() const;
+
 	private:
 		unsigned int rendererID;
 		std::string vertexFilePath;
