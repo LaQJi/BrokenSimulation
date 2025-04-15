@@ -9,6 +9,8 @@ namespace BrokenSim
 {
 	class Entity;
 
+	// TODO：对ECS架构理解有误，后续得重新设计并实现
+
 	class Component
 	{
 	public:

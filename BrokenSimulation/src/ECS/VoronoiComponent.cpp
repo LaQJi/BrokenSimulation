@@ -83,6 +83,30 @@ namespace BrokenSim
 		}
 	}
 
+	std::vector<glm::vec3>& VoronoiComponent::GetPoints()
+	{
+		std::vector<glm::vec3> points;
+		std::transform(
+			m_Points.begin(), m_Points.end(),
+			std::back_inserter(points),
+			[](const std::pair<glm::vec3, glm::vec3>& p) {
+				return p.first;
+			});
+		return points;
+	}
+
+	const std::vector<glm::vec3>& VoronoiComponent::GetPoints() const
+	{
+		std::vector<glm::vec3> points;
+		std::transform(
+			m_Points.begin(), m_Points.end(),
+			std::back_inserter(points),
+			[](const std::pair<glm::vec3, glm::vec3>& p) {
+				return p.first;
+			});
+		return points;
+	}
+
 	glm::vec3& VoronoiComponent::GetColor(unsigned int index)
 	{
 		if (index < m_Points.size())

@@ -21,6 +21,8 @@ namespace BrokenSim
 
 		glm::vec3& GetPoint(unsigned int index);
 		const glm::vec3& GetPoint(unsigned int index) const;
+		std::vector<glm::vec3>& GetPoints();
+		const std::vector<glm::vec3>& GetPoints() const;
 
 		glm::vec3& GetColor(unsigned int index);
 		const glm::vec3& GetColor(unsigned int index) const;

@@ -9,10 +9,25 @@
 
 namespace BrokenSim
 {
+
+	struct Vertex
+	{
+		glm::vec3 Position;
+		glm::vec3 Normal;
+		glm::vec2 TexCoords;
+	};
+
+	struct Meshes
+	{
+		std::vector<Vertex> vertices;
+		std::vector<unsigned int> indices;
+	};
+
 	class ModelComponent : public Component
 	{
 	public:
 		ModelComponent(Entity* owner, const std::string& path);
+		ModelComponent(Entity* owner, const Meshes& meshes);
 
 		~ModelComponent();
 
@@ -57,6 +72,12 @@ namespace BrokenSim
 		// 获取模型y轴最大值
 		float GetYMax() const;
 
+		// 获取模型顶点
+		const std::vector<Vertex>& GetVertices() const;
+
+		// 获取模型索引
+		const std::vector<unsigned int>& GetIndices() const;
+
 	private:
 		bool LoadModel(const std::string& path);
 		void ProcessNode(aiNode* node, const aiScene* scene);
@@ -80,13 +101,6 @@ namespace BrokenSim
 		float m_DiffuseStrength = 0.8f;
 		// 镜面反射强度
 		float m_SpecularStrength = 1.0f;
-
-		struct Vertex
-		{
-			glm::vec3 Position;
-			glm::vec3 Normal;
-			glm::vec2 TexCoords;
-		};
 
 		// 模型顶点
 		std::vector<Vertex> m_Vertices;

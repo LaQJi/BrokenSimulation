@@ -39,6 +39,32 @@ namespace BrokenSim
 		}
 	}
 
+	ModelComponent::ModelComponent(Entity* owner, const Meshes& meshes)
+		: Component(owner), m_Path("")
+	{
+		m_Vertices = meshes.vertices;
+		m_Indices = meshes.indices;
+
+		if (m_Vertices.size() > 0)
+		{
+			// 计算几何中心
+			m_GeometryCenter /= m_Vertices.size();
+
+			// 创建顶点数组
+			m_VertexArray = std::make_unique<VertexArray>();
+			std::shared_ptr<VertexBuffer> vb = std::make_shared<VertexBuffer>(&m_Vertices[0].Position.x, m_Vertices.size() * sizeof(Vertex));
+			std::shared_ptr<IndexBuffer> ib = std::make_shared<IndexBuffer>(&m_Indices[0], m_Indices.size());
+			VertexBufferLayout layout({
+				{ DataType::Float3, "a_Position" },
+				{ DataType::Float3, "a_Normal" },
+				{ DataType::Float2, "a_TexCoords" }
+				});
+			vb->SetLayout(layout);
+			m_VertexArray->AddVertexBuffer(vb);
+			m_VertexArray->SetIndexBuffer(ib);
+		}
+	}
+
 	ModelComponent::~ModelComponent()
 	{
 	}
@@ -115,6 +141,16 @@ namespace BrokenSim
 	float ModelComponent::GetYMax() const
 	{
 		return yMax;
+	}
+
+	const std::vector<Vertex>& ModelComponent::GetVertices() const
+	{
+		return m_Vertices;
+	}
+
+	const std::vector<unsigned int>& ModelComponent::GetIndices() const
+	{
+		return m_Indices;
 	}
 
 	bool ModelComponent::LoadModel(const std::string& path)
