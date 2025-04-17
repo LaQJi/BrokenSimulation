@@ -1,6 +1,10 @@
 #include "bspch.h"
 #include "ECS/Scene.h"
 
+#include "Geometry/ModelCut.h"
+#include "ECS/ModelComponent.h"
+#include "ECS/VoronoiComponent.h"
+
 namespace BrokenSim
 {
 	Scene::Scene()
@@ -105,6 +109,29 @@ namespace BrokenSim
 	std::vector<Entity*> Scene::GetEntities() const
 	{
 		return m_RootEntity->GetChildren();
+	}
+
+	void Scene::ApplyBreaking(Entity* entity)
+	{
+		ModelComponent* mc = entity->GetComponent<ModelComponent>();
+		VoronoiComponent* vc = entity->GetComponent<VoronoiComponent>();
+
+		std::vector<Meshes> meshes = Geometry::cutModel(*mc, *vc);
+
+		Entity* parent = entity->GetParent();
+		
+		mc->UpdateMeshes(meshes[0]);
+
+		for (int i = 1; i < meshes.size(); i++)
+		{
+			Entity* newEntity = CreateEntity(entity->GetName() + "_" + std::to_string(i), parent);
+			newEntity->AddComponent<ModelComponent>(meshes[i]);
+			newEntity->SetPosition(entity->GetPosition());
+			newEntity->SetRotation(entity->GetRotation());
+			newEntity->SetScale(entity->GetScale());
+		}
+
+		entity->RemoveComponent<VoronoiComponent>();
 	}
 
 	unsigned int Scene::AssignID()

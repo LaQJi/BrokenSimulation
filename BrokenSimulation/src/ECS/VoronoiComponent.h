@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "ECS/Component.h"
 
 namespace BrokenSim

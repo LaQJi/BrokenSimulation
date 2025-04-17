@@ -79,6 +79,7 @@ namespace BrokenSim
 
 			if (entityDeleted)
 			{
+				Application::Get().GetRenderSystem()->SetCurrentEntity(nullptr);
 				m_Context->DestroyEntity(const_cast<Entity*>(root));
 				if (m_SelectionContext == root)
 				{
@@ -233,6 +234,15 @@ namespace BrokenSim
 			ImGui::EndPopup();
 		}
 
+		if (ImGui::BeginPopupContextItem("EntityContextMenu"))
+		{
+			if (ImGui::MenuItem("Add Child Entity"))
+			{
+				m_Context->CreateEntity("Child Entity", entity);
+			}
+			ImGui::EndPopup();
+		}
+
 		if (opened)
 		{
 			// 递归渲染子实体
@@ -245,6 +255,7 @@ namespace BrokenSim
 
 		if (entityDeleted)
 		{
+			Application::Get().GetRenderSystem()->SetCurrentEntity(nullptr);
 			m_Context->DestroyEntity(entity);
 			if (m_SelectionContext == entity)
 			{
@@ -428,6 +439,14 @@ namespace BrokenSim
 				if (ImGui::Button("Clear Points"))
 				{
 					vc->ClearPoints();
+				}
+
+				ImGui::Separator();
+
+				if (ImGui::Button("Apply Breaking Effort"))
+				{
+					// 应用破碎效果
+					m_Context->ApplyBreaking(entity);
 				}
 
 				ImGui::Separator();

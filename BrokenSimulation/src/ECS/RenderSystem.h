@@ -29,6 +29,7 @@ namespace BrokenSim
 
 		// 设置当前选中的实体
 		void SetCurrentEntity(Entity* entity);
+		Entity* GetCurrentEntity() const;
 
 	private:
 		// 渲染实体

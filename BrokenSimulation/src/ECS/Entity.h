@@ -12,6 +12,7 @@
 #include "Renderer/Shader.h"
 
 #include <glm/glm.hpp>
+#include "Entity.h"
 
 namespace BrokenSim
 {

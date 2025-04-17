@@ -13,10 +13,11 @@
 #include "ECS/SceneCamera.h"
 #include "ECS/Entity.h"
 #include "ECS/Component.h"
-#include "ECS/ModelComponent.h"
-#include "ECS/LightComponent.h"
 #include "ECS/CameraComponent.h"
+#include "ECS/LightComponent.h"
+#include "ECS/ModelComponent.h"
 #include "ECS/VoronoiComponent.h"
+#include "ECS/RenderSystem.h"
 
 #include "Renderer/Renderer.h"
 #include "Renderer/VertexArray.h"

@@ -39,7 +39,7 @@ struct Vec3Hash {
 struct Vec3Equal {
 	bool operator()(const glm::vec3& lhs, const glm::vec3& rhs) const
 	{
-		return glm::all(glm::epsilonEqual(lhs, rhs, 0.0001f));
+		return glm::all(glm::epsilonEqual(lhs, rhs, 0.00000001f));
 	}
 };
 
@@ -54,18 +54,70 @@ struct Vec2Hash {
 struct Vec2Equal {
 	bool operator()(const glm::vec2& lhs, const glm::vec2& rhs) const
 	{
-		return glm::all(glm::epsilonEqual(lhs, rhs, 0.0001f));
+		return glm::all(glm::epsilonEqual(lhs, rhs, 0.00000001f));
 	}
 };
+
+template<>
+struct std::hash<glm::vec3>
+{
+	size_t operator()(const glm::vec3& vec) const
+	{
+		return std::hash<float>()(vec.x) ^
+			(std::hash<float>()(vec.y) << 1) ^
+			(std::hash<float>()(vec.z) << 2);
+	}
+};
+
+template<>
+struct std::hash<glm::vec2>
+{
+	size_t operator()(const glm::vec2& vec) const
+	{
+		return std::hash<float>()(vec.x) ^
+			(std::hash<float>()(vec.y) << 1);
+	}
+};
+
+template<>
+struct std::hash<BrokenSim::Vertex>
+{
+	size_t operator()(const BrokenSim::Vertex& vertex) const
+	{
+		return std::hash<glm::vec3>()(vertex.Position) ^
+			(std::hash<glm::vec3>()(vertex.Normal) << 1) ^
+			(std::hash<glm::vec2>()(vertex.TexCoords) << 2);
+	}
+};
+
 
 namespace BrokenSim
 {
 	namespace Geometry
 	{
-		std::vector<Meshes> cutModel(const ModelComponent& model, const VoronoiComponent& voronoi, const std::string& exportPath)
+		std::vector<Meshes> cutModel(const ModelComponent& model, const VoronoiComponent& voronoi)
 		{
 			// 获取所有voronoi种子点
-			std::vector<glm::vec3> points = voronoi.GetPoints();
+			std::vector<glm::vec3> points;
+
+			for (int i = 0; i < voronoi.GetNumPoints(); i++)
+			{
+				points.push_back(voronoi.GetPoint(i));
+			}
+
+			AABB boudingBox = model.GetBoundingBox();
+
+			float xScale = boudingBox.maxPoint.x - boudingBox.minPoint.x;
+			float yScale = boudingBox.maxPoint.y - boudingBox.minPoint.y;
+			float zScale = boudingBox.maxPoint.z - boudingBox.minPoint.z;
+
+			// 将种子点坐标转换为模型坐标系
+			for (unsigned int i = 0; i < points.size(); i++)
+			{
+				points[i].x = points[i].x * xScale + boudingBox.minPoint.x;
+				points[i].y = points[i].y * yScale + boudingBox.minPoint.y;
+				points[i].z = points[i].z * zScale + boudingBox.minPoint.z;
+			}
 
 			// 获取模型的顶点，将添加新生成的顶点
 			std::vector<Vertex> vertices = model.GetVertices();
@@ -157,7 +209,7 @@ namespace BrokenSim
 					else
 					{
 						triMesh tri = { index0, index1, index2 };
-						triSeedMeshes[std::make_tuple(seed0, seed1, seed2)].push_back(tri);
+						triSeedMeshes[{ seed0, seed1, seed2 }].push_back(tri);
 					}
 				}
 			}
@@ -286,6 +338,7 @@ namespace BrokenSim
 					// mesh3、mesh4为归属于seed1的面片
 					triMesh mesh3 = { curIndex, curIndex + 1, index2 };
 					triMesh mesh4 = { curIndex + 5, curIndex + 3, midPointIndex + 1 };
+
 					// 将当前三角面片的索引添加到纯面片列表中
 					pureMeshes[seed0].push_back(mesh0);
 					pureMeshes[seed0].push_back(mesh1);
@@ -332,8 +385,8 @@ namespace BrokenSim
 					float edge02Length2 = glm::dot(edge02, edge02);
 
 					glm::vec3 d = glm::cross(edge01, edge02);
-					glm::vec3 cross01 = glm::cross(edge01, normal);
-					glm::vec3 cross02 = glm::cross(edge02, normal);
+					glm::vec3 cross01 = glm::cross(edge01, d);
+					glm::vec3 cross02 = glm::cross(edge02, d);
 
 					float denom = 2.0f * glm::dot(d, d);
 					circumCenter = points[seed0] + (edge01Length2 * cross02 - edge02Length2 * cross01) / denom;
@@ -414,6 +467,20 @@ namespace BrokenSim
 				midVertex_CircumCenter_P_N20.Normal = normal20;
 				midVertex_CircumCenter_P_N20.TexCoords = glm::vec2(0.0f, 0.0f);
 
+				vertices.push_back(midVertex01_N);
+				vertices.push_back(midVertex01_P);
+				vertices.push_back(midVertex12_N);
+				vertices.push_back(midVertex12_P);
+				vertices.push_back(midVertex20_N);
+				vertices.push_back(midVertex20_P);
+
+				vertices.push_back(midVertex_CircumCenter_N_N01);
+				vertices.push_back(midVertex_CircumCenter_P_N01);
+				vertices.push_back(midVertex_CircumCenter_N_N12);
+				vertices.push_back(midVertex_CircumCenter_P_N12);
+				vertices.push_back(midVertex_CircumCenter_N_N20);
+				vertices.push_back(midVertex_CircumCenter_P_N20);
+
 				// 遍历当前面片列表
 				std::vector<triMesh>& triMeshes = meshes.second;
 
@@ -434,13 +501,20 @@ namespace BrokenSim
 					glm::vec3 edge20 = vertex0 - vertex2;
 
 					// 计算t值
-					glm::vec3 midToVertex0 = vertex0 - midPoint01;
-					glm::vec3 midToVertex1 = vertex1 - midPoint12;
-					glm::vec3 midToVertex2 = vertex2 - midPoint20;
+					float denominator01 = 2.0f * glm::dot(edge01, points[seed1] - points[seed0]);
+					float denominator12 = 2.0f * glm::dot(edge12, points[seed2] - points[seed1]);
+					float denominator20 = 2.0f * glm::dot(edge20, points[seed0] - points[seed2]);
 
-					float t01 = -glm::dot(midToVertex0, normal01) / glm::dot(edge01, normal01);
-					float t12 = -glm::dot(midToVertex1, normal12) / glm::dot(edge12, normal12);
-					float t20 = -glm::dot(midToVertex2, normal20) / glm::dot(edge20, normal20);
+					float numerator01 = glm::dot(points[seed1], points[seed1]) - glm::dot(points[seed0], points[seed0]) -
+						2.0f * glm::dot(vertex0, points[seed1] - points[seed0]);
+					float numerator12 = glm::dot(points[seed2], points[seed2]) - glm::dot(points[seed1], points[seed1]) -
+						2.0f * glm::dot(vertex1, points[seed2] - points[seed1]);
+					float numerator20 = glm::dot(points[seed0], points[seed0]) - glm::dot(points[seed2], points[seed2]) -
+						2.0f * glm::dot(vertex2, points[seed0] - points[seed2]);
+
+					float t01 = numerator01 / denominator01;
+					float t12 = numerator12 / denominator12;
+					float t20 = numerator20 / denominator20;
 
 					// 计算新顶点坐标
 					glm::vec3 newVertex0 = vertex0 + t01 * edge01;
@@ -747,7 +821,12 @@ namespace BrokenSim
 			// 清空triSeedMeshes
 			triSeedMeshes.clear();
 
-			std::string modelName = model.GetPath();
+			size_t lastSlash = model.GetPath().find_last_of("/\\");
+			std::string modelFileName = model.GetPath().substr(lastSlash + 1, model.GetPath().length() - lastSlash - 1);
+
+			std::string modelName = modelFileName.substr(0, modelFileName.find_last_of('.'));
+
+			std::vector<Meshes> newMeshes;
 
 			// 处理所有归属于同一种子点的面片
 			// 将其视为一个碎片模型
@@ -756,7 +835,7 @@ namespace BrokenSim
 				// 将生成的碎片模型导出到文件
 				std::string fileName = modelName + "_frag_" + std::to_string(meshes.first) + ".obj";
 
-				std::ofstream outFile(exportPath + "/" + fileName, std::ios::out | std::ios::binary);
+				std::ofstream outFile(fileName, std::ios::out | std::ios::binary);
 
 				if (!outFile)
 				{
@@ -773,10 +852,13 @@ namespace BrokenSim
 				outFile << "o frag_" << meshes.first << "\n";
 
 				// 将生成的碎片模型记录网格
-				Meshes newMeshes;
+				Meshes newMesh;
+
+				std::vector<Vertex> Vertices;
+				std::vector<unsigned int> Indices;
 
 				// 记录当前顶点坐标索引
-				std::unordered_map<glm::vec3, int, Vec3Hash, Vec3Equal> vertexMap;
+				std::unordered_map<glm::vec3, int, Vec3Hash, Vec3Equal> posMap;
 				int vIndex = 1;
 
 				// 记录当前顶点纹理坐标索引
@@ -787,6 +869,10 @@ namespace BrokenSim
 				std::unordered_map<glm::vec3, int, Vec3Hash, Vec3Equal> normalMap;
 				int vnIndex = 1;
 
+				// 记录顶点坐标、纹理坐标、法线坐标索引
+				std::unordered_map<Vertex, int> vertexMap;
+				int vertexIndex = 0;
+
 				for (auto mesh : meshes.second)
 				{
 					for (int i = 0; i < 3; i++)
@@ -794,14 +880,14 @@ namespace BrokenSim
 						unsigned int index = mesh[i];
 
 						// 分别处理当前三角面片的三个顶点坐标
-						glm::vec3 vertex = vertices[index].Position;
+						glm::vec3 position = vertices[index].Position;
 						glm::vec2 texCoord = vertices[index].TexCoords;
 						glm::vec3 normal = vertices[index].Normal;
 
 						// 处理顶点坐标
-						if (vertexMap.find(vertex) == vertexMap.end())
+						if (posMap.find(position) == posMap.end())
 						{
-							vertexMap[vertex] = vIndex++;
+							posMap[position] = vIndex++;
 						}
 
 						// 处理纹理坐标
@@ -815,29 +901,81 @@ namespace BrokenSim
 						{
 							normalMap[normal] = vnIndex++;
 						}
+
+						// 处理顶点坐标、纹理坐标、法线坐标索引
+						if (vertexMap.find(vertices[index]) == vertexMap.end())
+						{
+							vertexMap[vertices[index]] = vertexIndex++;
+						}
+
+						// 顶点索引
+						int indice = vertexMap[vertices[index]];
+						Indices.push_back(indice);
 					}
 				}
 
 				// 打印顶点坐标
-				for (auto vertex : vertexMap)
 				{
-					glm::vec3 v = vertex.first;
-					outFile << "v " << v.x << " " << v.y << " " << v.z << "\n";
+					// 将顶点坐标按索引排序
+					std::vector<std::pair<glm::vec3, int>> vertexMapSorted(posMap.begin(), posMap.end());
+					std::sort(vertexMapSorted.begin(), vertexMapSorted.end(), [](const auto& a, const auto& b) {
+						return a.second < b.second;
+						});
+					for (auto vertex : vertexMapSorted)
+					{
+						glm::vec3 v = vertex.first;
+						outFile << "v " << std::fixed << std::setprecision(6)
+							<< v.x << " " << v.y << " " << v.z << "\n";
+					}
 				}
 
 				// 打印纹理坐标
-				for (auto texCoord : texCoordMap)
 				{
-					glm::vec2 vt = texCoord.first;
-					outFile << "vt " << vt.x << " " << vt.y << "\n";
+					// 将纹理坐标按索引排序
+					std::vector<std::pair<glm::vec2, int>> texCoordMapSorted(texCoordMap.begin(), texCoordMap.end());
+					std::sort(texCoordMapSorted.begin(), texCoordMapSorted.end(), [](const auto& a, const auto& b) {
+						return a.second < b.second;
+						});
+					for (auto texCoord : texCoordMapSorted)
+					{
+						glm::vec2 vt = texCoord.first;
+						outFile << "vt " << std::fixed << std::setprecision(6)
+							<< vt.x << " " << vt.y << "\n";
+					}
 				}
 
 				// 打印法线坐标
-				for (auto normal : normalMap)
 				{
-					glm::vec3 vn = normal.first;
-					outFile << "vn " << vn.x << " " << vn.y << " " << vn.z << "\n";
+					// 将法线坐标按索引排序
+					std::vector<std::pair<glm::vec3, int>> normalMapSorted(normalMap.begin(), normalMap.end());
+					std::sort(normalMapSorted.begin(), normalMapSorted.end(), [](const auto& a, const auto& b) {
+						return a.second < b.second;
+						});
+					for (auto normal : normalMapSorted)
+					{
+						glm::vec3 vn = normal.first;
+						outFile << "vn " << std::fixed << std::setprecision(4)
+							<< vn.x << " " << vn.y << " " << vn.z << "\n";
+					}
 				}
+
+				// 获取vertices
+				{
+					// 将顶点坐标按索引排序
+					std::vector<std::pair<Vertex, int>> vertexMapSorted(vertexMap.begin(), vertexMap.end());
+					std::sort(vertexMapSorted.begin(), vertexMapSorted.end(), [](const auto& a, const auto& b) {
+						return a.second < b.second;
+						});
+					for (auto& vertex : vertexMapSorted)
+					{
+						Vertices.push_back(vertex.first);
+					}
+				}
+
+				newMesh.indices = Indices;
+				newMesh.vertices = Vertices;
+
+				newMeshes.push_back(newMesh);
 
 				// 打印面片索引
 				for (auto mesh : meshes.second)
@@ -850,12 +988,12 @@ namespace BrokenSim
 						unsigned int index = mesh[i];
 
 						// 对应的顶点坐标、纹理坐标、法线坐标
-						glm::vec3 vertex = vertices[index].Position;
+						glm::vec3 position = vertices[index].Position;
 						glm::vec2 texCoord = vertices[index].TexCoords;
 						glm::vec3 normal = vertices[index].Normal;
 
 						// 获取当前顶点坐标、纹理坐标、法线坐标的索引
-						int vIndex = vertexMap[vertex];
+						int vIndex = posMap[position];
 						int vtIndex = texCoordMap[texCoord];
 						int vnIndex = normalMap[normal];
 
@@ -864,9 +1002,10 @@ namespace BrokenSim
 
 					outFile << "\n";
 				}
+				outFile.close();
 			}
 
-			return std::vector<Meshes>();
+			return newMeshes;
 		}
 	}
 }

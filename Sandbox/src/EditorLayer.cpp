@@ -178,10 +178,33 @@ namespace BrokenSim
 		{
 			if (ImGui::BeginMenu("File"))
 			{
-				if (ImGui::MenuItem("New Scene", "Ctrl+N")) {}
-				if (ImGui::MenuItem("Open Scene", "Ctrl+O")) {}
-				if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {}
-				if (ImGui::MenuItem("Exit")) {}
+				if (ImGui::MenuItem("Import Model", "Ctrl+N"))
+				{
+					OPENFILENAMEA ofn;
+
+					char fileName[MAX_PATH] = "";
+
+					ZeroMemory(&ofn, sizeof(ofn));
+					ofn.lStructSize = sizeof(ofn);
+					ofn.lpstrFile = fileName;
+					ofn.nMaxFile = MAX_PATH;
+					ofn.lpstrFilter = "Model Files\0*.obj;*.fbx;*.gltf\0";
+					ofn.nFilterIndex = 1;
+					ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+					if (GetOpenFileNameA(&ofn))
+					{
+						std::string name = std::string(fileName);
+						name = name.substr(name.find_last_of("/\\") + 1, name.length() - name.find_last_of("/\\") - 1);
+						name = name.substr(0, name.find_last_of('.'));
+						Entity* entity = m_Scene->CreateEntity(name);
+						entity->AddComponent<ModelComponent>(fileName);
+					}
+				}
+				if (ImGui::MenuItem("Exit"))
+				{
+					Application::Get().Close();
+				}
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Edit"))

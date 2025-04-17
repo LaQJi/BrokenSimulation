@@ -33,6 +33,8 @@ namespace BrokenSim
 		std::vector<LightComponent*> GetLights() { return m_Lights; }
 		void AddLight(LightComponent* light) { m_Lights.push_back(light); }
 
+		void ApplyBreaking(Entity* entity);
+
 
 	private:
 		unsigned int AssignID();

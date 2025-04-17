@@ -2,9 +2,6 @@
 
 in vec3 v_Position;
 in vec3 v_Normal;
-in vec3 v_GeometryCenter;
-in float v_YMin;
-in float v_YMax;
 
 out vec4 fragColor;
 
@@ -21,6 +18,15 @@ uniform float u_AmbientStrength;
 uniform float u_DiffuseStrength;
 // 镜面反射系数
 uniform float u_SpecularStrength;
+
+// 几何中心
+struct BoudingBox
+{
+	vec3 Min;
+	vec3 Max;
+};
+
+uniform BoudingBox u_BoundingBox;
 
 // 光源属性
 uniform int u_LightCount;
@@ -74,6 +80,26 @@ vec3 CalculateLight(Light light, vec3 norm, vec3 viewDir, vec3 fragPos)
 	return (ambient + diffuse + specular) * attenuation;
 }
 
+vec3 CalculateDefaultColor(vec3 norm, vec3 viewDir, vec3 fragPos)
+{
+	// 默认颜色
+	vec3 defaultColor = vec3(0.5, 0.5, 0.5);
+
+	// 环境光
+	vec3 ambient = u_AmbientStrength * defaultColor;
+
+	// 漫反射
+	float diff = max(dot(norm, viewDir), 0.0);
+	vec3 diffuse = u_DiffuseStrength * diff * defaultColor;
+
+	// 镜面反射
+	vec3 reflectDir = reflect(-viewDir, norm);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_Shininess);
+	vec3 specular = u_SpecularStrength * spec * defaultColor;
+
+	return (ambient + diffuse + specular);
+}
+
 void main()
 {
 	// 计算法线
@@ -85,36 +111,27 @@ void main()
 	// 计算光照
 	vec3 result = vec3(0.0);
 
-	for (int i = 0; i < min(u_LightCount, 10); i++)
+	if (u_LightCount == 0)
 	{
-		result += CalculateLight(u_Lights[i], norm, viewDir, v_Position);
+		result = CalculateDefaultColor(norm, viewDir, v_Position);
+	}
+	else
+	{
+		for (int i = 0; i < min(u_LightCount, 10); i++)
+		{
+			result += CalculateLight(u_Lights[i], norm, viewDir, v_Position);
+		}
 	}
 
 	// 计算voronoi颜色
-	float minDist = 2.0;
+	float minDist = 1.0 / 0.0;
 	int closetPoint = 0;
-
-	// atan 范围 [-pi, pi]]
-	float theta = atan(v_Position.z - v_GeometryCenter.z, v_Position.x - v_GeometryCenter.x);
-
-	// 转换到[0, 1]
-	float normalizedTheta = (theta + 3.14159265359) / (2 * 3.14159265359);
-
-	// 将 y 转换到[0, 1]
-	float normalizeY = (v_Position.y - v_YMin) / (v_YMax - v_YMin);
-
-	vec2 fragCoord = vec2(normalizedTheta, normalizeY);
 
 	for (int i = 0; i < min(u_NumPoints, 100); i++)
 	{
-		vec2 point = u_Points[i].xy;
-
-		if (point.x - fragCoord.x > 0.5)
-			point.x -= 1.0;
-		else if (fragCoord.x - point.x > 0.5)
-			point.x += 1.0;
+		vec3 seedIinWorld = u_BoundingBox.Min + (u_BoundingBox.Max - u_BoundingBox.Min) * u_Points[i];
 		
-		float dist = distance(fragCoord, point);
+		float dist = distance(v_Position, seedIinWorld);
 		if (dist < minDist)
 		{
 			minDist = dist;
@@ -125,5 +142,4 @@ void main()
 	result = result * u_Colors[closetPoint];
 
 	fragColor = vec4(result, u_Color.a / 2);
-	//fragColor = vec4(0.0, 0.0, u_LightCount, 1.0);
 }

@@ -11,6 +11,8 @@ namespace BrokenSim
 	ModelComponent::ModelComponent(Entity* owner, const std::string& path)
 		: Component(owner), m_Path(path)
 	{
+		m_BoudingBox.minPoint = glm::vec3(FLT_MAX);
+		m_BoudingBox.maxPoint = glm::vec3(FLT_MIN);
 		if (LoadModel(m_Path))
 		{
 			if (m_Vertices.size() > 0)
@@ -71,6 +73,30 @@ namespace BrokenSim
 
 	void ModelComponent::OnUpdate(TimeStep ts)
 	{
+	}
+
+	void ModelComponent::UpdateMeshes(const Meshes& meshes)
+	{
+		m_Vertices = meshes.vertices;
+		m_Indices = meshes.indices;
+
+		if (m_Vertices.size() > 0)
+		{
+			// 计算几何中心
+			m_GeometryCenter /= m_Vertices.size();
+			// 创建顶点数组
+			m_VertexArray = std::make_unique<VertexArray>();
+			std::shared_ptr<VertexBuffer> vb = std::make_shared<VertexBuffer>(&m_Vertices[0].Position.x, m_Vertices.size() * sizeof(Vertex));
+			std::shared_ptr<IndexBuffer> ib = std::make_shared<IndexBuffer>(&m_Indices[0], m_Indices.size());
+			VertexBufferLayout layout({
+				{ DataType::Float3, "a_Position" },
+				{ DataType::Float3, "a_Normal" },
+				{ DataType::Float2, "a_TexCoords" }
+				});
+			vb->SetLayout(layout);
+			m_VertexArray->AddVertexBuffer(vb);
+			m_VertexArray->SetIndexBuffer(ib);
+		}
 	}
 
 	glm::vec4& ModelComponent::GetColor()
@@ -153,6 +179,11 @@ namespace BrokenSim
 		return m_Indices;
 	}
 
+	const AABB& ModelComponent::GetBoundingBox() const
+	{
+		return m_BoudingBox;
+	}
+
 	bool ModelComponent::LoadModel(const std::string& path)
 	{
 		// 读取模型
@@ -203,6 +234,33 @@ namespace BrokenSim
 				if (vertex.Position.y > yMax)
 				{
 					yMax = vertex.Position.y;
+				}
+
+				if (vertex.Position.x < m_BoudingBox.minPoint.x)
+				{
+					m_BoudingBox.minPoint.x = vertex.Position.x;
+				}
+				if (vertex.Position.x > m_BoudingBox.maxPoint.x)
+				{
+					m_BoudingBox.maxPoint.x = vertex.Position.x;
+				}
+
+				if (vertex.Position.y < m_BoudingBox.minPoint.y)
+				{
+					m_BoudingBox.minPoint.y = vertex.Position.y;
+				}
+				if (vertex.Position.y > m_BoudingBox.maxPoint.y)
+				{
+					m_BoudingBox.maxPoint.y = vertex.Position.y;
+				}
+
+				if (vertex.Position.z < m_BoudingBox.minPoint.z)
+				{
+					m_BoudingBox.minPoint.z = vertex.Position.z;
+				}
+				if (vertex.Position.z > m_BoudingBox.maxPoint.z)
+				{
+					m_BoudingBox.maxPoint.z = vertex.Position.z;
 				}
 
 				// 顶点法线

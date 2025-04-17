@@ -193,6 +193,11 @@ namespace BrokenSim
 		m_CurrentEntity = entity;
 	}
 
+	Entity* RenderSystem::GetCurrentEntity() const
+	{
+		return m_CurrentEntity;
+	}
+
 	void RenderSystem::RenderEntity(TimeStep ts, Entity* entity, glm::mat4 parentMatrix)
 	{
 		if (!entity->IsVisible())

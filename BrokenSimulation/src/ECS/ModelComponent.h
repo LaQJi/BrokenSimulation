@@ -9,18 +9,35 @@
 
 namespace BrokenSim
 {
-
 	struct Vertex
 	{
 		glm::vec3 Position;
 		glm::vec3 Normal;
 		glm::vec2 TexCoords;
+
+		bool operator==(const Vertex& other) const
+		{
+			return Position == other.Position &&
+				Normal == other.Normal &&
+				TexCoords == other.TexCoords;
+		}
 	};
 
 	struct Meshes
 	{
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
+	};
+
+	struct AABB
+	{
+		glm::vec3 minPoint;
+		glm::vec3 maxPoint;
+
+		glm::vec3 GetCenter() const
+		{
+			return (minPoint + maxPoint) * 0.5f;
+		}
 	};
 
 	class ModelComponent : public Component
@@ -32,6 +49,8 @@ namespace BrokenSim
 		~ModelComponent();
 
 		void OnUpdate(TimeStep ts) override;
+
+		void UpdateMeshes(const Meshes& meshes);
 		
 		VertexArray* GetVertexArray() { return m_VertexArray.get(); }
 		
@@ -78,6 +97,9 @@ namespace BrokenSim
 		// 获取模型索引
 		const std::vector<unsigned int>& GetIndices() const;
 
+		// 获取模型包围盒
+		const AABB& GetBoundingBox() const;
+
 	private:
 		bool LoadModel(const std::string& path);
 		void ProcessNode(aiNode* node, const aiScene* scene);
@@ -112,5 +134,7 @@ namespace BrokenSim
 
 		float yMin = FLT_MAX;
 		float yMax = FLT_MIN;
+
+		AABB m_BoudingBox;
 	};
 }

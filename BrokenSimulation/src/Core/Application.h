@@ -27,6 +27,7 @@ namespace BrokenSim
 		ImGuiLayer& GetImGuiLayer();
 
 		void Run();
+		void Close();
 
 		static Application& Get() { return *s_Instance; }
 
