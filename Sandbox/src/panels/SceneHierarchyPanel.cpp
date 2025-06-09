@@ -1,6 +1,8 @@
 #include "bspch.h"
 #include "SceneHierarchyPanel.h"
+
 #include <glm/gtc/type_ptr.hpp>
+
 
 namespace BrokenSim
 {
@@ -51,19 +53,25 @@ namespace BrokenSim
 			// 处理选中
 			if (ImGui::IsItemClicked())
 			{
-				if (!m_SelectionContext)
+				if (!ImGui::IsItemToggledOpen())
 				{
+					// 选中实体
 					m_SelectionContext = const_cast<Entity*>(root);
+				}
+				else
+				{
+					// 取消选中实体
+					m_SelectionContext = nullptr;
 				}
 			}
 
-			bool entityDeleted = false;
 			if (ImGui::BeginPopupContextItem())
 			{
-				if (ImGui::MenuItem("Delete Entity"))
+				if (ImGui::MenuItem("Add Child Entity"))
 				{
-					entityDeleted = true;
+					m_Context->CreateEntity("Child Entity", const_cast<Entity*>(root));
 				}
+
 				ImGui::EndPopup();
 			}
 
@@ -76,16 +84,6 @@ namespace BrokenSim
 				}
 				ImGui::TreePop();
 			}
-
-			if (entityDeleted)
-			{
-				Application::Get().GetRenderSystem()->SetCurrentEntity(nullptr);
-				m_Context->DestroyEntity(const_cast<Entity*>(root));
-				if (m_SelectionContext == root)
-				{
-					m_SelectionContext = nullptr;
-				}
-			}
 		}
 
 		ImGui::End();
@@ -94,7 +92,48 @@ namespace BrokenSim
 
 		if (m_SelectionContext)
 		{
-			ImGui::Text(m_SelectionContext->GetName().c_str());
+			static bool isEditing = false;
+			static char tempBuffer[256];
+			static std::string* currentEditingName = nullptr;
+
+			// 若开始编辑或切换编辑对象
+			// 初始化缓冲区
+			if (!isEditing || currentEditingName != &m_SelectionContext->GetName())
+			{
+				currentEditingName = &m_SelectionContext->GetName();
+				strcpy_s(tempBuffer, sizeof(tempBuffer), currentEditingName->c_str());
+			}
+
+			if (!isEditing)
+			{
+				ImGui::Text("Name: %s", m_SelectionContext->GetName().c_str());
+				if (ImGui::IsItemClicked())
+				{
+					isEditing = true;
+				}
+			}
+			else
+			{
+				ImGui::SetKeyboardFocusHere();
+				if (ImGui::InputText("##EditName", tempBuffer, sizeof(tempBuffer),
+					ImGuiInputTextFlags_EnterReturnsTrue |
+					ImGuiInputTextFlags_AutoSelectAll))
+				{
+					// 按下回车键或失去焦点时保存名称
+					m_SelectionContext->SetName(tempBuffer);
+					isEditing = false;
+				}
+				// 检测点击其它地方或失去焦点
+				if (!ImGui::IsItemActive() && ImGui::IsMouseClicked(0))
+				{
+					m_SelectionContext->SetName(tempBuffer);
+					isEditing = false;
+				}
+			}
+
+			ImGui::Separator();
+
+			ImGui::Checkbox("Visible", &m_SelectionContext->GetVisible());
 
 			ImGui::Separator();
 
@@ -198,13 +237,16 @@ namespace BrokenSim
 
 	void SceneHierarchyPanel::DrawEntityNode(Entity* entity)
 	{
+		ImGui::PushID(entity->GetID());
+
 		const char* name = entity->GetName().empty()
 			? "Entity" : entity->GetName().c_str();
 
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow
 			| ImGuiTreeNodeFlags_SpanAvailWidth;
 
-		if (ImGui::IsItemClicked())
+
+		if (ImGui::IsItemClicked() || m_SelectionContext == entity)
 		{
 			// 高亮选中的实体
 			flags |= ImGuiTreeNodeFlags_Selected;
@@ -231,15 +273,12 @@ namespace BrokenSim
 			{
 				entityDeleted = true;
 			}
-			ImGui::EndPopup();
-		}
 
-		if (ImGui::BeginPopupContextItem("EntityContextMenu"))
-		{
 			if (ImGui::MenuItem("Add Child Entity"))
 			{
 				m_Context->CreateEntity("Child Entity", entity);
 			}
+
 			ImGui::EndPopup();
 		}
 
@@ -256,12 +295,14 @@ namespace BrokenSim
 		if (entityDeleted)
 		{
 			Application::Get().GetRenderSystem()->SetCurrentEntity(nullptr);
-			m_Context->DestroyEntity(entity);
 			if (m_SelectionContext == entity)
 			{
 				m_SelectionContext = nullptr;
 			}
+			m_Context->DestroyEntity(entity);
 		}
+
+		ImGui::PopID();
 	}
 
 	void SceneHierarchyPanel::DrawComponents(Entity* entity)

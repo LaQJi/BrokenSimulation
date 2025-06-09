@@ -14,7 +14,8 @@ namespace BrokenSim
 	{
 		m_DefaultShader = AddShaderResource("Default", "res/Shaders/Default_v.shader", "res/Shaders/Default_f.shader");
 		m_VoronoiShader = AddShaderResource("Voronoi", "res/Shaders/Voronoi_v.shader", "res/Shaders/Voronoi_f.shader");
-		m_VoronoiMappingShader = AddShaderResource("VoronoiMapping", "res/Shaders/VoronoiMapping_v.shader", "res/Shaders/VoronoiMapping_f.shader");
+		m_VoronoiMappingShader = AddShaderResource("Voronoi3D", "res/Shaders/Voronoi3D_v.shader", "res/Shaders/Voronoi3D_f.shader");
+		AddShaderResource("VoronoiMapping", "res/Shaders/VoronoiMapping_v.shader", "res/Shaders/VoronoiMapping_f.shader");
 		AddShaderResource("Phong", "res/Shaders/Phong_v.shader", "res/Shaders/Phong_f.shader");
 		AddShaderResource("BlinnPhong", "res/Shaders/BlinnPhong_v.shader", "res/Shaders/BlinnPhong_f.shader");
 	}

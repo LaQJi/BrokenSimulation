@@ -29,6 +29,7 @@ namespace BrokenSim
 		std::vector<Entity*> GetEntities() const;
 
 		SceneCamera* GetCamera() { return m_Camera.get(); }
+		SceneCamera& GetCameraRef() { return *m_Camera; }
 
 		std::vector<LightComponent*> GetLights() { return m_Lights; }
 		void AddLight(LightComponent* light) { m_Lights.push_back(light); }

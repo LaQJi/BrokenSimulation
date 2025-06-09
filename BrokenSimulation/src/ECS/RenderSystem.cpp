@@ -267,13 +267,23 @@ namespace BrokenSim
 				m_VoronoiMappingShader->SetUniformMat4f("u_Model", modelMatrix);
 				m_VoronoiMappingShader->SetUniformMat3f("u_NormalMatrix", normalMatrix);
 
-				// 设置模型几何中心
-				m_VoronoiMappingShader->SetUniform3f("u_GeometryCenter", model->GetGeometryCenter());
+				//// 设置模型几何中心
+				//m_VoronoiMappingShader->SetUniform3f("u_GeometryCenter", model->GetGeometryCenter());
 
-				// 设置模型y轴最小值
-				m_VoronoiMappingShader->SetUniform1f("u_YMin", model->GetYMin());
-				// 设置模型y轴最大值
-				m_VoronoiMappingShader->SetUniform1f("u_YMax", model->GetYMax());
+				//// 设置模型y轴最小值
+				//m_VoronoiMappingShader->SetUniform1f("u_YMin", model->GetYMin());
+				//// 设置模型y轴最大值
+				//m_VoronoiMappingShader->SetUniform1f("u_YMax", model->GetYMax());
+
+
+				// 设置包围盒
+				AABB boudingBox = model->GetBoundingBox();
+
+				glm::vec3 worldMin = glm::vec3(modelMatrix * glm::vec4(boudingBox.minPoint, 1.0f));
+				glm::vec3 worldMax = glm::vec3(modelMatrix * glm::vec4(boudingBox.maxPoint, 1.0f));
+
+				m_VoronoiMappingShader->SetUniform3f("u_BoundingBox.Min", boudingBox.minPoint);
+				m_VoronoiMappingShader->SetUniform3f("u_BoundingBox.Max", boudingBox.maxPoint);
 
 				// 设置材质
 				m_VoronoiMappingShader->SetUniform4f("u_Color", model->GetColor());

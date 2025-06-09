@@ -26,6 +26,7 @@ namespace BrokenSim
 
 		// 切换投影类型
 		void SwitchProjectionType();
+		ProjectionType& GetProjectionType();
 
 		// 设置视口大小
 		void SetViewportSize(float width, float height);

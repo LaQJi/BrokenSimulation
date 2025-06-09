@@ -19,6 +19,8 @@ namespace BrokenSim
 		virtual void OnEvent(Event& e) override;
 		virtual void OnImGuiRender() override;
 
+		void SetSelected(Entity* entity);
+
 	private:
 		bool OnKeyPressed(KeyPressedEvent& e);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
@@ -64,6 +66,9 @@ namespace BrokenSim
 		};
 		// 当前语言
 		Language m_Language = Language::English;
+
+		// 当前Gizmo类型
+		int m_GizmoType = -1;
 
 		// 字体路径
 		std::string m_FontPath;

@@ -7,6 +7,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <ImGuizmo/ImGuizmo.h>
+
+#include "Geometry/Math.h"
 
 namespace BrokenSim
 {
@@ -43,14 +46,6 @@ namespace BrokenSim
 
 		Application::Get().GetRenderSystem()->SetCurrentShader("BlinnPhong");
 
-		for (int i = 0; i < 8; i++)
-		{
-			std::stringstream ss;
-			ss << "res/Models/ring_" << i << ".obj";
-			Entity* entity = m_Scene->CreateEntity();
-			entity->AddComponent<ModelComponent>(ss.str());
-		}
-		
 		m_SceneHierarchyPanel = SceneHierarchyPanel(m_Scene);
 	}
 
@@ -71,17 +66,14 @@ namespace BrokenSim
 
 		m_SceneFrameBuffer->Bind();
 
-		Application::Get().GetRenderSystem()->SetClearColor({ 0.24f, 0.24f, 0.24f, 1.0f });
+		Application::Get().GetRenderSystem()->SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		Application::Get().GetRenderSystem()->Clear();
 		
 		Application::Get().GetRenderSystem()->OnUpdate(ts, m_Scene.get());
 
 		m_SceneFrameBuffer->Unbind();
 
-		if (m_SceneHierarchyPanel.GetSelectionContext())
-		{
-			m_SelectedEntity = m_SceneHierarchyPanel.GetSelectionContext();
-		}
+		m_SelectedEntity = m_SceneHierarchyPanel.GetSelectionContext();
 
 		// 若有选中的实体，则根据实体是否有VoronoiComponent切换场景状态
 		if (m_SelectedEntity)
@@ -106,6 +98,7 @@ namespace BrokenSim
 			}
 		}
 
+		/*
 		// 若开启破碎模式，则渲染Voronoi图
 		if (m_EngineMode == EngineMode::FractureMode)
 		{
@@ -121,6 +114,7 @@ namespace BrokenSim
 
 			m_VoronoiFrameBuffer->Unbind();
 		}
+		*/
 	}
 
 	void EditorLayer::OnEvent(Event& e)
@@ -144,8 +138,8 @@ namespace BrokenSim
 		if (opt_fullscreen)
 		{
 			const ImGuiViewport* viewport = ImGui::GetMainViewport();
-			ImGui::SetNextWindowPos(viewport->WorkPos);
-			ImGui::SetNextWindowSize(viewport->WorkSize);
+			ImGui::SetNextWindowPos(viewport->Pos);
+			ImGui::SetNextWindowSize(viewport->Size);
 			ImGui::SetNextWindowViewport(viewport->ID);
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -156,13 +150,11 @@ namespace BrokenSim
 		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
 			window_flags |= ImGuiWindowFlags_NoBackground;
 
-		if (!opt_padding)
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
 		ImGui::Begin("DockSpace Demo", &dockspaceOpen, window_flags);
 
-		if (!opt_padding)
-			ImGui::PopStyleVar();
+		ImGui::PopStyleVar();
 
 		if (opt_fullscreen)
 			ImGui::PopStyleVar(2);
@@ -201,6 +193,12 @@ namespace BrokenSim
 						entity->AddComponent<ModelComponent>(fileName);
 					}
 				}
+
+				if (ImGui::MenuItem("Perspective/Orthogonal"))
+				{
+					m_Scene->GetCamera()->SwitchProjectionType();
+				}
+
 				if (ImGui::MenuItem("Exit"))
 				{
 					Application::Get().Close();
@@ -215,16 +213,8 @@ namespace BrokenSim
 			}
 			ImGui::EndMenuBar();
 		}
-		ImGui::End();
 
-		ImGui::ShowDemoWindow();
-
-		if (ImGui::Button("Hello, world!"))
-		{
-
-			// TODO: 将切换投影类型的按钮写到合适的ImGui窗口中
-			m_Scene->GetCamera()->SwitchProjectionType();
-		}
+		//ImGui::ShowDemoWindow();
 
 		//m_Scene->OnImGuiRender();
 		m_SceneHierarchyPanel.OnImGuiRender();
@@ -245,9 +235,78 @@ namespace BrokenSim
 		}
 		unsigned int textureID = m_SceneFrameBuffer->GetColorAttachmentRendererID();
 		ImGui::Image((ImTextureID)(uintptr_t)textureID, ImVec2{ m_SceneViewportSize.x, m_SceneViewportSize.y }, ImVec2(0, 1), ImVec2(1, 0));
+
+
+		//ImGuizmo::BeginFrame();
+		// ImGuizmos
+		m_SelectedEntity = m_SceneHierarchyPanel.GetSelectionContext();
+
+		if (m_SelectedEntity && m_GizmoType != -1)
+		{
+			ImGuizmo::SetOrthographic(false);
+			ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
+
+			float windowWidth = (float)ImGui::GetWindowContentRegionMax().x -
+				(float)ImGui::GetWindowContentRegionMin().x;
+
+			float windowHeight = (float)ImGui::GetWindowContentRegionMax().y -
+				(float)ImGui::GetWindowContentRegionMin().y;
+
+			ImGuizmo::SetRect(ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMin().x,
+				ImGui::GetWindowPos().y + ImGui::GetWindowContentRegionMin().y,
+				windowWidth, windowHeight);
+
+			// Camera
+			const auto& camera = m_Scene->GetCameraRef();
+			const glm::mat4& view = camera.GetViewMatrix();
+			const glm::mat4& projection = camera.GetProjectionMatrix();
+
+			// Entity
+			glm::mat4 transform = m_SelectedEntity->GetModelMatrix();
+
+			// Snapping
+			bool snap = Input::IsKeyPressed(Key::LeftControl);
+			float snapValue = 0.5f;
+
+			if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+			{
+				snapValue = 45.0f;
+			}
+
+			float snapValues[3] = { snapValue, snapValue, snapValue };
+
+			// 传入参数
+			ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection),
+				(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::MODE::LOCAL,
+				glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr);
+
+			// 更新实体的变换
+			if (ImGuizmo::IsUsing())
+			{
+				glm::vec3 translation, rotation, scale;
+
+				ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform),
+					glm::value_ptr(translation), glm::value_ptr(rotation), glm::value_ptr(scale));
+
+				// 将旋转转换为欧拉角
+				rotation.x = glm::degrees(rotation.x);
+				rotation.y = glm::degrees(rotation.y);
+				rotation.z = glm::degrees(rotation.z);
+
+				
+				m_SelectedEntity->GetPosition() = translation;
+				m_SelectedEntity->GetRotation() = rotation;
+				m_SelectedEntity->GetScale() = scale;
+
+			}
+		}
+
+
+
 		
 		ImGui::End();
 
+		/*
 		if (m_EngineMode == EngineMode::FractureMode)
 		{
 			ImGui::Begin("Voronoi");
@@ -270,15 +329,95 @@ namespace BrokenSim
 			
 			ImGui::End();
 		}
+		*/
+		ImGui::End();
+	}
+
+	void EditorLayer::SetSelected(Entity* entity)
+	{
+		m_SelectedEntity = entity;
 	}
 
 	bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
 	{
+		// 获取ctrl键状态
+		bool control = Input::IsKeyPressed(Key::LeftControl) ||
+			Input::IsKeyPressed(Key::RightControl);
+
+		// 获取shift键状态
+		bool shift = Input::IsKeyPressed(Key::LeftShift) ||
+			Input::IsKeyPressed(Key::RightShift);
+
+		switch (e.GetKeyCode())
+		{
+		case Key::N:
+		{
+			if (control)
+			{
+				OPENFILENAMEA ofn;
+
+				char fileName[MAX_PATH] = "";
+
+				ZeroMemory(&ofn, sizeof(ofn));
+				ofn.lStructSize = sizeof(ofn);
+				ofn.lpstrFile = fileName;
+				ofn.nMaxFile = MAX_PATH;
+				ofn.lpstrFilter = "Model Files\0*.obj;*.fbx;*.gltf\0";
+				ofn.nFilterIndex = 1;
+				ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+				if (GetOpenFileNameA(&ofn))
+				{
+					std::string name = std::string(fileName);
+					name = name.substr(name.find_last_of("/\\") + 1, name.length() - name.find_last_of("/\\") - 1);
+					name = name.substr(0, name.find_last_of('.'));
+					Entity* entity = m_Scene->CreateEntity(name);
+					entity->AddComponent<ModelComponent>(fileName);
+				}
+			}
+			break;
+		}
+		case Key::Q:
+		{
+			if (!ImGuizmo::IsUsing())
+				m_GizmoType = -1;
+			break;
+		}
+		case Key::W:
+		{
+			if (!ImGuizmo::IsUsing())
+				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			break;
+		}
+		case Key::E:
+		{
+			if (!ImGuizmo::IsUsing())
+				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+			break;
+		}
+		case Key::R:
+		{
+			if (!ImGuizmo::IsUsing())
+				m_GizmoType = ImGuizmo::OPERATION::SCALE;
+			break;
+		}
+		}
+
 		return false;
 	}
 
 	bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
 	{
+		/*
+		if (e.GetButton() == Mouse::Button_Left)
+		{
+			if (m_SceneHovered && !ImGuizmo::IsOver() && !Input::IsKeyPressed(Key::LeftAlt))
+			{
+				m_SceneHierarchyPanel.SetSelectionContext(nullptr);
+			}
+		}
+		*/
+
 		return false;
 	}
 

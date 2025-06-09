@@ -141,5 +141,5 @@ void main()
 
 	result = result * u_Colors[closetPoint];
 
-	fragColor = vec4(result, u_Color.a / 2);
+	fragColor = vec4(result, u_Color.a);
 }

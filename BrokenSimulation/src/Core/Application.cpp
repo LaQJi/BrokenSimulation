@@ -82,6 +82,7 @@ namespace BrokenSim
 			TimeStep ts = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
+
 			if (!m_Minimized)
 			{
 				{
@@ -106,6 +107,21 @@ namespace BrokenSim
 			}
 
 			m_Window->OnUpdate();
+
+
+			 //¼ÆËãÖ¡ÂÊ
+			static double fpsTimer = 0.0;
+			static int frameCount = 0;
+			fpsTimer += ts;
+			frameCount++;
+			if (fpsTimer >= 1.0)
+			{
+				double fps = frameCount / fpsTimer;
+				BS_CORE_INFO("FPS: {0}", fps);
+				fpsTimer = 0.0;
+				frameCount = 0;
+			}
+
 		}
 	}
 

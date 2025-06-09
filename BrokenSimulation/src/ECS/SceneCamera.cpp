@@ -64,6 +64,11 @@ namespace BrokenSim
 		}
 	}
 
+	SceneCamera::ProjectionType& SceneCamera::GetProjectionType()
+	{
+		return m_ProjectionType;
+	}
+
 	void SceneCamera::SetViewportSize(float width, float height)
 	{
 		m_ViewportWidth = width;

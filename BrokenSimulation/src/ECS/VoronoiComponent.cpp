@@ -41,7 +41,7 @@ namespace BrokenSim
 	{
 		for (unsigned int i = 0; i < numPoints; i++)
 		{
-			glm::vec3 pos = { RandomFloat(0.0f, 1.0f), RandomFloat(0.0f, 1.0f), RandomFloat(0.0f, 1.0f) };
+			glm::vec3 pos = { RandomFloat(0.0f, 1.0f), RandomFloat(0.3f, 0.7f), RandomFloat(0.0f, 1.0f) };
 			glm::vec3 color = { RandomFloat(0.0f, 1.0f), RandomFloat(0.0f, 1.0f), RandomFloat(0.0f, 1.0f) };
 			m_Points.push_back({ pos, color });
 		}

@@ -41,6 +41,11 @@ namespace BrokenSim
 		return m_Name;
 	}
 
+	std::string& Entity::GetName()
+	{
+		return m_Name;
+	}
+
 	void Entity::SetName(const std::string& name)
 	{
 		m_Name = name;
@@ -134,12 +139,22 @@ namespace BrokenSim
 		return m_Visible;
 	}
 
+	bool& Entity::GetVisible()
+	{
+		return m_Visible;
+	}
+
 	void Entity::SetVisible(bool visible)
 	{
 		m_Visible = visible;
 	}
 
 	bool Entity::IsEnabled() const
+	{
+		return m_Enabled;
+	}
+
+	bool& Entity::GetEnabled()
 	{
 		return m_Enabled;
 	}

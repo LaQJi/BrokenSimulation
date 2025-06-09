@@ -36,6 +36,7 @@ namespace BrokenSim
 
 		// 获取名称
 		const std::string& GetName() const;
+		std::string& GetName();
 		// 设置名称
 		void SetName(const std::string& name);
 
@@ -60,11 +61,13 @@ namespace BrokenSim
 
 		// 获取可见性
 		bool IsVisible() const;
+		bool& GetVisible();
 		// 设置可见性
 		void SetVisible(bool visible);
 
 		// 获取启用性
 		bool IsEnabled() const;
+		bool& GetEnabled();
 		// 设置启用性
 		void SetEnabled(bool enabled);
 
